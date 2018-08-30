@@ -1,12 +1,14 @@
 
-#ifndef __Container_H
-#define __Container_H
+#ifndef __ContainerType_H
+#define __ContainerType_H
 
 #include "util.h"
 
 namespace NS_JSTL
 {
-	template<typename __DataType, typename __Container, typename __KeyType = __DataType>
+	template<typename __DataType> class JSArray;
+
+	template<typename __DataType, typename __ContainerType, typename __KeyType = __DataType>
 	class ContainerT
 	{
 	private:
@@ -14,10 +16,44 @@ namespace NS_JSTL
 		using __Key_InitList = __InitList<__KeyType>;
 
 		using __Container_CB = __FN_CB<__DataType>;
-		using __Container_Cond = __FN_Cond<__DataType>;
+		using __Container_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
 	protected:
-		__Container m_data;
+		__ContainerType m_data;
+
+		template<typename... args>
+		bool extractDataTypeArgs(const function<bool(const __DataType&)>& cb, const __DataType&v, const args&... others)
+		{
+			return tagDynamicArgsExtractor<const __DataType>::extract([&](const __DataType&v) {
+				return cb(v);
+			}, v, others...);
+		}
+
+		template<typename... args>
+		void extractDataTypeArgs(vector<__DataType>& vecArgs, const __DataType&v, const args&... others)
+		{
+			tagDynamicArgsExtractor<const __DataType>::extract([&](const __DataType&v) {
+				vecArgs.push_back(v);
+				return true;
+			}, v, others...);
+		}
+
+		template<typename... args>
+		bool extractKeyTypeArgs(const function<bool(const __KeyType&)>& cb, const __KeyType&k, const args&... others)
+		{
+			return tagDynamicArgsExtractor<const __KeyType>::extract([&](const __KeyType&k) {
+				return cb(k);
+			}, k, others...);
+		}
+
+		template<typename... args>
+		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, const __KeyType&k, const args&... others)
+		{
+			tagDynamicArgsExtractor<const __KeyType>::extract([&](const __KeyType&k) {
+				vecArgs.push_back(k);
+				return true;
+			}, k, others...);
+		}
 
 		ContainerT()
 		{
@@ -30,26 +66,36 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		bool CheckIsSelf(T& container)
+		bool checkIsSelf(const T& container)
 		{
 			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
 		}
 
 	public:
-		template<typename T>
-		ContainerT& assign(const T& container)
+		template<typename... args>
+		ContainerT& assign(const __DataType&v, const args&... others)
 		{
-			if (CheckIsSelf(container))
-			{
-				return *this;
-			}
-			
-			m_data = __Container(container.begin(), container.end());
-			
+			clear();
+
+			add(v, others...);
+
 			return *this;
 		}
 
-		ContainerT& assign(const __Data_InitList& initList)
+		template<typename T>
+		ContainerT& assign(const T& container)
+		{
+			if (checkIsSelf(container))
+			{
+				return *this;
+			}
+
+			m_data = __ContainerType(container.begin(), container.end());
+
+			return *this;
+		}
+
+		ContainerT& assign(__Data_InitList initList)
 		{
 			return assign<__Data_InitList>(initList);
 		}
@@ -142,14 +188,31 @@ namespace NS_JSTL
 			return true;
 		}
 
-		virtual bool has(const __KeyType& key) const = 0;
+		virtual bool _includes(const __KeyType&k) const = 0;
+
+		template<typename... args>
+		bool includes(const __DataType&v, const args&... others)
+		{
+			bool bRet = true;
+
+			(void)extractDataTypeArgs([&](const __DataType&v) {
+				return bRet = _includes(v);
+			}, v, others...);
+
+			return bRet;
+		}
 
 		template<typename T>
-		bool includes(const T& container) const
+		decltype(checkContainer<T, bool>()) includes(const T& container) const
 		{
-			for (auto& v : container)
+			if (checkIsSelf(container))
 			{
-				if (!has(v))
+				return true;
+			}
+
+			for (auto&v : container)
+			{
+				if (!_includes(v))
 				{
 					return false;
 				}
@@ -158,10 +221,17 @@ namespace NS_JSTL
 			return true;
 		}
 
-		template<typename T>
-		bool includes(const __Data_InitList& initList) const
+		bool includes(__Data_InitList initList) const
 		{
 			return includes<__Data_InitList>(initList);
+		}
+
+		template<typename... args>
+		vector<__KeyType> getInner(const __KeyType&k, const args&... others)
+		{
+			vector<__KeyType> vec;
+			extractKeyTypeArgs(vec, k, others...);
+			return getInner(vec);
 		}
 
 		template <typename T>
@@ -173,7 +243,7 @@ namespace NS_JSTL
 			{
 				for (auto itr = ret.begin(); itr != ret.end(); )
 				{
-					if (!has(*itr))
+					if (!_includes(*itr))
 					{
 						itr = ret.erase(itr);
 					}
@@ -187,10 +257,18 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		vector<__KeyType> getInner(const __Key_InitList& initList) const
+		vector<__KeyType> getInner(__Key_InitList initList) const
 		{
-			vector<__KeyType > vec(initList);
+			vector<__KeyType> vec(initList);
 			return getInner(vec);
+		}
+
+		template<typename... args>
+		vector<__KeyType> getOuter(const __KeyType&k, const args&... others)
+		{
+			vector<__KeyType> vec;
+			extractKeyTypeArgs(vec, k, others...);
+			return getOuter(vec);
 		}
 
 		template <typename T>
@@ -202,7 +280,7 @@ namespace NS_JSTL
 			{
 				for (auto itr = ret.begin(); itr != ret.end(); )
 				{
-					if (has(*itr))
+					if (_includes(*itr))
 					{
 						itr = ret.erase(itr);
 					}
@@ -216,7 +294,7 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		vector<__KeyType> getOuter(const __Key_InitList& initList) const
+		vector<__KeyType> getOuter(__Key_InitList initList) const
 		{
 			vector<__KeyType> vec(initList);
 			return getOuter(vec);
@@ -228,12 +306,23 @@ namespace NS_JSTL
 			return itr = m_data.erase(itr);
 		}
 
-		virtual TD_SizeType del(const __KeyType& key) = 0;
+		template<typename... args>
+		TD_SizeType del(const __KeyType&k, const args&... others)
+		{
+			TD_SizeType uRet = 0;
+
+			(void)extractKeyTypeArgs([&](const __KeyType&k) {
+				uRet += _del(k);
+				return true;
+			}, k, others...);
+
+			return uRet;
+		}
 
 		template <typename T>
-		TD_SizeType del(const T& container)
+		decltype(checkContainer<T, TD_SizeType>()) del(const T& container)
 		{
-			if (CheckIsSelf(container))
+			if (checkIsSelf(container))
 			{
 				TD_SizeType uRet = this->size();
 				this->clear();
@@ -242,25 +331,25 @@ namespace NS_JSTL
 
 			TD_SizeType uRet = 0;
 
-			for (auto& v : container)
+			for (auto&v : container)
 			{
 				if (m_data.empty())
 				{
 					break;
 				}
 
-				uRet += del(v);
+				uRet += _del(v);
 			}
 
 			return uRet;
 		}
 
-		TD_SizeType del(const __Key_InitList& initList)
+		TD_SizeType del(__Key_InitList initList)
 		{
-			return remove<__Key_InitList>(initList);
+			return del<__Key_InitList>(initList);
 		}
 
-		TD_SizeType del(__Container_Cond fn)
+		TD_SizeType del(__Container_CB_RetBool fn)
 		{
 			TD_SizeType uRet = 0;
 
@@ -303,17 +392,51 @@ namespace NS_JSTL
 			return ss.str();
 		}
 
-		const __Container& data() const
+		const __ContainerType& data() const
 		{
 			return m_data;
 		}
-		__Container& data()
+		__ContainerType& data()
 		{
 			return m_data;
 		}
 
-	private:
+	protected:
 		virtual TD_SizeType _add(const __DataType&v) = 0;
+
+		template<typename... args>
+		TD_SizeType add(const __DataType&v, const args&... others)
+		{
+			(void)extractDataTypeArgs([&](const __DataType&v) {
+				_add(v);
+				return true;
+			}, v, others...);
+
+			return size();
+		}
+
+		template<typename T>
+		decltype(checkContainer<T, TD_SizeType>()) add(const T& container)
+		{
+			if (checkIsSelf(container))
+			{
+				return size();
+			}
+
+			for (auto&v : container)
+			{
+				_add(v);
+			}
+
+			return size();
+		}
+
+		TD_SizeType add(__Data_InitList initList)
+		{
+			return add<__Data_InitList>(initList);
+		}
+
+		virtual TD_SizeType _del(const __KeyType&k) = 0;
 
 		virtual void _tostring(stringstream& ss, const __DataType&v) const
 		{
@@ -321,10 +444,36 @@ namespace NS_JSTL
 		}
 
 	public:
+		template <typename T>
+		JSArray<T> map(__FN_CB<__DataType, T> fn) const
+		{
+			JSArray<T> arr;
+
+			for (auto&v : m_data)
+			{
+				arr.push(fn(v));
+			}
+
+			return arr;
+		}
+
+		template <typename __Function>
+		auto map(__Function fn) const ->JSArray<decltype(fn(__DataType()))> const
+		{
+			JSArray<decltype(fn(__DataType()))> arr;
+
+			for (auto&v : m_data)
+			{
+				arr.push(fn(v));
+			}
+
+			return arr;
+		}
+
 		void forEach(function<bool(TD_PosType pos, const __DataType&v)> fn) const
 		{
 			TD_PosType pos = 0;
-			for (auto& v : m_data)
+			for (auto&v : m_data)
 			{
 				if (!fn(pos, v))
 				{
@@ -335,9 +484,9 @@ namespace NS_JSTL
 			}
 		}
 
-		bool every(__Container_Cond fn)
+		bool every(__Container_CB_RetBool fn)
 		{
-			for (auto& v : m_data)
+			for (auto&v : m_data)
 			{
 				if (!fn(v))
 				{
@@ -348,9 +497,9 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool some(__Container_Cond fn)
+		bool some(__Container_CB_RetBool fn)
 		{
-			for (auto& v : m_data)
+			for (auto&v : m_data)
 			{
 				if (fn(v))
 				{
@@ -365,7 +514,7 @@ namespace NS_JSTL
 		T reduce(const T& stat, __Function fn)
 		{
 			T ret = stat;
-			for (auto& v : m_data)
+			for (auto&v : m_data)
 			{
 				ret = (T)fn(ret, v);
 			}
@@ -375,4 +524,4 @@ namespace NS_JSTL
 	};
 }
 
-#endif //__Container_H
+#endif //__ContainerType_H

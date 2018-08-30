@@ -9,24 +9,26 @@
 
 namespace NS_JSTL
 {
-	template<typename __DataType, template<typename...> class __Container=set
-		, typename __SuperClass = ContainerT<__DataType, __Container<__DataType>>
-	> class JSSet : public __SuperClass
+	template<typename __DataType, template<typename...> class __SetType=set>
+	class JSSet : public ContainerT<__DataType, __SetType<__DataType>>
 	{
 	private:
+		using __SuperClass = ContainerT <__DataType, __SetType<__DataType>>;
+
 		using __JSSet_InitList = __InitList<__DataType>;
 
 		using __JSSet_CB = __FN_CB<__DataType>;
-		using __JSSet_Cond = __FN_Cond<__DataType>;
+		using __JSSet_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
 	public:
 		JSSet()
 		{
 		}
 
-		explicit JSSet(const __DataType&v)
+		template<typename... args>
+		explicit JSSet(const __DataType&v, const args&... others)
 		{
-			push(v);
+			__SuperClass::add(v, others...);
 		}
 
 		explicit JSSet(const JSSet& set)
@@ -39,12 +41,12 @@ namespace NS_JSTL
 			__SuperClass::swap(set);
 		}
 
-		explicit JSSet(const __JSSet_InitList& initList)
+		explicit JSSet(__JSSet_InitList initList)
 			: __SuperClass(initList)
 		{
 		}
 
-		template<typename T>
+		template<typename T, typename _ITR = decltype(declval<T>().begin())>
 		explicit JSSet(const T& container)
 			: __SuperClass(container)
 		{
@@ -62,77 +64,28 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		JSSet& operator=(const __JSSet_InitList& initList)
+		JSSet& operator=(__JSSet_InitList initList)
 		{
 			__SuperClass::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
-		JSSet& operator=(const T& container)
+		JSSet& operator=(const T&t)
 		{
-			if (__SuperClass::CheckIsSelf(container))
-			{
-				return *this;
-			}
-
-			__SuperClass::assign(container);
+			__SuperClass::assign(t);
 			return *this;
 		}
-		
+
 	private:
-		virtual TD_SizeType _add(const __DataType&v) override
+		TD_SizeType _add(const __DataType&v) override
 		{
 			__SuperClass::m_data.insert(v);
 
 			return __SuperClass::m_data.size();
 		}
-		
-	public:
-		bool has(const __DataType&v) const override
-		{
-			return __SuperClass::m_data.find(v) != __SuperClass::m_data.end();
-		}
 
-		TD_SizeType add(const __DataType&v)
-		{
-			return _add(v);
-		}
-
-		template<typename T>
-		TD_SizeType add(const T& container)
-		{
-			if (__SuperClass::CheckIsSelf(container))
-			{
-				return __SuperClass::size();
-			}
-
-			__SuperClass::m_data.insert(container.begin(), container.end());
-
-			return __SuperClass::m_data.size();
-		}
-
-		TD_SizeType add(const __JSSet_InitList& initList)
-		{
-			return add<__JSSet_InitList>(initList);
-		}
-		
-		template<typename T>
-		JSSet concat(const T& container)
-		{
-			JSSet ret(*this);
-			ret.add(container);
-			return ret;
-		}
-
-		JSSet concat(const __JSSet_InitList& initList)
-		{
-			JSSet ret(*this);
-			ret.add(initList);
-			return ret;
-		}
-
-		TD_SizeType del(const __DataType&v) override
+		TD_SizeType _del(const __DataType&v) override
 		{
 			auto itr = __SuperClass::m_data.find(v);
 			if (itr == __SuperClass::m_data.end())
@@ -145,33 +98,68 @@ namespace NS_JSTL
 			return 1;
 		}
 
-	public:
-		template <typename T>
-		JSSet<T, __Container> map(__FN_CB<__DataType, T> fn) const
+		bool _includes(const __DataType&v) const override
 		{
-			JSSet<T, __Container> ret;
+			return __SuperClass::m_data.find(v) != __SuperClass::m_data.end();
+		}
 
-			for (auto& v : __SuperClass::m_data)
+	public:
+		template<typename... args>
+		TD_SizeType add(const __DataType&v, const args&... others)
+		{
+			return __SuperClass::add(v, others...);
+		}
+
+		template<typename T>
+		TD_SizeType add(const T& container)
+		{
+			return __SuperClass::add(container);
+		}
+
+		TD_SizeType add(__JSSet_InitList initList)
+		{
+			return add<__JSSet_InitList>(initList);
+		}
+
+		template <typename T>
+		JSSet<T, __SetType> map(__FN_CB<__DataType, T> fn) const
+		{
+			JSSet<T, __SetType> ret;
+
+			for (auto&v : __SuperClass::m_data)
 			{
-				ret._add(fn(v));
+				ret.add(fn(v));
 			}
 
 			return ret;
 		}
 
-		JSSet filter(__JSSet_Cond fn) const
+		template <typename __Function>
+		auto map(__Function fn) const ->JSSet<decltype(fn(__DataType())), __SetType> const
 		{
-			JSSet ret;
-
-			for (auto& v : __SuperClass::m_data)
+			JSSet<decltype(fn(__DataType())), __SetType> ret;
+			
+			for (auto&v : __SuperClass::m_data)
 			{
-				if (fn(v))
-				{
-					ret._add(v);
-				}
+				ret.add(fn(v));
 			}
 
 			return ret;
+		}
+
+		JSSet filter(__JSSet_CB_RetBool fn) const
+		{
+			JSSet set;
+
+			for (auto&v : __SuperClass::m_data)
+			{
+				if (fn(v))
+				{
+					set.add(v);
+				}
+			}
+
+			return set;
 		}
 	};
 

@@ -10,124 +10,166 @@
 
 using namespace std;
 
-typedef size_t TD_PosType;
-typedef size_t TD_SizeType;
-
-template <typename T>
-using __InitList = const initializer_list<T>&;
-
-template <typename T, typename __RET = void>
-using __FN_CB = const function<__RET(const T&v)>&;
-
-template <typename T>
-using __FN_Cond = __FN_CB<T, bool>;
-
-template <typename T, typename U>
-struct decay_is_same :
-	std::is_same<typename std::decay<T>::type, U>::type
-{};
-
-template <typename T>
-struct tagTryCompare
+namespace NS_JSTL
 {
-	static bool compare(const T&t1, const T&t2)
+	typedef size_t TD_PosType;
+	typedef size_t TD_SizeType;
+	
+	template <typename T>
+	using __InitList = const initializer_list<T>&;
+
+	template <typename T, typename __RET = void>
+	using __FN_CB = const function<__RET(const T&v)>&;
+
+	template <typename T>
+	using __FN_CB_RetBool = __FN_CB<T, bool>;
+
+	template <typename T, typename U>
+	struct decay_is_same :
+		std::is_same<typename std::decay<T>::type, U>::type
+	{};
+
+	template <typename T>
+	struct tagTryCompare
 	{
-		return _compare(t1, t2);
-	}
-
-	template <typename U>
-	static auto _compare(const U&t1, const U&t2) ->decltype(declval<U>() == declval<U>())
-	{
-		return t1 == t2;
-	}
-
-	static bool _compare(...)
-	{
-		return false;
-	}
-};
-
-template <typename T>
-using __FN_Sort = const function<bool(const T&t1, const T&t2)>&;
-
-template <typename T>
-struct tagTrySort
-{
-	tagTrySort(__FN_Sort<T> fn = NULL)
-		: m_fn(fn)
-	{
-	}
-
-	__FN_Sort<T> m_fn;
-
-	bool operator()(const T&t1, const T&t2)const
-	{
-		if (m_fn)
+		static bool compare(const T&t1, const T&t2)
 		{
-			return m_fn(t1, t2);
+			return _compare(t1, t2);
 		}
 
-		return _compare(t1, t2);
-	}
+		template <typename U>
+		static auto _compare(const U&t1, const U&t2) ->decltype(declval<U>() == declval<U>())
+		{
+			return t1 == t2;
+		}
 
-	template <typename U>
-	static auto _compare(const U&t1, const U&t2) -> decltype(declval<U>() < declval<U>())
+		static bool _compare(...)
+		{
+			return false;
+		}
+	};
+
+	template <typename T>
+	using __FN_Sort = const function<bool(const T&t1, const T&t2)>&;
+
+	template <typename T>
+	struct tagTrySort
 	{
-		return t1 < t2;
-	}
+		tagTrySort(__FN_Sort<T> fn = NULL)
+			: m_fn(fn)
+		{
+		}
 
-	static bool _compare(...)
+		__FN_Sort<T> m_fn;
+
+		bool operator()(const T&t1, const T&t2)const
+		{
+			if (m_fn)
+			{
+				return m_fn(t1, t2);
+			}
+
+			return _compare(t1, t2);
+		}
+
+		template <typename U>
+		static auto _compare(const U&t1, const U&t2) -> decltype(declval<U>() < declval<U>())
+		{
+			return t1 < t2;
+		}
+
+		static bool _compare(...)
+		{
+			return false;
+		}
+	};
+
+	template <typename T, typename U>
+	struct tagTryLMove
 	{
-		return false;
-	}
-};
+		static void lmove(T&t, const U&u)
+		{
+			_lmove(&t, &u);
+		}
 
-template <typename T, typename U>
-struct tagTryLMove
-{
-	static void lmove(T&t, const U&u)
+		template <typename X, typename Y>
+		static auto _lmove(X*px, const Y*py) -> decltype(declval<X*>()->operator<<(declval<Y>()))
+		{
+			return *px << *py;
+		}
+
+		static bool _lmove(...)
+		{
+			return false;
+		}
+
+		enum { value = std::is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
+	};
+
+	template <typename T, typename U = int>
+	struct tagLMove
 	{
-		_lmove(&t, &u);
-	}
+		tagLMove(T&t)
+			: m_t(t)
+		{
+		}
 
-	template <typename X, typename Y>
-	static auto _lmove(X*px, const Y*py) -> decltype(declval<X*>()->operator<<(declval<Y>()))
+		T& m_t;
+
+		tagLMove& operator<<(const U& u)
+		{
+			tagTryLMove<T, U>::lmove(m_t, u);
+			return *this;;
+		}
+
+		template <typename V>
+		tagLMove& operator<<(const V&v)
+		{
+			tagLMove<T, V>(m_t) << v;
+			return *this;
+		}
+	};
+
+	using tagSSTryLMove = tagLMove<stringstream>;
+
+	template<typename __DataType>
+	class tagDynamicArgsExtractor
 	{
-		return *px << *py;
-	}
+	public:
+		using FN_ExtractCB = function<bool(__DataType&v)>;
 
-	static bool _lmove(...)
-	{
-		return false;
-	}
+		template<typename... args>
+		static bool extract(const FN_ExtractCB& cb, __DataType&v, args&... others)
+		{
+			if (!cb)
+			{
+				return false;
+			}
 
-	enum { value = std::is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
-};
+			if (!extract(cb, v))
+			{
+				return false;
+			}
 
-template <typename T, typename U = int>
-struct tagLMove
-{
-	tagLMove(T& t)
-		: m_t(t)
-	{
-	}
+			if (sizeof...(others))
+			{
+				if (!extract(cb, others...))
+				{
+					return false;
+				}
+			}
 
-	T& m_t;
+			return true;
+		}
 
-	tagLMove& operator<<(const U& u)
-	{
-		tagTryLMove<T, U>::lmove(m_t, u);
-		return *this;;
-	}
+		static bool extract(const FN_ExtractCB& cb, __DataType&v)
+		{
+			return cb(v);
+		}
+	};
 
-	template <typename V>
-	tagLMove& operator<<(const V& v)
-	{
-		tagLMove<T, V>(m_t) << v;
-		return *this;
-	}
-};
-
-using tagSSTryLMove = tagLMove<stringstream>;
+	template <typename T, typename _RetType, typename _ITR = decltype(declval<T>().begin())>
+	_RetType checkContainer();
+}
 
 #endif // __Util_H

@@ -105,12 +105,16 @@ int main()
 	qqta.sort();
 	auto strsk = qqta.toString();
 	
-	JSArray<int> qq  ( {1,3,4,2 });
+	JSArray<int> qq;
 	qq= { 12,2,3 };
+	qq = 1;
 	auto aaaa = qq.indexOf({2});
 	qq.sort();
 	auto aaaaaaa = qq.toString();
-
+	qq.unshift({ 1 });
+	qq.unshift(1);
+	qq.unshift(1,2);
+	
 	//qq = ll;
 	auto idf = qq.indexOf(2);
 
@@ -125,20 +129,32 @@ int main()
 	arr2 = arr.map([](float i) {return i * 2; });
 	auto ff = arr.reduce(2.0f, [](const float& a1, const int& a2) {return a1+a2; });
 
-	auto arr3 = arr2.sub(6, 3);
+	auto arr3 = arr2.get(6, 3);
 
 	map<int, int> tm;
 	JSMap<int,int> mmm(tm);
 	mmm = tm;
 	mmm.keys();
+	mmm.getInner(1);
+	mmm.getInner({ 1, 2 });
+	mmm.getInner(arr3);
+	mmm.getOuter(1, 2);
+	mmm.getOuter(11);
+	mmm.getOuter({ 1, 2 });
+	mmm.getOuter(arr3);
+
+	mmm.del(1, 2);
+	mmm.del(11);
+	mmm.del({ 1, 2 });
+	mmm.del(arr3);
 
 	JSSet<int> set ;
 	set.add({ 2,3,4 });
-	set.add({ 1,2,3 });
+	set.add( 1,2,3 );
 
 	JSSet<int> set2 ( {1});
 	set2 = arr2;
-	set2.add({});
+	set2.add({3,4,5});
 
 	JSMap<int, int> m{ { 21,2 },{ 1,2 },{ 1,2 } };
 	auto as = m[1];
@@ -152,21 +168,80 @@ int main()
 
 	JSArray<int> ts2(7.9);
 	ts2.sort();
+	ts2.concat(9);
+	ts2.concat({ 9 });
+	ts2.concat(9, 9);
+	ts2.concat(ts2);
+	ts2.getInner(9);
+	ts2.getInner(9, 9);
+	ts2.getInner({ 9, 9 });
+	ts2.getInner(ts2);
+	ts2.getOuter(9, 9);
+	ts2.getOuter(9);
+	ts2.getOuter({ 9, 9 });
+	ts2.getOuter(ts2);
 
+	ts2.del(9, 9);
+	ts2.del(9);
+	ts2.del({ 9, 9 });
+	ts2.del(ts2);
+
+	JSArray<int*> pils;
 	int uy = 1;
-	PtrArray<int> PtrArray111(ts2);
-	PtrArray111.push(uy);
-	PtrArray111.push(&uy);
+	PtrArray<int> PtrArray0001(uy, uy);
+	PtrArray<int> PtrArray111(&uy, &uy);
+	PtrArray111.assign(uy, uy);
+	PtrArray111.assign(&uy, &uy);
+	PtrArray111.push(uy, uy);
+	PtrArray111.push(&uy, &uy);
 	PtrArray111.push({ &uy });
-	PtrArray111.concat({ &uy });
+	PtrArray111.push(PtrArray111);
 
-	ConstPtrArray<int> ConstPtrArray111(uy);
+	PtrArray111.unshift(uy, uy);
+	PtrArray111.unshift(&uy, &uy);
+	PtrArray111.unshift({ &uy });
+	PtrArray111.unshift(PtrArray111);
+
+	PtrArray111.concat(uy, uy);
+	PtrArray111.concat(&uy, &uy);
+	PtrArray111.concat({ &uy });
+	PtrArray111.concat(PtrArray111);
+
+	ConstPtrArray<int> ConstPtrArray111(&(const int&)uy);
+	ConstPtrArray111.push(uy);
+	ConstPtrArray111.push(&uy);
+	ConstPtrArray111.push({ &uy });
+	ConstPtrArray111.push(PtrArray111);
+	ConstPtrArray111.push(ConstPtrArray111);
+
+	ConstPtrArray111.unshift(uy);
+	ConstPtrArray111.unshift(&uy);
+	ConstPtrArray111.unshift({ &uy });
+	ConstPtrArray111.unshift(PtrArray111);
+	ConstPtrArray111.unshift(ConstPtrArray111);
+
+	ConstPtrArray111.concat(uy);
+	ConstPtrArray111.concat(&uy);
+	ConstPtrArray111.concat({ &uy });
+	ConstPtrArray111.concat(PtrArray111);
+	ConstPtrArray111.concat(ConstPtrArray111);
+
+
 	ConstPtrArray111.push(PtrArray111);
 	ConstPtrArray111.concat(PtrArray111);
 
 	ConstPtrArray<int> ConstPtrArray222(ConstPtrArray111);
 	ConstPtrArray222.push(ConstPtrArray111);
 	ConstPtrArray222.concat(ConstPtrArray111);
+	ConstPtrArray222.push(nullptr);
 
+	bool b = ConstPtrArray222.includes(&uy);
+	ConstPtrArray222.del(nullptr, nullptr, nullptr);
+
+	ConstPtrArray222 = 5;
+
+	JSArray<int> jahss(5, 5, 5, 5);
+	JSSet<int> afrdg(5, 5, 5, 4);
+	bool bbb = afrdg.includes(5);
 	return 0;
 }
