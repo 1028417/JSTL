@@ -1,5 +1,6 @@
 
 #include "jstl/JSArray.h"
+#include "jstl/PtrArray.h"
 #include "jstl/JSSet.h"
 #include "jstl/JSMap.h"
 using namespace NS_JSTL;
@@ -149,8 +150,23 @@ int main()
 	JSMap<int, int> ts1;
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
-	JSArray<int> ts2;
+	JSArray<int> ts2(7.9);
 	ts2.sort();
+
+	int uy = 1;
+	PtrArray<int> PtrArray111(ts2);
+	PtrArray111.push(uy);
+	PtrArray111.push(&uy);
+	PtrArray111.push({ &uy });
+	PtrArray111.concat({ &uy });
+
+	ConstPtrArray<int> ConstPtrArray111(uy);
+	ConstPtrArray111.push(PtrArray111);
+	ConstPtrArray111.concat(PtrArray111);
+
+	ConstPtrArray<int> ConstPtrArray222(ConstPtrArray111);
+	ConstPtrArray222.push(ConstPtrArray111);
+	ConstPtrArray222.concat(ConstPtrArray111);
+
 	return 0;
 }
-

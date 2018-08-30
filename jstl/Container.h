@@ -29,21 +29,23 @@ namespace NS_JSTL
 		{
 		}
 
+		template<typename T>
+		bool CheckIsSelf(T& container)
+		{
+			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
+		}
+
 	public:
 		template<typename T>
 		ContainerT& assign(const T& container)
 		{
-			if ((void*)this != (void*)&container)
+			if (CheckIsSelf(container))
 			{
-				m_data = __Container(container.begin(), container.end());
-
-				//clear();
-				//for (auto& v : container)
-				//{
-				//	this->_add(v);
-				//}
+				return *this;
 			}
-
+			
+			m_data = __Container(container.begin(), container.end());
+			
 			return *this;
 		}
 
@@ -226,11 +228,18 @@ namespace NS_JSTL
 			return itr = m_data.erase(itr);
 		}
 
-		virtual TD_SizeType remove(const __KeyType& key) = 0;
+		virtual TD_SizeType del(const __KeyType& key) = 0;
 
 		template <typename T>
-		TD_SizeType remove(const T& container)
+		TD_SizeType del(const T& container)
 		{
+			if (CheckIsSelf(container))
+			{
+				TD_SizeType uRet = this->size();
+				this->clear();
+				return uRet;
+			}
+
 			TD_SizeType uRet = 0;
 
 			for (auto& v : container)
@@ -240,18 +249,18 @@ namespace NS_JSTL
 					break;
 				}
 
-				uRet += remove(v);
+				uRet += del(v);
 			}
 
 			return uRet;
 		}
 
-		TD_SizeType remove(const __Key_InitList& initList)
+		TD_SizeType del(const __Key_InitList& initList)
 		{
 			return remove<__Key_InitList>(initList);
 		}
 
-		TD_SizeType remove(__Container_Cond fn)
+		TD_SizeType del(__Container_Cond fn)
 		{
 			TD_SizeType uRet = 0;
 

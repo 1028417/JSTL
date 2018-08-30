@@ -10,8 +10,8 @@
 namespace NS_JSTL
 {
 	template<typename __DataType, template<typename...> class __Container=set
-		, typename __SueperClass = ContainerT<__DataType, __Container<__DataType>>
-	> class JSSet : public __SueperClass
+		, typename __SuperClass = ContainerT<__DataType, __Container<__DataType>>
+	> class JSSet : public __SuperClass
 	{
 	private:
 		using __JSSet_InitList = __InitList<__DataType>;
@@ -24,64 +24,74 @@ namespace NS_JSTL
 		{
 		}
 
+		explicit JSSet(const __DataType&v)
+		{
+			push(v);
+		}
+
 		explicit JSSet(const JSSet& set)
-			: __SueperClass(set)
+			: __SuperClass(set)
 		{
 		}
 
 		JSSet(JSSet&& set)
 		{
-			__SueperClass::swap(set);
+			__SuperClass::swap(set);
 		}
 
 		explicit JSSet(const __JSSet_InitList& initList)
-			: __SueperClass(initList)
+			: __SuperClass(initList)
 		{
 		}
 
 		template<typename T>
 		explicit JSSet(const T& container)
-			: __SueperClass(container)
+			: __SuperClass(container)
 		{
 		}
 
 		JSSet& operator=(const JSSet& set)
 		{
-			__SueperClass::assign(set);
+			__SuperClass::assign(set);
 			return *this;
 		}
 
 		JSSet& operator=(JSSet&& set)
 		{
-			__SueperClass::swap(set);
+			__SuperClass::swap(set);
 			return *this;
 		}
 
 		JSSet& operator=(const __JSSet_InitList& initList)
 		{
-			__SueperClass::assign(initList);
+			__SuperClass::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
 		JSSet& operator=(const T& container)
 		{
-			__SueperClass::assign(container);
+			if (__SuperClass::CheckIsSelf(container))
+			{
+				return *this;
+			}
+
+			__SuperClass::assign(container);
 			return *this;
 		}
 		
 	private:
 		virtual TD_SizeType _add(const __DataType&v) override
 		{
-			__SueperClass::m_data.insert(v);
+			__SuperClass::m_data.insert(v);
 
-			return __SueperClass::m_data.size();
+			return __SuperClass::m_data.size();
 		}
 		
 	public:
 		bool has(const __DataType&v) const override
 		{
-			return __SueperClass::m_data.find(v) != __SueperClass::m_data.end();
+			return __SuperClass::m_data.find(v) != __SuperClass::m_data.end();
 		}
 
 		TD_SizeType add(const __DataType&v)
@@ -92,16 +102,21 @@ namespace NS_JSTL
 		template<typename T>
 		TD_SizeType add(const T& container)
 		{
-			__SueperClass::m_data.insert(container.begin(), container.end());
+			if (__SuperClass::CheckIsSelf(container))
+			{
+				return __SuperClass::size();
+			}
 
-			return __SueperClass::m_data.size();
+			__SuperClass::m_data.insert(container.begin(), container.end());
+
+			return __SuperClass::m_data.size();
 		}
 
 		TD_SizeType add(const __JSSet_InitList& initList)
 		{
 			return add<__JSSet_InitList>(initList);
 		}
-
+		
 		template<typename T>
 		JSSet concat(const T& container)
 		{
@@ -117,15 +132,15 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		TD_SizeType remove(const __DataType&v) override
+		TD_SizeType del(const __DataType&v) override
 		{
-			auto itr = __SueperClass::m_data.find(v);
-			if (itr == __SueperClass::m_data.end())
+			auto itr = __SuperClass::m_data.find(v);
+			if (itr == __SuperClass::m_data.end())
 			{
 				return 0;
 			}
 
-			__SueperClass::m_data.erase(itr);
+			__SuperClass::m_data.erase(itr);
 
 			return 1;
 		}
@@ -136,7 +151,7 @@ namespace NS_JSTL
 		{
 			JSSet<T, __Container> ret;
 
-			for (auto& v : __SueperClass::m_data)
+			for (auto& v : __SuperClass::m_data)
 			{
 				ret._add(fn(v));
 			}
@@ -148,7 +163,7 @@ namespace NS_JSTL
 		{
 			JSSet ret;
 
-			for (auto& v : __SueperClass::m_data)
+			for (auto& v : __SuperClass::m_data)
 			{
 				if (fn(v))
 				{

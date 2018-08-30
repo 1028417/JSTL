@@ -45,6 +45,9 @@
 		<Unit filename="jstl/JSSet.h">
 			<Option virtualFolder="jstl/" />
 		</Unit>
+		<Unit filename="jstl/PtrArray.h">
+			<Option virtualFolder="jstl/" />
+		</Unit>
 		<Unit filename="jstl/util.h">
 			<Option virtualFolder="jstl/" />
 		</Unit>

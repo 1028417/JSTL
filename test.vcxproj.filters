@@ -24,5 +24,8 @@
     <ClInclude Include="jstl\util.h">
       <Filter>jstl</Filter>
     </ClInclude>
+    <ClInclude Include="jstl\PtrArray.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
