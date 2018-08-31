@@ -24,11 +24,13 @@ namespace NS_JSTL
 		using __JSArray_CB = __FN_CB<__DataType>;
 		using __JSArray_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
+		using __ConstDataRef = const __DataType&;
+	
 	public:
-		static JSArray init(TD_SizeType size, const __DataType&v)
+		static JSArray init(TD_SizeType size, __ConstDataRef data)
 		{
 			JSArray arr;
-			arr._init(size, v);
+			arr._init(size, data);
 			return arr;
 		}
 
@@ -37,9 +39,9 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		explicit JSArray(const __DataType&v, const args&... others)
+		explicit JSArray(__ConstDataRef data, const args&... others)
 		{
-			__SuperClass::add(v, others...);
+			__SuperClass::add(data, others...);
 		}
 
 		explicit JSArray(const JSArray& arr)
@@ -89,26 +91,26 @@ namespace NS_JSTL
 		}
 
 	protected:
-		void _init(TD_SizeType size, const __DataType&v)
+		void _init(TD_SizeType size, __ConstDataRef data)
 		{
 			JSArray arr;
-			__SuperClass::m_data.assign(size, v);
+			__SuperClass::m_data.assign(size, data);
 		}
 
-		TD_SizeType _add(const __DataType&v) override
+		TD_SizeType _add(__ConstDataRef data) override
 		{
-			__SuperClass::m_data.push_back(v);
+			__SuperClass::m_data.push_back(data);
 			return __SuperClass::m_data.size();
 		}
 
-		TD_SizeType _del(const __DataType&v) override
+		TD_SizeType _del(__ConstDataRef data) override
 		{
 			TD_SizeType uRet = 0;
 
 			auto itr = __SuperClass::m_data.begin();
 			while (itr != __SuperClass::m_data.end())
 			{
-				if (tagTryCompare<__DataType>().compare(*itr, v))
+				if (tagTryCompare<__DataType>().compare(*itr, data))
 				{
 					itr = __SuperClass::m_data.erase(itr);
 					uRet++;
@@ -122,9 +124,9 @@ namespace NS_JSTL
 			return uRet;
 		}
 
-		bool _includes(const __DataType&v) const override
+		bool _includes(__ConstDataRef data) const override
 		{
-			return indexOf(v) >= 0;
+			return indexOf(data) >= 0;
 		}
 
 		int _checkPos(int pos) const
@@ -141,7 +143,7 @@ namespace NS_JSTL
 			}
 			else
 			{
-				if (pos >= size)
+				if (pos >= (int)size)
 				{
 					return -1;
 				}
@@ -155,17 +157,17 @@ namespace NS_JSTL
 		{
 			return __SuperClass::m_data[pos];
 		}
-		const __DataType& operator[](TD_PosType pos) const
+		__ConstDataRef operator[](TD_PosType pos) const
 		{
 			return __SuperClass::m_data[pos];
 		}
 
-		int indexOf(const __DataType&v) const
+		int indexOf(__ConstDataRef data) const
 		{
 			int uIdx = 0;
-			for (auto& data : __SuperClass::m_data)
+			for (auto& item : __SuperClass::m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(data, v))
+				if (tagTryCompare<__DataType>().compare(item, data))
 				{
 					return uIdx;
 				}
@@ -175,12 +177,12 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		int lastIndexOf(const __DataType&v) const
+		int lastIndexOf(__ConstDataRef data) const
 		{
 			int uIdx = 1;
-			for (auto& data : __SuperClass::m_data)
+			for (auto& item : __SuperClass::m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(data, v))
+				if (tagTryCompare<__DataType>().compare(item, data))
 				{
 					return __SuperClass::m_data.size()-uIdx;
 				}
@@ -205,7 +207,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		void forEach(const function<bool(const __DataType&v, TD_PosType pos)>& fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(const function<bool(__ConstDataRef, TD_PosType)>& fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!fn)
 			{
@@ -237,8 +239,8 @@ namespace NS_JSTL
 				return;
 			}
 
-			forEach([&](const __DataType&v, TD_PosType pos) {
-				return fn(v);
+			forEach([&](__ConstDataRef data, TD_PosType pos) {
+				return fn(data);
 			}, (TD_PosType)startPos);
 		}
 
@@ -249,8 +251,8 @@ namespace NS_JSTL
 			startPos = _checkPos(startPos);
 			if (startPos >= 0)
 			{
-				forEach([&](const __DataType&v) {
-					arr.push(v);
+				forEach([&](__ConstDataRef data) {
+					arr.push(data);
 				}, (TD_PosType)startPos);
 			}
 
@@ -266,8 +268,8 @@ namespace NS_JSTL
 
 			if (startPos >= 0 && endPos >=0 && startPos <= endPos)
 			{
-				forEach([&](const __DataType&v) {
-					arr.push(v);
+				forEach([&](__ConstDataRef data) {
+					arr.push(data);
 					return true;
 				}, (TD_PosType)startPos, TD_SizeType(endPos-startPos+1));
 			}
@@ -292,9 +294,9 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType push(const __DataType&v, const args&... others)
+		TD_SizeType push(__ConstDataRef data, const args&... others)
 		{
-			return __SuperClass::add(v, others...);
+			return __SuperClass::add(data, others...);
 		}
 
 		template<typename T>
@@ -309,10 +311,10 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray concat(const __DataType&v, const args&... others) const
+		JSArray concat(__ConstDataRef data, const args&... others) const
 		{
 			JSArray arr(*this);
-			arr.push(v, others...);
+			arr.push(data, others...);
 			return arr;
 		}
 
@@ -354,12 +356,12 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(const __DataType&v, const args&... others)
+		TD_SizeType unshift(__ConstDataRef data, const args&... others)
 		{
-			(void)__SuperClass::extractDataTypeArgs([&](const __DataType&v) {
-				__SuperClass::m_data.push_front(v);
+			(void)__SuperClass::extractDataTypeArgs([&](__ConstDataRef data) {
+				__SuperClass::m_data.push_front(data);
 				return true;
-			}, v, others...);
+			}, data, others...);
 
 			return __SuperClass::size();
 		}
@@ -383,10 +385,10 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, const __DataType&v, const args&... others)
+		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __ConstDataRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
-			extractDataTypeArgs(vecData, v, others...);
+			extractDataTypeArgs(vecData, data, others...);
 			return splice(pos, nRemove, vecData);
 		}
 
@@ -444,11 +446,11 @@ namespace NS_JSTL
 		{
 			JSArray arr;
 
-			for (auto&v : __SuperClass::m_data)
+			for (auto&data : __SuperClass::m_data)
 			{
-				if (fn(v))
+				if (fn(data))
 				{
-					arr.push(v);
+					arr.push(data);
 				}
 			}
 
@@ -459,9 +461,9 @@ namespace NS_JSTL
 		{
 			JSMap<__DataType, TD_SizeType> mapItemSum;
 
-			for (auto&v : __SuperClass::m_data)
+			for (auto&data : __SuperClass::m_data)
 			{
-				mapItemSum[v]++;
+				mapItemSum[data]++;
 			}
 
 			return mapItemSum;

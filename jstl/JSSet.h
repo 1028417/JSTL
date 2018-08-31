@@ -20,15 +20,17 @@ namespace NS_JSTL
 		using __JSSet_CB = __FN_CB<__DataType>;
 		using __JSSet_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
+		using __ConstDataRef = const __DataType&;
+
 	public:
 		JSSet()
 		{
 		}
 
 		template<typename... args>
-		explicit JSSet(const __DataType&v, const args&... others)
+		explicit JSSet(__ConstDataRef data, const args&... others)
 		{
-			__SuperClass::add(v, others...);
+			__SuperClass::add(data, others...);
 		}
 
 		explicit JSSet(const JSSet& set)
@@ -78,16 +80,16 @@ namespace NS_JSTL
 		}
 
 	private:
-		TD_SizeType _add(const __DataType&v) override
+		TD_SizeType _add(__ConstDataRef data) override
 		{
-			__SuperClass::m_data.insert(v);
+			__SuperClass::m_data.insert(data);
 
 			return __SuperClass::m_data.size();
 		}
 
-		TD_SizeType _del(const __DataType&v) override
+		TD_SizeType _del(__ConstDataRef data) override
 		{
-			auto itr = __SuperClass::m_data.find(v);
+			auto itr = __SuperClass::m_data.find(data);
 			if (itr == __SuperClass::m_data.end())
 			{
 				return 0;
@@ -98,16 +100,16 @@ namespace NS_JSTL
 			return 1;
 		}
 
-		bool _includes(const __DataType&v) const override
+		bool _includes(__ConstDataRef data) const override
 		{
-			return __SuperClass::m_data.find(v) != __SuperClass::m_data.end();
+			return __SuperClass::m_data.find(data) != __SuperClass::m_data.end();
 		}
 
 	public:
 		template<typename... args>
-		TD_SizeType add(const __DataType&v, const args&... others)
+		TD_SizeType add(__ConstDataRef data, const args&... others)
 		{
-			return __SuperClass::add(v, others...);
+			return __SuperClass::add(data, others...);
 		}
 
 		template<typename T>
@@ -126,9 +128,9 @@ namespace NS_JSTL
 		{
 			JSSet<T, __SetType> ret;
 
-			for (auto&v : __SuperClass::m_data)
+			for (auto&data : __SuperClass::m_data)
 			{
-				ret.add(fn(v));
+				ret.add(fn(data));
 			}
 
 			return ret;
@@ -139,9 +141,9 @@ namespace NS_JSTL
 		{
 			JSSet<decltype(fn(__DataType())), __SetType> ret;
 			
-			for (auto&v : __SuperClass::m_data)
+			for (auto&data : __SuperClass::m_data)
 			{
-				ret.add(fn(v));
+				ret.add(fn(data));
 			}
 
 			return ret;
@@ -151,11 +153,11 @@ namespace NS_JSTL
 		{
 			JSSet set;
 
-			for (auto&v : __SuperClass::m_data)
+			for (auto&data : __SuperClass::m_data)
 			{
-				if (fn(v))
+				if (fn(data))
 				{
-					set.add(v);
+					set.add(data);
 				}
 			}
 

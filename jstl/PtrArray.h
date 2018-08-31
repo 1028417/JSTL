@@ -10,12 +10,14 @@ namespace NS_JSTL
 	class PtrArray : public JSArray<__Type*>
 	{
 	private:
+		using __SuperClass = JSArray<__Type*>;
+
+		using __PtrArray_InitList = __InitList<__Type*>;
+
+		using __PtrArray_CB = __FN_CB<__Type>;
+
 		using __PtrType = __Type*;
-		using __RefType = __Type&;
-
-		using __SuperClass = JSArray<__PtrType>;
-
-		using __PtrArray_InitList = __InitList<__PtrType>;
+		using __ConstPtrRef = const __PtrType&;
 
 	public:
 		PtrArray()
@@ -29,7 +31,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		explicit PtrArray(__RefType ref, args&... others)
+		explicit PtrArray(__Type& ref, args&... others)
 		{
 			assign(ref, others...);
 		}
@@ -81,22 +83,22 @@ namespace NS_JSTL
 		}
 		
 	private:
-		TD_SizeType _add(const __PtrType& ptr) override
+		TD_SizeType _add(__ConstPtrRef ptr) override
 		{
 			return __SuperClass::_add(ptr);
 		}
 
-		TD_SizeType _add(__RefType ref)
+		TD_SizeType _add(__Type& ref)
 		{
 			return __SuperClass::_add(&ref);
 		}
 		
-		void _unshift(const __PtrType& ptr)
+		void _unshift(__ConstPtrRef ptr)
 		{
 			__SuperClass::unshift(ptr);
 		}
 
-		void _unshift(__RefType ref)
+		void _unshift(__Type& ref)
 		{
 			__SuperClass::unshift(&ref);
 		}
@@ -110,7 +112,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArray& assign(__RefType ref, args&... others)
+		PtrArray& assign(__Type& ref, args&... others)
 		{
 			__SuperClass::clear();
 
@@ -147,9 +149,9 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType push(__RefType ref, args&... others)
+		TD_SizeType push(__Type& ref, args&... others)
 		{
-			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
+			(void)tagDynamicArgsExtractor<__Type&>::extract([&](__Type& ref) {
 				_add(ref);
 				return true;
 			}, ref, others...);
@@ -165,9 +167,9 @@ namespace NS_JSTL
 				return __SuperClass::size();
 			}
 
-			for (auto&v : container)
+			for (auto&data : container)
 			{
-				_add(v);
+				_add(data);
 			}
 			
 			return __SuperClass::size();
@@ -185,7 +187,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArray concat(__RefType ref, args&... others)
+		PtrArray concat(__Type& ref, args&... others)
 		{
 			PtrArray arr(*this);
 			arr.push(ref, others...);
@@ -212,9 +214,9 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(__RefType ref, args&... others)
+		TD_SizeType unshift(__Type& ref, args&... others)
 		{
-			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
+			(void)tagDynamicArgsExtractor<__Type&>::extract([&](__Type& ref) {
 				__SuperClass::unshift({ &ref });
 				return true;
 			}, ref, others...);
@@ -230,9 +232,9 @@ namespace NS_JSTL
 				return __SuperClass::size();
 			}
 
-			for (auto&v : container)
+			for (auto&data : container)
 			{
-				_unshift(v);
+				_unshift(data);
 			}
 
 			return __SuperClass::size();
@@ -252,10 +254,10 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __RefType ref, args&... others)
+		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __Type& ref, args&... others)
 		{
 			vector<__PtrType> vec;
-			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
+			(void)tagDynamicArgsExtractor<__Type&>::extract([&](__Type& ref) {
 				vec.push_back(&ref);
 				return true;
 			}, ref, others...);
@@ -278,6 +280,21 @@ namespace NS_JSTL
 			__SuperClass::splice(pos, nRemove, initList);
 
 			return *this;
+		}
+
+	public:
+		bool getRef(TD_PosType pos, __PtrArray_CB fn) const
+		{
+			bool bRet = false;
+			(void)__SuperClass::get(pos, [&](__PtrType ptr) {
+				if (NULL != ptr)
+				{
+					bRet = true;
+					fn(*ptr);
+				}
+			});
+
+			return bRet;
 		}
 	};
 

@@ -20,9 +20,14 @@ namespace NS_JSTL
 		using __DataType = pair<__KeyType const, __ValueType>;
 		using __JSMap_InitList = __InitList<__DataType>;
 
-		using __JSMap_CB = const function<void(const __KeyType&k, const __ValueType&v)>&;
+		using __ConstKeyRef = const __KeyType&;
+		using __ConstValueRef = const __ValueType&;
+
+		using __JSMap_CB = const function<void(__ConstKeyRef, __ConstValueRef)>&;
+
 		template <typename T>
-		using __JSMap_CB_Ret = const function<T(const __KeyType&k, const __ValueType&v)>&;
+		using __JSMap_CB_Ret = const function<T(__ConstKeyRef, __ConstValueRef)>&;
+
 		using __JSMap_CB_RetBool = __JSMap_CB_Ret<bool>;
 
 	public:
@@ -77,16 +82,16 @@ namespace NS_JSTL
 		}
 
 	private:
-		TD_SizeType _add(const __DataType&v) override
+		TD_SizeType _add(const __DataType& pr) override
 		{
-			__SuperClass::m_data.insert(v);
+			__SuperClass::m_data.insert(pr);
 
 			return __SuperClass::m_data.size();
 		}
 
-		TD_SizeType _del(const __KeyType&k) override
+		TD_SizeType _del(__ConstKeyRef key) override
 		{
-			auto itr = __SuperClass::m_data.find(k);
+			auto itr = __SuperClass::m_data.find(key);
 			if (itr == __SuperClass::m_data.end())
 			{
 				return 0;
@@ -97,29 +102,29 @@ namespace NS_JSTL
 			return 1;
 		}
 
-		bool _includes(const __KeyType&k) const override
+		bool _includes(__ConstKeyRef key) const override
 		{
-			return __SuperClass::m_data.find(k) != __SuperClass::m_data.end();
+			return __SuperClass::m_data.find(key) != __SuperClass::m_data.end();
 		}
 
-		virtual void _tostring(stringstream& ss, const __DataType&v) const override
+		virtual void _tostring(stringstream& ss, const __DataType& pr) const override
 		{
-			tagSSTryLMove(ss) << '<' << v.first << ", " << v.second << '>';
+			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
 		}
 
 	public:
-		__ValueType& operator[](const __KeyType&k)
+		__ValueType& operator[](__ConstKeyRef key)
 		{
-			return __SuperClass::m_data[k];
+			return __SuperClass::m_data[key];
 		}
-		const __ValueType& operator[](const __KeyType&k)const
+		__ConstValueRef operator[](__ConstKeyRef key)const
 		{
-			return __SuperClass::m_data[k];
+			return __SuperClass::m_data[key];
 		}
 
-		bool get(const __KeyType&k, __JSMap_CB fn=NULL) const
+		bool get(__ConstKeyRef key, __JSMap_CB fn=NULL) const
 		{
-			auto itr = __SuperClass::m_data.find(k);
+			auto itr = __SuperClass::m_data.find(key);
 			if (itr == __SuperClass::m_data.end())
 			{
 				return false;
@@ -174,9 +179,9 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMap& set(const __KeyType&k, const __ValueType&v)
+		JSMap& set(__ConstKeyRef key, __ConstValueRef value)
 		{
-			__SuperClass::m_data[k] = v;
+			__SuperClass::m_data[key] = value;
 			return *this;
 		}
 

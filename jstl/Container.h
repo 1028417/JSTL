@@ -18,24 +18,28 @@ namespace NS_JSTL
 		using __Container_CB = __FN_CB<__DataType>;
 		using __Container_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
+		using __ConstDataRef = const __DataType&;
+
+		using __Data_Pos_CB = const function<bool(__ConstDataRef, TD_PosType)>&;
+
 	protected:
 		__ContainerType m_data;
 
 		template<typename... args>
-		bool extractDataTypeArgs(const function<bool(const __DataType&)>& cb, const __DataType&v, const args&... others)
+		bool extractDataTypeArgs(const function<bool(__ConstDataRef)>& cb, __ConstDataRef data, const args&... others)
 		{
-			return tagDynamicArgsExtractor<const __DataType>::extract([&](const __DataType&v) {
-				return cb(v);
-			}, v, others...);
+			return tagDynamicArgsExtractor<const __DataType>::extract([&](__ConstDataRef data) {
+				return cb(data);
+			}, data, others...);
 		}
 
 		template<typename... args>
-		void extractDataTypeArgs(vector<__DataType>& vecArgs, const __DataType&v, const args&... others)
+		void extractDataTypeArgs(vector<__DataType>& vecArgs, __ConstDataRef data, const args&... others)
 		{
-			tagDynamicArgsExtractor<const __DataType>::extract([&](const __DataType&v) {
-				vecArgs.push_back(v);
+			tagDynamicArgsExtractor<const __DataType>::extract([&](__ConstDataRef data) {
+				vecArgs.push_back(data);
 				return true;
-			}, v, others...);
+			}, data, others...);
 		}
 
 		template<typename... args>
@@ -73,11 +77,11 @@ namespace NS_JSTL
 
 	public:
 		template<typename... args>
-		ContainerT& assign(const __DataType&v, const args&... others)
+		ContainerT& assign(__ConstDataRef data, const args&... others)
 		{
 			clear();
 
-			add(v, others...);
+			add(data, others...);
 
 			return *this;
 		}
@@ -191,13 +195,13 @@ namespace NS_JSTL
 		virtual bool _includes(const __KeyType&k) const = 0;
 
 		template<typename... args>
-		bool includes(const __DataType&v, const args&... others)
+		bool includes(__ConstDataRef data, const args&... others)
 		{
 			bool bRet = true;
 
-			(void)extractDataTypeArgs([&](const __DataType&v) {
-				return bRet = _includes(v);
-			}, v, others...);
+			(void)extractDataTypeArgs([&](__ConstDataRef data) {
+				return bRet = _includes(data);
+			}, data, others...);
 
 			return bRet;
 		}
@@ -210,9 +214,9 @@ namespace NS_JSTL
 				return true;
 			}
 
-			for (auto&v : container)
+			for (auto&data : container)
 			{
-				if (!_includes(v))
+				if (!_includes(data))
 				{
 					return false;
 				}
@@ -331,14 +335,14 @@ namespace NS_JSTL
 
 			TD_SizeType uRet = 0;
 
-			for (auto&v : container)
+			for (auto&data : container)
 			{
 				if (m_data.empty())
 				{
 					break;
 				}
 
-				uRet += _del(v);
+				uRet += _del(data);
 			}
 
 			return uRet;
@@ -402,15 +406,15 @@ namespace NS_JSTL
 		}
 
 	protected:
-		virtual TD_SizeType _add(const __DataType&v) = 0;
+		virtual TD_SizeType _add(__ConstDataRef data) = 0;
 
 		template<typename... args>
-		TD_SizeType add(const __DataType&v, const args&... others)
+		TD_SizeType add(__ConstDataRef data, const args&... others)
 		{
-			(void)extractDataTypeArgs([&](const __DataType&v) {
-				_add(v);
+			(void)extractDataTypeArgs([&](__ConstDataRef data) {
+				_add(data);
 				return true;
-			}, v, others...);
+			}, data, others...);
 
 			return size();
 		}
@@ -423,9 +427,9 @@ namespace NS_JSTL
 				return size();
 			}
 
-			for (auto&v : container)
+			for (auto&data : container)
 			{
-				_add(v);
+				_add(data);
 			}
 
 			return size();
@@ -438,9 +442,9 @@ namespace NS_JSTL
 
 		virtual TD_SizeType _del(const __KeyType&k) = 0;
 
-		virtual void _tostring(stringstream& ss, const __DataType&v) const
+		virtual void _tostring(stringstream& ss, __ConstDataRef data) const
 		{
-			tagSSTryLMove(ss) << v;
+			tagSSTryLMove(ss) << data;
 		}
 
 	public:
@@ -449,9 +453,9 @@ namespace NS_JSTL
 		{
 			JSArray<T> arr;
 
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				arr.push(fn(v));
+				arr.push(fn(data));
 			}
 
 			return arr;
@@ -462,15 +466,15 @@ namespace NS_JSTL
 		{
 			JSArray<decltype(fn(__DataType()))> arr;
 
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				arr.push(fn(v));
+				arr.push(fn(data));
 			}
 
 			return arr;
 		}
 
-		void forEach(const function<bool(const __DataType&v, TD_PosType pos)>& fn) const
+		void forEach(__Data_Pos_CB fn) const
 		{
 			if (!fn)
 			{
@@ -478,9 +482,9 @@ namespace NS_JSTL
 			}
 
 			TD_PosType pos = 0;
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				if (!fn(pos, v))
+				if (!fn(pos, data))
 				{
 					break;
 				}
@@ -491,9 +495,9 @@ namespace NS_JSTL
 
 		bool every(__Container_CB_RetBool fn)
 		{
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				if (!fn(v))
+				if (!fn(data))
 				{
 					return false;
 				}
@@ -504,9 +508,9 @@ namespace NS_JSTL
 
 		bool some(__Container_CB_RetBool fn)
 		{
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				if (fn(v))
+				if (fn(data))
 				{
 					return true;
 				}
@@ -519,9 +523,9 @@ namespace NS_JSTL
 		T reduce(const T& stat, __Function fn)
 		{
 			T ret = stat;
-			for (auto&v : m_data)
+			for (auto&data : m_data)
 			{
-				ret = (T)fn(ret, v);
+				ret = (T)fn(ret, data);
 			}
 
 			return ret;
