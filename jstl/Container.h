@@ -449,7 +449,7 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSArray<T> map(__FN_CB<__DataType, T> fn) const
+		JSArray<T> map(__FN_CB<__ConstDataRef, T> fn) const
 		{
 			JSArray<T> arr;
 

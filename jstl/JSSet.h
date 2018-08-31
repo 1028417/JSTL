@@ -124,7 +124,7 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		JSSet<T, __SetType> map(__FN_CB<__DataType, T> fn) const
+		JSSet<T, __SetType> map(__FN_CB<__ConstDataRef, T> fn) const
 		{
 			JSSet<T, __SetType> ret;
 

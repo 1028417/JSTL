@@ -25,7 +25,9 @@ namespace NS_JSTL
 		using __JSArray_CB_RetBool = __FN_CB_RetBool<__DataType>;
 
 		using __ConstDataRef = const __DataType&;
-	
+
+		using __Data_Pos_CB = const function<bool(__ConstDataRef, TD_PosType)>&;
+
 	public:
 		static JSArray init(TD_SizeType size, __ConstDataRef data)
 		{
@@ -207,7 +209,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		void forEach(const function<bool(__ConstDataRef, TD_PosType)>& fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__Data_Pos_CB fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!fn)
 			{
