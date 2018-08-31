@@ -470,8 +470,13 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		void forEach(function<bool(TD_PosType pos, const __DataType&v)> fn) const
+		void forEach(const function<bool(const __DataType&v, TD_PosType pos)>& fn) const
 		{
+			if (!fn)
+			{
+				return;
+			}
+
 			TD_PosType pos = 0;
 			for (auto&v : m_data)
 			{

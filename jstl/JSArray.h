@@ -127,6 +127,29 @@ namespace NS_JSTL
 			return indexOf(v) >= 0;
 		}
 
+		int _checkPos(int pos) const
+		{
+			auto size = __SuperClass::size();
+			if (0 == size)
+			{
+				return -1;
+			}
+
+			if (pos < 0)
+			{
+				return size + pos;
+			}
+			else
+			{
+				if (pos >= size)
+				{
+					return -1;
+				}
+
+				return pos;
+			}
+		}
+
 	public:
 		__DataType& operator[](TD_PosType pos)
 		{
@@ -182,13 +205,24 @@ namespace NS_JSTL
 			return true;
 		}
 
-		void get(TD_PosType posStart, TD_PosType posEnd, __JSArray_CB_RetBool fn) const
+		void forEach(const function<bool(const __DataType&v, TD_PosType pos)>& fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			if (fn)
+			if (!fn)
 			{
-				for (TD_PosType pos = posStart; pos <= posEnd && posEnd < __SuperClass::m_data.size(); pos++)
+				return;
+			}
+
+			for (TD_PosType pos = startPos; pos < __SuperClass::m_data.size(); pos++)
+			{
+				if (!fn(__SuperClass::m_data[pos], pos))
 				{
-					if (!fn(__SuperClass::m_data[pos]))
+					break;
+				}
+
+				if (0 < count)
+				{
+					count--;
+					if (0 == count)
 					{
 						break;
 					}
@@ -196,18 +230,46 @@ namespace NS_JSTL
 			}
 		}
 
-		JSArray get(TD_PosType pos, TD_SizeType count) const
+		void forEach(__JSArray_CB_RetBool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		{
+			if (!fn)
+			{
+				return;
+			}
+
+			forEach([&](const __DataType&v, TD_PosType pos) {
+				return fn(v);
+			}, (TD_PosType)startPos);
+		}
+
+		JSArray slice(int startPos) const
 		{
 			JSArray arr;
 
-			for (TD_PosType idx = 0; idx < count; idx++)
+			startPos = _checkPos(startPos);
+			if (startPos >= 0)
 			{
-				if (!this->get(pos + idx, [&](const __DataType&v) {
+				forEach([&](const __DataType&v) {
 					arr.push(v);
-				}))
-				{
-					break;
-				}
+				}, (TD_PosType)startPos);
+			}
+
+			return arr;
+		}
+
+		JSArray slice(int startPos, int endPos) const
+		{
+			JSArray arr;
+
+			startPos = _checkPos(startPos);
+			endPos = _checkPos(startPos);
+
+			if (startPos >= 0 && endPos >=0 && startPos <= endPos)
+			{
+				forEach([&](const __DataType&v) {
+					arr.push(v);
+					return true;
+				}, (TD_PosType)startPos, TD_SizeType(endPos-startPos+1));
 			}
 
 			return arr;

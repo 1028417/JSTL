@@ -129,7 +129,7 @@ int main()
 	arr2 = arr.map([](float i) {return i * 2; });
 	auto ff = arr.reduce(2.0f, [](const float& a1, const int& a2) {return a1+a2; });
 
-	auto arr3 = arr2.get(6, 3);
+	auto arr3 = arr2.slice(6, 3);
 
 	map<int, int> tm;
 	JSMap<int,int> mmm(tm);
