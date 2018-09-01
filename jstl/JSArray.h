@@ -23,16 +23,16 @@ namespace NS_JSTL
 
 		using __ConstDataRef = const __DataType&;
 
-		using __JSArray_CB = __FN_CB<__ConstDataRef>;
-		using __JSArray_CB_RetBool = __FN_CB_RetBool<__ConstDataRef>;
+		using __CB_void = __CB_T_void<__ConstDataRef>;
+		using __CB_bool = __CB_T_bool<__ConstDataRef>;
 
-		using __Data_Pos_CB = const function<bool(__ConstDataRef, TD_PosType)>&;
+		using __CB_ConstDataRef_Pos = __CB_Data_Pos<__ConstDataRef>;
 
 	public:
 		static JSArray init(TD_SizeType size, __ConstDataRef data)
 		{
 			JSArray arr;
-			arr._init(size, data);
+			arr.m_data.assign(size, data);
 			return arr;
 		}
 
@@ -93,12 +93,6 @@ namespace NS_JSTL
 		}
 
 	protected:
-		void _init(TD_SizeType size, __ConstDataRef data)
-		{
-			JSArray arr;
-			__SuperClass::m_data.assign(size, data);
-		}
-
 		__DataType* _at(TD_PosType pos)
 		{
 			if (pos >= __SuperClass::m_data.size())
@@ -175,7 +169,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		bool get(TD_PosType pos, __JSArray_CB fn) const
+		bool get(TD_PosType pos, __CB_void fn) const
 		{
 			const __DataType *ptr = _at(pos);
 			if (NULL == ptr)
@@ -247,7 +241,7 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		void forEach(__Data_Pos_CB fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_ConstDataRef_Pos fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!fn)
 			{
@@ -273,7 +267,7 @@ namespace NS_JSTL
 			});
 		}
 
-		void forEach(__JSArray_CB_RetBool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_bool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!fn)
 			{
@@ -285,7 +279,7 @@ namespace NS_JSTL
 			}, (TD_PosType)startPos);
 		}
 
-		int find(__Data_Pos_CB fn, TD_PosType stratPos = 0) const
+		int find(__CB_ConstDataRef_Pos fn, TD_PosType stratPos = 0) const
 		{
 			if (!fn)
 			{
@@ -379,7 +373,7 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		bool pop(__JSArray_CB fn=NULL)
+		bool pop(__CB_void fn=NULL)
 		{
 			if (__SuperClass::m_data.empty())
 			{
@@ -396,7 +390,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool shift(__JSArray_CB fn=NULL)
+		bool shift(__CB_void fn=NULL)
 		{
 			return pop_begin(fn);
 		}
@@ -468,7 +462,7 @@ namespace NS_JSTL
 			return splice(pos, nRemove, initList);
 		}
 
-		JSArray& sort(__FN_Sort<__DataType> fn = NULL)
+		JSArray& sort(__CB_Sort_T<__DataType> fn = NULL)
 		{
 			std::sort(__SuperClass::m_data.begin(), __SuperClass::m_data.end(), tagTrySort<__DataType>(fn));
 
@@ -488,7 +482,29 @@ namespace NS_JSTL
 		}
 
 	public:
-		JSArray filter(__JSArray_CB_RetBool fn) const
+		template <typename T>
+		JSArray<T> map(__CB_T_RET<__ConstDataRef, T> fn) const
+		{
+			JSArray<T> arr;
+
+			if (fn)
+			{
+				for (auto&data : __SuperClass::m_data)
+				{
+					arr.push(fn(data));
+				}
+			}
+
+			return arr;
+		}
+
+		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
+		JSArray<__RET> map(__Function fn) const
+		{
+			return map<__RET>(fn);
+		}
+
+		JSArray filter(__CB_bool fn) const
 		{
 			JSArray arr;
 

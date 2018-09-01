@@ -23,12 +23,11 @@ namespace NS_JSTL
 		using __ConstKeyRef = const __KeyType&;
 		using __ConstValueRef = const __ValueType&;
 
-		using __JSMap_CB = const function<void(__ConstKeyRef, __ConstValueRef)>&;
-
 		template <typename T>
-		using __JSMap_CB_Ret = const function<T(__ConstKeyRef, __ConstValueRef)>&;
+		using __CB_T = const function<T(__ConstKeyRef, __ConstValueRef)>&;
 
-		using __JSMap_CB_RetBool = __JSMap_CB_Ret<bool>;
+		using __CB_void = __CB_T<void>;
+		using __CB_bool = __CB_T<bool>;
 
 	public:
 		JSMap()
@@ -106,7 +105,7 @@ namespace NS_JSTL
 		{
 			return __SuperClass::m_data.find(key) != __SuperClass::m_data.end();
 		}
-
+		
 		virtual void _tostring(stringstream& ss, const __DataType& pr) const override
 		{
 			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
@@ -122,7 +121,7 @@ namespace NS_JSTL
 			return __SuperClass::m_data[key];
 		}
 
-		bool get(__ConstKeyRef key, __JSMap_CB fn=NULL) const
+		bool get(__ConstKeyRef key, __CB_void fn=NULL) const
 		{
 			auto itr = __SuperClass::m_data.find(key);
 			if (itr == __SuperClass::m_data.end())
@@ -138,8 +137,13 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool find(__JSMap_CB_RetBool fn)
+		bool find(__CB_bool fn)
 		{
+			if (!fn)
+			{
+				return false;
+			}
+
 			for (auto& pr : __SuperClass::m_data)
 			{
 				if (fn(pr.first, pr.second))
@@ -151,29 +155,39 @@ namespace NS_JSTL
 			return false;
 		}
 
-		JSArray<__KeyType> keys(__JSMap_CB_RetBool fn=NULL) const
+		JSArray<__KeyType> keys(__CB_bool fn=NULL) const
 		{
 			JSArray<__KeyType> arr;
 			for (auto& pr : __SuperClass::m_data)
 			{
-				if (!fn || fn(pr.first, pr.second))
+				if (fn)
 				{
-					arr.push(pr.first);
+					if (!fn(pr.first, pr.second))
+					{
+						continue;
+					}
 				}
+
+				arr.push(pr.first);
 			}
 
 			return arr;
 		}
 
-		JSArray<__ValueType> values(__JSMap_CB_RetBool fn = NULL) const
+		JSArray<__ValueType> values(__CB_bool fn = NULL) const
 		{
 			JSArray<__ValueType> arr;
 			for (auto& pr : __SuperClass::m_data)
 			{
-				if (!fn || fn(pr.first, pr.second))
+				if (fn)
 				{
-					arr.push(pr.second);
+					if (!fn(pr.first, pr.second))
+					{
+						continue;
+					}
 				}
+
+				arr.push(pr.second);
 			}
 
 			return arr;
@@ -205,32 +219,28 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		auto map(__JSMap_CB_Ret<T> fn) const->JSMap<__KeyType, T, __MapType>
+		JSMap<__KeyType, T, __MapType> map(__CB_T<T> fn) const
 		{
 			JSMap<__KeyType, T, __MapType> ret;
 
-			for (auto& pr : __SuperClass::m_data)
+			if (fn)
 			{
-				ret.set(pr.first, fn(pr.first, pr.second));
+				for (auto& pr : __SuperClass::m_data)
+				{
+					ret.set(pr.first, fn(pr.first, pr.second));
+				}
 			}
 
 			return ret;
 		}
 
-		template <typename __Function>
-		auto map(__Function fn) const ->JSMap<__KeyType, decltype(fn(__KeyType(), __ValueType())), __MapType>
+		template <typename __Function, typename __RET = decltype(declval<__Function>()(__KeyType(), __ValueType()))>
+		JSMap<__KeyType, __RET, __MapType> map(__Function fn) const
 		{
-			JSMap<__KeyType, decltype(fn(__KeyType(), __ValueType())), __MapType> ret;
-
-			for (auto& pr : __SuperClass::m_data)
-			{
-				ret.set(pr.first, fn(pr.first, pr.second));
-			}
-
-			return ret;
+			return map<__RET>(fn);
 		}
 
-		JSMap filter(__JSMap_CB_RetBool fn) const
+		JSMap filter(__CB_bool fn) const
 		{
 			JSMap ret;
 

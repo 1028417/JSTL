@@ -6,6 +6,24 @@
 
 namespace NS_JSTL
 {
+	typedef size_t TD_PosType;
+	typedef size_t TD_SizeType;
+
+	template <typename T>
+	using __InitList = const initializer_list<T>&;
+
+	template <typename T, typename __RET>
+	using __CB_T_RET = const function<__RET(const T&v)>&;
+
+	template <typename T>
+	using __CB_T_void = __CB_T_RET<T, void>;
+
+	template <typename T>
+	using __CB_T_bool = __CB_T_RET<T, bool>;
+
+	template <typename T>
+	using __CB_Data_Pos = const function<bool(T, TD_PosType)>&;
+
 	template<typename __DataType> class JSArray;
 
 	template<typename __DataType, typename __ContainerType, typename __KeyType = __DataType>
@@ -15,12 +33,13 @@ namespace NS_JSTL
 		using __Data_InitList = __InitList<__DataType>;
 		using __Key_InitList = __InitList<__KeyType>;
 
-		using __Container_CB = __FN_CB<__DataType>;
-		using __Container_CB_RetBool = __FN_CB_RetBool<__DataType>;
-
 		using __ConstDataRef = const __DataType&;
+		using __ConstKeyRef = const __KeyType&;
 
-		using __Data_Pos_CB = const function<bool(__ConstDataRef, TD_PosType)>&;
+		using __CB_void = __CB_T_void<__ConstDataRef>;
+		using __CB_bool = __CB_T_bool<__ConstDataRef>;
+
+		using __CB_ConstDataRef_Pos = __CB_Data_Pos<__ConstDataRef>;
 
 	protected:
 		__ContainerType m_data;
@@ -43,17 +62,17 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		bool extractKeyTypeArgs(const function<bool(const __KeyType&)>& cb, const __KeyType&k, const args&... others)
+		bool extractKeyTypeArgs(const function<bool(__ConstKeyRef)>& cb, __ConstKeyRef k, const args&... others)
 		{
-			return tagDynamicArgsExtractor<const __KeyType>::extract([&](const __KeyType&k) {
+			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef k) {
 				return cb(k);
 			}, k, others...);
 		}
 
 		template<typename... args>
-		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, const __KeyType&k, const args&... others)
+		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __ConstKeyRef k, const args&... others)
 		{
-			tagDynamicArgsExtractor<const __KeyType>::extract([&](const __KeyType&k) {
+			tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef k) {
 				vecArgs.push_back(k);
 				return true;
 			}, k, others...);
@@ -143,7 +162,7 @@ namespace NS_JSTL
 			return m_data.cend();
 		}
 
-		bool front(__Container_CB fn=NULL) const
+		bool front(__CB_void fn=NULL) const
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())
@@ -159,7 +178,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool back(__Container_CB fn)
+		bool back(__CB_void fn)
 		{
 			auto itr = m_data.rbegin();
 			if (itr == m_data.rend())
@@ -175,7 +194,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool popFront(__Container_CB fn=NULL)
+		bool popFront(__CB_void fn=NULL)
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())
@@ -192,7 +211,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		virtual bool _includes(const __KeyType&k) const = 0;
+		virtual bool _includes(__ConstKeyRef k) const = 0;
 
 		template<typename... args>
 		bool includes(__ConstDataRef data, const args&... others)
@@ -231,7 +250,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getInner(const __KeyType&k, const args&... others)
+		vector<__KeyType> getInner(__ConstKeyRef k, const args&... others)
 		{
 			vector<__KeyType> vec;
 			extractKeyTypeArgs(vec, k, others...);
@@ -268,7 +287,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getOuter(const __KeyType&k, const args&... others)
+		vector<__KeyType> getOuter(__ConstKeyRef k, const args&... others)
 		{
 			vector<__KeyType> vec;
 			extractKeyTypeArgs(vec, k, others...);
@@ -311,11 +330,11 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType del(const __KeyType&k, const args&... others)
+		TD_SizeType del(__ConstKeyRef k, const args&... others)
 		{
 			TD_SizeType uRet = 0;
 
-			(void)extractKeyTypeArgs([&](const __KeyType&k) {
+			(void)extractKeyTypeArgs([&](__ConstKeyRef k) {
 				uRet += _del(k);
 				return true;
 			}, k, others...);
@@ -353,7 +372,7 @@ namespace NS_JSTL
 			return del<__Key_InitList>(initList);
 		}
 
-		TD_SizeType del(__Container_CB_RetBool fn)
+		TD_SizeType del(__CB_bool fn)
 		{
 			TD_SizeType uRet = 0;
 
@@ -440,7 +459,7 @@ namespace NS_JSTL
 			return add<__Data_InitList>(initList);
 		}
 
-		virtual TD_SizeType _del(const __KeyType&k) = 0;
+		virtual TD_SizeType _del(__ConstKeyRef k) = 0;
 
 		virtual void _tostring(stringstream& ss, __ConstDataRef data) const
 		{
@@ -448,26 +467,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		template <typename T>
-		JSArray<T> map(__FN_CB<__ConstDataRef, T> fn) const
-		{
-			JSArray<T> arr;
-
-			for (auto&data : m_data)
-			{
-				arr.push(fn(data));
-			}
-
-			return arr;
-		}
-
-		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
-		JSArray<__RET> map(__Function fn) const
-		{
-			return map<__RET>(fn);
-		}
-
-		void forEach(__Data_Pos_CB fn) const
+		void forEach(__CB_ConstDataRef_Pos fn) const
 		{
 			if (!fn)
 			{
@@ -486,7 +486,7 @@ namespace NS_JSTL
 			}
 		}
 
-		bool find(__Data_Pos_CB fn) const
+		bool find(__CB_ConstDataRef_Pos fn) const
 		{
 			if (!fn)
 			{
@@ -507,7 +507,7 @@ namespace NS_JSTL
 			return bRet;
 		}
 
-		bool every(__Container_CB_RetBool fn)
+		bool every(__CB_bool fn)
 		{
 			for (auto&data : m_data)
 			{
@@ -520,7 +520,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool some(__Container_CB_RetBool fn)
+		bool some(__CB_bool fn)
 		{
 			for (auto&data : m_data)
 			{

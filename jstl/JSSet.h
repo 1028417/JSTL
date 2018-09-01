@@ -17,10 +17,10 @@ namespace NS_JSTL
 
 		using __JSSet_InitList = __InitList<__DataType>;
 
-		using __JSSet_CB = __FN_CB<__DataType>;
-		using __JSSet_CB_RetBool = __FN_CB_RetBool<__DataType>;
-
 		using __ConstDataRef = const __DataType&;
+
+		using __CB_void = __CB_T_void<__ConstDataRef>;
+		using __CB_bool = __CB_T_bool<__ConstDataRef>;
 
 	public:
 		JSSet()
@@ -123,33 +123,30 @@ namespace NS_JSTL
 			return add<__JSSet_InitList>(initList);
 		}
 
+	public:
 		template <typename T>
-		JSSet<T, __SetType> map(__FN_CB<__ConstDataRef, T> fn) const
+		JSSet<T, __SetType> map(__CB_T_RET<__ConstDataRef, T> fn) const
 		{
 			JSSet<T, __SetType> ret;
 
-			for (auto&data : __SuperClass::m_data)
+			if (fn)
 			{
-				ret.add(fn(data));
+				for (auto&data : __SuperClass::m_data)
+				{
+					ret.add(fn(data));
+				}
 			}
 
 			return ret;
 		}
 
-		template <typename __Function>
-		auto map(__Function fn) const ->JSSet<decltype(fn(__DataType())), __SetType> const
+		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
+		JSSet<__RET, __SetType> map(__Function fn) const
 		{
-			JSSet<decltype(fn(__DataType())), __SetType> ret;
-			
-			for (auto&data : __SuperClass::m_data)
-			{
-				ret.add(fn(data));
-			}
-
-			return ret;
+			return map<__RET>(fn);
 		}
 
-		JSSet filter(__JSSet_CB_RetBool fn) const
+		JSSet filter(__CB_bool fn) const
 		{
 			JSSet set;
 

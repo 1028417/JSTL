@@ -12,18 +12,6 @@ using namespace std;
 
 namespace NS_JSTL
 {
-	typedef size_t TD_PosType;
-	typedef size_t TD_SizeType;
-	
-	template <typename T>
-	using __InitList = const initializer_list<T>&;
-
-	template <typename T, typename __RET = void>
-	using __FN_CB = const function<__RET(const T&v)>&;
-
-	template <typename T>
-	using __FN_CB_RetBool = __FN_CB<T, bool>;
-
 	template <typename T, typename U>
 	struct decay_is_same :
 		std::is_same<typename std::decay<T>::type, U>::type
@@ -50,17 +38,17 @@ namespace NS_JSTL
 	};
 
 	template <typename T>
-	using __FN_Sort = const function<bool(const T&t1, const T&t2)>&;
+	using __CB_Sort_T = const function<bool(const T&t1, const T&t2)>&;
 
 	template <typename T>
 	struct tagTrySort
 	{
-		tagTrySort(__FN_Sort<T> fn = NULL)
+		tagTrySort(__CB_Sort_T<T> fn = NULL)
 			: m_fn(fn)
 		{
 		}
 
-		__FN_Sort<T> m_fn;
+		__CB_Sort_T<T> m_fn;
 
 		bool operator()(const T&t1, const T&t2)const
 		{
