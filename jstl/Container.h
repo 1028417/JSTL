@@ -159,7 +159,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool back(__Container_CB fn=NULL) const
+		bool back(__Container_CB fn)
 		{
 			auto itr = m_data.rbegin();
 			if (itr == m_data.rend())
@@ -175,7 +175,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool pop_begin(__Container_CB fn=NULL)
+		bool popFront(__Container_CB fn=NULL)
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())
@@ -396,14 +396,14 @@ namespace NS_JSTL
 			return ss.str();
 		}
 
-		const __ContainerType& data() const
-		{
-			return m_data;
-		}
-		__ContainerType& data()
-		{
-			return m_data;
-		}
+		//const __ContainerType& data() const
+		//{
+		//	return m_data;
+		//}
+		//__ContainerType& data()
+		//{
+		//	return m_data;
+		//}
 
 	protected:
 		virtual TD_SizeType _add(__ConstDataRef data) = 0;
@@ -461,17 +461,10 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		template <typename __Function>
-		auto map(__Function fn) const ->JSArray<decltype(fn(__DataType()))> const
+		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
+		JSArray<__RET> map(__Function fn) const
 		{
-			JSArray<decltype(fn(__DataType()))> arr;
-
-			for (auto&data : m_data)
-			{
-				arr.push(fn(data));
-			}
-
-			return arr;
+			return map<__RET>(fn);
 		}
 
 		void forEach(__Data_Pos_CB fn) const
