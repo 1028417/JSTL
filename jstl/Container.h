@@ -484,13 +484,34 @@ namespace NS_JSTL
 			TD_PosType pos = 0;
 			for (auto&data : m_data)
 			{
-				if (!fn(pos, data))
+				if (!fn(data, pos))
 				{
 					break;
 				}
 
 				pos++;
 			}
+		}
+
+		bool find(__Data_Pos_CB fn) const
+		{
+			if (!fn)
+			{
+				return false;
+			}
+
+			bool bRet = false;
+			forEach([&](__ConstDataRef data, TD_PosType pos) {
+				if (fn(data, pos))
+				{
+					bRet = true;
+					return false;
+				}
+
+				return true;
+			});
+
+			return bRet;
 		}
 
 		bool every(__Container_CB_RetBool fn)

@@ -14,10 +14,12 @@ namespace NS_JSTL
 
 		using __PtrArray_InitList = __InitList<__Type*>;
 
-		using __PtrArray_CB = __FN_CB<__Type>;
-
 		using __PtrType = __Type*;
 		using __ConstPtrRef = const __PtrType&;
+
+		using __PtrArray_CB = __FN_CB<__Type&>;
+		using __PtrArray_CB_RetBool = __FN_CB_RetBool<__Type&>;
+		using __Data_Pos_CB = const function<bool(__Type&, TD_PosType)>&;
 
 	public:
 		PtrArray()
@@ -104,6 +106,37 @@ namespace NS_JSTL
 		}
 
 	public:
+		bool get(TD_PosType pos, __PtrArray_CB fn) const
+		{
+			__PtrType ptr = NULL;
+			if (!__SuperClass::get(pos, ptr))
+			{
+				return false;
+			}
+
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			if (fn)
+			{
+				fn(*ptr);
+			}
+
+			return true;
+		}
+
+		bool set(TD_PosType pos, __PtrType ptr)
+		{
+			return __SuperClass::set(pos, ptr);
+		}
+
+		bool set(TD_PosType pos, __Type& data)
+		{
+			return __SuperClass::set(pos, &data);
+		}
+
 		template<typename... args>
 		PtrArray& assign(__PtrType ptr, args... others)
 		{
@@ -283,18 +316,97 @@ namespace NS_JSTL
 		}
 
 	public:
-		bool getRef(TD_PosType pos, __PtrArray_CB fn) const
+		void forEach(__Data_Pos_CB fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			bool bRet = false;
-			(void)__SuperClass::get(pos, [&](__PtrType ptr) {
-				if (NULL != ptr)
-				{
-					bRet = true;
-					fn(*ptr);
-				}
-			});
+			if (!fn)
+			{
+				return;
+			}
 
-			return bRet;
+			for (TD_PosType pos = startPos; pos < __SuperClass::size(); pos++)
+			{
+				auto ptr = __SuperClass::at(pos);
+				if (NULL == ptr)
+				{
+					continue;
+				}
+
+				if (!fn(*ptr, pos))
+				{
+					break;
+				}
+
+				if (0 < count)
+				{
+					count--;
+					if (0 == count)
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		void forEach(__PtrArray_CB_RetBool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		{
+			if (!fn)
+			{
+				return;
+			}
+
+			forEach([&](__Type& data, TD_PosType pos) {
+				return fn(data);
+			}, (TD_PosType)startPos);
+		}
+
+		int find(__Data_Pos_CB fn, TD_PosType stratPos = 0) const
+		{
+			if (!fn)
+			{
+				return -1;
+			}
+
+			return __SuperClass::forEach([&](__PtrType ptr, TD_PosType pos) {
+				if (NULL == ptr)
+				{
+					return false;
+				}
+
+				return fn(*ptr, pos);
+			});
+		}
+
+		PtrArray slice(int startPos) const
+		{
+			PtrArray arr;
+
+			startPos = __SuperClass::_checkPos(startPos);
+			if (startPos >= 0)
+			{
+				forEach([&](__Type& data) {
+					arr.push(&data);
+				}, (TD_PosType)startPos);
+			}
+
+			return arr;
+		}
+
+		PtrArray slice(int startPos, int endPos) const
+		{
+			PtrArray arr;
+
+			startPos = __SuperClass::_checkPos(startPos);
+			endPos = __SuperClass::_checkPos(startPos);
+
+			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
+			{
+				forEach([&](__Type& data) {
+					arr.push(&data);
+					return true;
+				}, (TD_PosType)startPos, TD_SizeType(endPos - startPos + 1));
+			}
+
+			return arr;
 		}
 	};
 

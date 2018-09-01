@@ -21,10 +21,10 @@ namespace NS_JSTL
 
 		using __JSArray_InitList = __InitList<__DataType>;
 
-		using __JSArray_CB = __FN_CB<__DataType>;
-		using __JSArray_CB_RetBool = __FN_CB_RetBool<__DataType>;
-
 		using __ConstDataRef = const __DataType&;
+
+		using __JSArray_CB = __FN_CB<__ConstDataRef>;
+		using __JSArray_CB_RetBool = __FN_CB_RetBool<__ConstDataRef>;
 
 		using __Data_Pos_CB = const function<bool(__ConstDataRef, TD_PosType)>&;
 
@@ -99,6 +99,26 @@ namespace NS_JSTL
 			__SuperClass::m_data.assign(size, data);
 		}
 
+		__DataType* _at(TD_PosType pos)
+		{
+			if (pos >= __SuperClass::m_data.size())
+			{
+				return NULL;
+			}
+
+			return &__SuperClass::m_data[pos];
+		}
+
+		const __DataType* _at(TD_PosType pos) const
+		{
+			if (pos >= __SuperClass::m_data.size())
+			{
+				return NULL;
+			}
+
+			return &__SuperClass::m_data[pos];
+		}
+
 		TD_SizeType _add(__ConstDataRef data) override
 		{
 			__SuperClass::m_data.push_back(data);
@@ -155,13 +175,46 @@ namespace NS_JSTL
 		}
 
 	public:
-		__DataType& operator[](TD_PosType pos)
+		bool get(TD_PosType pos, __JSArray_CB fn) const
 		{
-			return __SuperClass::m_data[pos];
+			const __DataType *ptr = _at(pos);
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			if (fn)
+			{
+				fn(*ptr);
+			}
+
+			return true;
 		}
-		__ConstDataRef operator[](TD_PosType pos) const
+
+		bool get(TD_PosType pos, __DataType& data) const
 		{
-			return __SuperClass::m_data[pos];
+			const __DataType *ptr = _at(pos);
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			data = *ptr;
+
+			return true;
+		}
+
+		bool set(TD_PosType pos, __ConstDataRef& data)
+		{
+			__DataType *ptr = _at(pos);
+			if (NULL == ptr)
+			{
+				return false;
+			}
+
+			*ptr = data;
+
+			return true;
 		}
 
 		int indexOf(__ConstDataRef data) const
@@ -194,21 +247,6 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		bool get(TD_PosType pos, __JSArray_CB fn) const
-		{
-			if (pos >= __SuperClass::m_data.size())
-			{
-				return false;
-			}
-
-			if (fn)
-			{
-				fn(__SuperClass::m_data[pos]);
-			}
-
-			return true;
-		}
-
 		void forEach(__Data_Pos_CB fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!fn)
@@ -216,11 +254,10 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (TD_PosType pos = startPos; pos < __SuperClass::m_data.size(); pos++)
-			{
-				if (!fn(__SuperClass::m_data[pos], pos))
+			__SuperClass::forEach([&](__ConstDataRef data, TD_PosType pos) {
+				if (!fn(data, pos))
 				{
-					break;
+					return false;
 				}
 
 				if (0 < count)
@@ -228,10 +265,12 @@ namespace NS_JSTL
 					count--;
 					if (0 == count)
 					{
-						break;
+						return false;
 					}
 				}
-			}
+
+				return true;
+			});
 		}
 
 		void forEach(__JSArray_CB_RetBool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
@@ -244,6 +283,27 @@ namespace NS_JSTL
 			forEach([&](__ConstDataRef data, TD_PosType pos) {
 				return fn(data);
 			}, (TD_PosType)startPos);
+		}
+
+		int find(__Data_Pos_CB fn, TD_PosType stratPos = 0) const
+		{
+			if (!fn)
+			{
+				return -1;
+			}
+
+			int iRet = -1;
+			forEach([&](__ConstDataRef data, TD_PosType pos) {
+				if (fn(data, pos))
+				{
+					iRet = pos;
+					return false;
+				}
+
+				return true;
+			});
+
+			return iRet;
 		}
 
 		JSArray slice(int startPos) const
@@ -277,22 +337,6 @@ namespace NS_JSTL
 			}
 
 			return arr;
-		}
-
-		template <typename __Function>
-		int find(__Function fn, TD_PosType stratPos = 0) const
-		{
-			for (TD_PosType pos = stratPos; pos < __SuperClass::m_data.size(); pos++)
-			{
-				if (fn(pos, __SuperClass::m_data[pos]))
-				{
-					return pos;
-				}
-
-				pos++;
-			}
-
-			return -1;
 		}
 
 		template<typename... args>
