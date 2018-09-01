@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="jstl">
+      <UniqueIdentifier>{caa0ae4d-9ad0-4fc7-87e6-b50ef38a4b4e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="jstl\Container.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\JSArray.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\JSMap.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\JSSet.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\util.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\PtrArray.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

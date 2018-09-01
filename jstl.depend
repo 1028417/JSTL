@@ -1,0 +1,29 @@
+# depslib dependency file v1.0
+1532276274 source:/home/lhyuan/Desktop/JSTL/main.cpp
+	<iostream>
+	"JSArray.h"
+	"JSSet.h"
+	"JSMap.h"
+
+1532276775 /home/lhyuan/Desktop/JSTL/JSArray.h
+	"Container.h"
+	<deque>
+
+1532276775 /home/lhyuan/Desktop/JSTL/Container.h
+	<initializer_list>
+	<algorithm>
+	<functional>
+	<sstream>
+
+1532276775 /home/lhyuan/Desktop/JSTL/JSSet.h
+	"Container.h"
+	<unordered_set>
+	<set>
+
+1532276775 /home/lhyuan/Desktop/JSTL/JSMap.h
+	"Container.h"
+	<unordered_map>
+	<map>
+	"JSSet.h"
+	"JSArray.h"
+
