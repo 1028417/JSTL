@@ -42,10 +42,22 @@ namespace NS_JSTL
 		using __CB_ConstDataRef_Pos = __CB_Data_Pos<__ConstDataRef>;
 
 	protected:
+		ContainerT()
+		{
+		}
+
+		template<typename T>
+		explicit ContainerT(const T& container)
+			: m_data(container.begin(), container.end())
+		{
+		}
+
+	protected:
 		__ContainerType m_data;
 
+	protected:
 		template<typename... args>
-		bool extractDataTypeArgs(const function<bool(__ConstDataRef)>& cb, __ConstDataRef data, const args&... others)
+		bool extractDataTypeArgs(__CB_bool cb, __ConstDataRef data, const args&... others)
 		{
 			return tagDynamicArgsExtractor<const __DataType>::extract([&](__ConstDataRef data) {
 				return cb(data);
@@ -55,37 +67,27 @@ namespace NS_JSTL
 		template<typename... args>
 		void extractDataTypeArgs(vector<__DataType>& vecArgs, __ConstDataRef data, const args&... others)
 		{
-			tagDynamicArgsExtractor<const __DataType>::extract([&](__ConstDataRef data) {
+			extractDataTypeArgs([&](__ConstDataRef data) {
 				vecArgs.push_back(data);
 				return true;
 			}, data, others...);
 		}
-
+		
 		template<typename... args>
-		bool extractKeyTypeArgs(const function<bool(__ConstKeyRef)>& cb, __ConstKeyRef k, const args&... others)
+		bool extractKeyTypeArgs(__CB_T_bool<__ConstKeyRef> cb, __ConstKeyRef key, const args&... others)
 		{
-			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef k) {
-				return cb(k);
-			}, k, others...);
+			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef key) {
+				return cb(key);
+			}, key, others...);
 		}
 
 		template<typename... args>
-		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __ConstKeyRef k, const args&... others)
+		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __ConstKeyRef key, const args&... others)
 		{
-			tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef k) {
-				vecArgs.push_back(k);
+			extractKeyTypeArgs([&](__ConstKeyRef key) {
+				vecArgs.push_back(key);
 				return true;
-			}, k, others...);
-		}
-
-		ContainerT()
-		{
-		}
-
-		template<typename T>
-		explicit ContainerT(const T& container)
-			: m_data(container.begin(), container.end())
-		{
+			}, key, others...);
 		}
 
 		template<typename T>
@@ -211,7 +213,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		virtual bool _includes(__ConstKeyRef k) const = 0;
+		virtual bool _includes(__ConstKeyRef key) const = 0;
 
 		template<typename... args>
 		bool includes(__ConstDataRef data, const args&... others)
@@ -250,10 +252,10 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getInner(__ConstKeyRef k, const args&... others)
+		vector<__KeyType> getInner(__ConstKeyRef key, const args&... others)
 		{
 			vector<__KeyType> vec;
-			extractKeyTypeArgs(vec, k, others...);
+			extractKeyTypeArgs(vec, key, others...);
 			return getInner(vec);
 		}
 
@@ -287,10 +289,10 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getOuter(__ConstKeyRef k, const args&... others)
+		vector<__KeyType> getOuter(__ConstKeyRef key, const args&... others)
 		{
 			vector<__KeyType> vec;
-			extractKeyTypeArgs(vec, k, others...);
+			extractKeyTypeArgs(vec, key, others...);
 			return getOuter(vec);
 		}
 
@@ -330,14 +332,14 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType del(__ConstKeyRef k, const args&... others)
+		TD_SizeType del(__ConstKeyRef key, const args&... others)
 		{
 			TD_SizeType uRet = 0;
 
-			(void)extractKeyTypeArgs([&](__ConstKeyRef k) {
-				uRet += _del(k);
+			(void)extractKeyTypeArgs([&](__ConstKeyRef key) {
+				uRet += _del(key);
 				return true;
-			}, k, others...);
+			}, key, others...);
 
 			return uRet;
 		}
@@ -459,7 +461,7 @@ namespace NS_JSTL
 			return add<__Data_InitList>(initList);
 		}
 
-		virtual TD_SizeType _del(__ConstKeyRef k) = 0;
+		virtual TD_SizeType _del(__ConstKeyRef keyk) = 0;
 
 		virtual void _tostring(stringstream& ss, __ConstDataRef data) const
 		{

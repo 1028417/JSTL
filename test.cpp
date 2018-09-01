@@ -166,7 +166,15 @@ int main()
 	JSMap<int, int> ts1;
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
-	JSArray<int> ts2(7.9);
+	JSArray<int> ts2(7.9, 4);
+	ts2.forEach([](int i) {
+		return true;
+	});
+	for (auto& t : ts2)
+	{
+		t = 7;
+	}
+
 	ts2.sort();
 	ts2.concat(9);
 	ts2.concat({ 9 });
