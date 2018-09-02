@@ -8,145 +8,176 @@
 #include <map>
 
 #include "JSArray.h"
-
+ 
 namespace NS_JSTL
 {
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __MapType>
-	class JSMap : public ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>
+	template<typename __DataType> class JSArray;
+
+	template<typename __KeyType, typename __ValueType, template<typename...> typename __MapType> class JSMapT
+		: public ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>
 	{
-	private:
-		using __SuperClass = ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>;
-		
+	protected:
+		using __ContainerType = __MapType<__KeyType, __ValueType>;
+		using __SuperClass = ContainerT<pair<__KeyType const, __ValueType>, __ContainerType, __KeyType>;
+
 		using __DataType = pair<__KeyType const, __ValueType>;
 		using __JSMap_InitList = __InitList<__DataType>;
 
 		using __ConstKeyRef = const __KeyType&;
+
+		using __ValueRef = __ValueType&;
 		using __ConstValueRef = const __ValueType&;
 
 		template <typename T>
-		using __CB_T = const function<T(__ConstKeyRef, __ConstValueRef)>&;
+		using __CB_CRK_RV_T = const function<T(__ConstKeyRef, __ValueRef)>&;
+		using __CB_CRK_RV_void = __CB_CRK_RV_T<void>;
+		using __CB_CRK_RV_bool = __CB_CRK_RV_T<bool>;
 
-		using __CB_void = __CB_T<void>;
-		using __CB_bool = __CB_T<bool>;
+		template <typename T>
+		using __CB_CRK_CRV_T = const function<T(__ConstKeyRef, __ConstValueRef)>&;
+		using __CB_CRK_CRV_void = __CB_CRK_CRV_T<void>;
+		using __CB_CRK_CRV_bool = __CB_CRK_CRV_T<bool>;
+
+		using __CB_RV_CRK_void = const function<void(__ValueRef, __ConstKeyRef)>&;
+		using __CB_CRV_CRK_void = const function<void(__ConstValueRef, __ConstKeyRef)>&;
+		using __CB_CRV_CRK_bool = const function<bool(__ConstValueRef, __ConstKeyRef)>&;
+
+	protected:
+		__ContainerType& _data()
+		{
+			return __SuperClass::m_data;
+		}
+
+		const __ContainerType& _data() const
+		{
+			return __SuperClass::m_data;
+		}
 
 	public:
-		JSMap()
+		JSMapT()
 		{
 		}
-		
-		explicit JSMap(const JSMap& map)
+
+		explicit JSMapT(const JSMapT& map)
 			: __SuperClass(map)
 		{
 		}
 
-		JSMap(JSMap&& map)
+		JSMapT(JSMapT&& map)
 		{
 			__SuperClass::swap(map);
 		}
 
-		explicit JSMap(__JSMap_InitList initList)
+		explicit JSMapT(__JSMap_InitList initList)
 			: __SuperClass(initList)
 		{
 		}
 
 		template<typename T>
-		explicit JSMap(const T& container)
+		explicit JSMapT(const T& container)
 			: __SuperClass(container)
 		{
 		}
 
-		JSMap& operator=(const JSMap& map)
+		JSMapT& operator=(const JSMapT& map)
 		{
 			__SuperClass::assign(map);
 			return *this;
 		}
 
-		JSMap& operator=(JSMap&& map)
+		JSMapT& operator=(JSMapT&& map)
 		{
 			__SuperClass::swap(map);
 			return *this;
 		}
 
-		JSMap& operator=(__JSMap_InitList initList)
+		JSMapT& operator=(__JSMap_InitList initList)
 		{
 			__SuperClass::assign(initList);
 			return *this;
 		}
 
 		template<typename T>
-		JSMap& operator=(const T&t)
+		JSMapT& operator=(const T&t)
 		{
 			__SuperClass::assign(t);
 			return *this;
 		}
 
-	private:
+	protected:
 		TD_SizeType _add(const __DataType& pr) override
 		{
-			__SuperClass::m_data.insert(pr);
+			_data().insert(pr);
 
-			return __SuperClass::m_data.size();
+			return _data().size();
 		}
 
 		TD_SizeType _del(__ConstKeyRef key) override
 		{
-			auto itr = __SuperClass::m_data.find(key);
-			if (itr == __SuperClass::m_data.end())
+			auto itr = _data().find(key);
+			if (itr == _data().end())
 			{
 				return 0;
 			}
 
-			__SuperClass::m_data.erase(itr);
+			_data().erase(itr);
 
 			return 1;
 		}
 
 		bool _includes(__ConstKeyRef key) const override
 		{
-			return __SuperClass::m_data.find(key) != __SuperClass::m_data.end();
+			return _data().find(key) != _data().end();
 		}
-		
-		virtual void _tostring(stringstream& ss, const __DataType& pr) const override
+
+		virtual void _toString(stringstream& ss, const __DataType& pr) const override
 		{
 			tagSSTryLMove(ss) << '<' << pr.first << ", " << pr.second << '>';
 		}
 
 	public:
-		__ValueType& operator[](__ConstKeyRef key)
+		bool get(__ConstKeyRef key, __CB_RV_CRK_void cb)
 		{
-			return __SuperClass::m_data[key];
-		}
-		__ConstValueRef operator[](__ConstKeyRef key)const
-		{
-			return __SuperClass::m_data[key];
-		}
-
-		bool get(__ConstKeyRef key, __CB_void fn=NULL) const
-		{
-			auto itr = __SuperClass::m_data.find(key);
-			if (itr == __SuperClass::m_data.end())
+			auto itr = _data().find(key);
+			if (itr == _data().end())
 			{
 				return false;
 			}
 
-			if (fn)
+			if (cb)
 			{
-				fn(itr->first, itr->second);
+				cb(itr->second, itr->first);
 			}
 
 			return true;
 		}
 
-		bool find(__CB_bool fn)
+		bool get(__ConstKeyRef key, __CB_CRV_CRK_void cb) const
 		{
-			if (!fn)
+			auto itr = _data().find(key);
+			if (itr == _data().end())
 			{
 				return false;
 			}
 
-			for (auto& pr : __SuperClass::m_data)
+			if (cb)
 			{
-				if (fn(pr.first, pr.second))
+				cb(itr->second, itr->first);
+			}
+
+			return true;
+		}
+
+		bool findValue(__CB_CRV_CRK_bool cb) const
+		{
+			if (!cb)
+			{
+				return false;
+			}
+
+			for (auto& pr : _data())
+			{
+				if (cb(pr.second, pr.first))
 				{
 					return true;
 				}
@@ -154,15 +185,15 @@ namespace NS_JSTL
 
 			return false;
 		}
-
-		JSArray<__KeyType> keys(__CB_bool fn=NULL) const
+		
+		JSArray<__KeyType> keys(__CB_CRK_CRV_bool cb = NULL) const
 		{
 			JSArray<__KeyType> arr;
-			for (auto& pr : __SuperClass::m_data)
+			for (auto& pr : _data())
 			{
-				if (fn)
+				if (cb)
 				{
-					if (!fn(pr.first, pr.second))
+					if (!cb(pr.first, pr.second))
 					{
 						continue;
 					}
@@ -174,14 +205,14 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSArray<__ValueType> values(__CB_bool fn = NULL) const
+		JSArray<__ValueType> values(__CB_CRK_CRV_bool cb = NULL) const
 		{
 			JSArray<__ValueType> arr;
-			for (auto& pr : __SuperClass::m_data)
+			for (auto& pr : _data())
 			{
-				if (fn)
+				if (cb)
 				{
-					if (!fn(pr.first, pr.second))
+					if (!cb(pr.first, pr.second))
 					{
 						continue;
 					}
@@ -193,9 +224,9 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMap& set(__ConstKeyRef key, __ConstValueRef value)
+		JSMapT& set(__ConstKeyRef key, __ConstValueRef value)
 		{
-			__SuperClass::m_data[key] = value;
+			_data()[key] = value;
 			return *this;
 		}
 
@@ -207,9 +238,9 @@ namespace NS_JSTL
 				return __SuperClass::size();
 			}
 
-			__SuperClass::m_data.insert(container.begin(), container.end());
+			_data().insert(container.begin(), container.end());
 
-			return __SuperClass::m_data.size();
+			return _data().size();
 		}
 
 		TD_SizeType set(__JSMap_InitList initList)
@@ -219,36 +250,39 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSMap<__KeyType, T, __MapType> map(__CB_T<T> fn) const
+		JSMapT<__KeyType, T, __MapType> map(__CB_CRK_CRV_T<T> cb) const
 		{
-			JSMap<__KeyType, T, __MapType> ret;
+			JSMapT<__KeyType, T, __MapType> ret;
 
-			if (fn)
+			if (cb)
 			{
-				for (auto& pr : __SuperClass::m_data)
+				for (auto& pr : _data())
 				{
-					ret.set(pr.first, fn(pr.first, pr.second));
+					ret.set(pr.first, cb(pr.first, pr.second));
 				}
 			}
 
 			return ret;
 		}
 
-		template <typename __Function, typename __RET = decltype(declval<__Function>()(__KeyType(), __ValueType()))>
-		JSMap<__KeyType, __RET, __MapType> map(__Function fn) const
+		template <typename CB, typename __RET = decltype(declval<CB>()(__KeyType(), __ValueType()))>
+		JSMapT<__KeyType, __RET, __MapType> map(const CB& cb) const
 		{
-			return map<__RET>(fn);
+			return map<__RET>(cb);
 		}
 
-		JSMap filter(__CB_bool fn) const
+		JSMapT filter(__CB_CRK_CRV_bool cb) const
 		{
-			JSMap ret;
+			JSMapT ret;
 
-			for (auto& pr : __SuperClass::m_data)
+			if (cb)
 			{
-				if (fn(pr.first, pr.second))
+				for (auto& pr : _data())
 				{
-					ret.set(pr.first, pr.second);
+					if (cb(pr.first, pr.second))
+					{
+						ret.set(pr.first, pr.second);
+					}
 				}
 			}
 
@@ -257,7 +291,10 @@ namespace NS_JSTL
 	};
 
 	template <typename __KeyType, typename __ValueType>
-	using JSUnsortMap = JSMap<__KeyType, __ValueType, unordered_map>;
+	using JSMap = JSMapT<__KeyType, __ValueType, map>;
+
+	template <typename __KeyType, typename __ValueType>
+	using JSUnsortMap = JSMapT<__KeyType, __ValueType, unordered_map>;
 }
 
 #endif // __JSMap_H

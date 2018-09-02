@@ -7,9 +7,7 @@ using namespace NS_JSTL;
 
 #include <list>
 
-typedef unsigned int UINT;
-
-typedef UINT TD_CardNum;
+typedef size_t TD_CardNum;
 
 enum ECardPattern
 {
@@ -22,7 +20,7 @@ struct tagCardPattern
 	{
 	}
 
-	tagCardPattern(ECardPattern t_eCardPattern, TD_CardNum t_uBaseCardNum, UINT t_uContinuityCount)
+	tagCardPattern(ECardPattern t_eCardPattern, TD_CardNum t_uBaseCardNum, size_t t_uContinuityCount)
 		: eCardPattern(t_eCardPattern)
 		, uBaseCardNum(t_uBaseCardNum)
 		, uContinuityCount(t_uContinuityCount)
@@ -31,7 +29,7 @@ struct tagCardPattern
 
 	ECardPattern eCardPattern = CP_None;
 	TD_CardNum uBaseCardNum = 0;
-	UINT uContinuityCount;
+	size_t uContinuityCount;
 
 	bool operator==(const tagCardPattern& oher) const
 	{
@@ -44,13 +42,13 @@ struct tagCardPattern
 	}
 };
 
-static map<ECardPattern, UINT> g_mapCardPattern{};
+static map<ECardPattern, size_t> g_mapCardPattern{};
 
-bool enumCardPattern(ECardPattern eCardPattern, UINT uFlag, const JSMap<TD_CardNum, UINT>& mapCardSum, TD_CardNum uBaseCardNum, UINT uContinuityCount, JSArray<tagCardPattern>& retCardPattern)
+bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const JSMap<TD_CardNum, size_t>& mapCardSum, TD_CardNum uBaseCardNum, size_t uContinuityCount, JSArray<tagCardPattern>& retCardPattern)
 {
 	bool bRet = false;
 
-	JSArray<TD_CardNum> arrCardExpect = mapCardSum.filter([&](const TD_CardNum&uCardNum, const UINT& uSum) {
+	JSArray<TD_CardNum> arrCardExpect = mapCardSum.filter([&](const TD_CardNum&uCardNum, const size_t& uSum) {
 		return uSum >= uFlag && uCardNum>= uBaseCardNum;
 	}).keys();
 
@@ -80,16 +78,16 @@ bool enumCardPattern(ECardPattern eCardPattern, UINT uFlag, const JSMap<TD_CardN
 	return bRet;
 }
 
-bool enumCardPattern(ECardPattern eCardPattern, TD_CardNum uBaseCardNum = 0, UINT uContinuityCount=0)
+bool enumCardPattern(ECardPattern eCardPattern, TD_CardNum uBaseCardNum = 0, size_t uContinuityCount=0)
 {
 	auto itr = g_mapCardPattern.find(eCardPattern);
 	if (itr == g_mapCardPattern.end())
 	{
 		return false;
 	}
-	UINT uCardPatternFlag = itr->second;
+	size_t uCardPatternFlag = itr->second;
 	
-	JSMap<TD_CardNum, UINT> mapCardSum;
+	JSMap<TD_CardNum, size_t> mapCardSum;
 
 	JSArray<tagCardPattern> retCardPattern;
 	return enumCardPattern(eCardPattern, uCardPatternFlag, mapCardSum, uBaseCardNum, uContinuityCount, retCardPattern);
@@ -157,8 +155,6 @@ int main()
 	set2.add({3,4,5});
 
 	JSMap<int, int> m{ { 21,2 },{ 1,2 },{ 1,2 } };
-	auto as = m[1];
-	m[1] *= 2;
 	m.set(1, 1);
 
 	enumCardPattern(CP_None);
@@ -167,6 +163,9 @@ int main()
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
 	JSArray<int> ts2(7.9, 4);
+	ts2.getFront([](int&) {});
+	((const JSArray<int>&)ts2).getFront([](const int&) {});
+
 	ts2.forEach([](int i) {
 		return true;
 	});

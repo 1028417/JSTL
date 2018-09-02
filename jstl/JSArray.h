@@ -5,28 +5,42 @@
 #include "Container.h"
 
 #include <deque>
-#include <map>
 
-#include <memory.h>
+#include "JSMap.h"
 
 namespace NS_JSTL
 {
-	template<typename __KeyType, typename __ValueType, template<typename...> class __MapType = map> class JSMap;
-
 	template<typename __DataType>
 	class JSArray : public  ContainerT<__DataType, deque<__DataType>>
 	{
-	private:
-		using __SuperClass = ContainerT<__DataType, deque<__DataType>>;
+	protected:
+		using __ContainerType = deque<__DataType>;
+		using __SuperClass = ContainerT<__DataType, __ContainerType>;
 
 		using __JSArray_InitList = __InitList<__DataType>;
 
+		using __DataRef = __DataType&;
 		using __ConstDataRef = const __DataType&;
 
-		using __CB_void = __CB_T_void<__ConstDataRef>;
-		using __CB_bool = __CB_T_bool<__ConstDataRef>;
+		using __CB_Ref_void = __CB_T_void<__DataRef>;
+		using __CB_Ref_bool = __CB_T_bool<__DataRef>;
 
-		using __CB_ConstDataRef_Pos = __CB_Data_Pos<__ConstDataRef>;
+		using __CB_ConstRef_void = __CB_T_void<__ConstDataRef>;
+		using __CB_ConstRef_bool = __CB_T_bool<__ConstDataRef>;
+
+		using __CB_Ref_Pos = __CB_Data_Pos<__DataRef>;
+		using __CB_ConstRef_Pos = __CB_Data_Pos<__ConstDataRef>;
+
+	protected:
+		__ContainerType& _data()
+		{
+			return __SuperClass::m_data;
+		}
+
+		const __ContainerType& _data() const
+		{
+			return __SuperClass::m_data;
+		}
 
 	public:
 		static JSArray init(TD_SizeType size, __ConstDataRef data)
@@ -93,42 +107,22 @@ namespace NS_JSTL
 		}
 
 	protected:
-		__DataType* _at(TD_PosType pos)
-		{
-			if (pos >= __SuperClass::m_data.size())
-			{
-				return NULL;
-			}
-
-			return &__SuperClass::m_data[pos];
-		}
-
-		const __DataType* _at(TD_PosType pos) const
-		{
-			if (pos >= __SuperClass::m_data.size())
-			{
-				return NULL;
-			}
-
-			return &__SuperClass::m_data[pos];
-		}
-
 		TD_SizeType _add(__ConstDataRef data) override
 		{
-			__SuperClass::m_data.push_back(data);
-			return __SuperClass::m_data.size();
+			_data().push_back(data);
+			return _data().size();
 		}
 
 		TD_SizeType _del(__ConstDataRef data) override
 		{
 			TD_SizeType uRet = 0;
 
-			auto itr = __SuperClass::m_data.begin();
-			while (itr != __SuperClass::m_data.end())
+			auto itr = _data().begin();
+			while (itr != _data().end())
 			{
 				if (tagTryCompare<__DataType>().compare(*itr, data))
 				{
-					itr = __SuperClass::m_data.erase(itr);
+					itr = _data().erase(itr);
 					uRet++;
 				}
 				else
@@ -169,52 +163,54 @@ namespace NS_JSTL
 		}
 
 	public:
-		bool get(TD_PosType pos, __CB_void fn) const
+		bool get(TD_PosType pos, __CB_Ref_void cb)
 		{
-			const __DataType *ptr = _at(pos);
-			if (NULL == ptr)
+			if (pos >= _data().size())
 			{
 				return false;
 			}
-
-			if (fn)
+			
+			if (cb)
 			{
-				fn(*ptr);
+				cb(_data()[pos]);
 			}
 
 			return true;
 		}
 
-		bool get(TD_PosType pos, __DataType& data) const
+		bool get(TD_PosType pos, __CB_ConstRef_void cb) const
 		{
-			const __DataType *ptr = _at(pos);
-			if (NULL == ptr)
+			if (pos >= _data().size())
 			{
 				return false;
 			}
 
-			data = *ptr;
+			if (cb)
+			{
+				cb(_data()[pos]);
+			}
 
 			return true;
 		}
 
+		bool get(TD_PosType pos, __DataRef data)
+		{
+			return get([&](__DataRef refData) {
+				data = refData;
+			});
+		}
+		
 		bool set(TD_PosType pos, __ConstDataRef& data)
 		{
-			__DataType *ptr = _at(pos);
-			if (NULL == ptr)
-			{
-				return false;
-			}
-
-			*ptr = data;
-
-			return true;
+			return get([&](__DataRef refData) {
+				refData = data;
+			});
 		}
 
 		int indexOf(__ConstDataRef data) const
 		{
 			int uIdx = 0;
-			for (auto& item : __SuperClass::m_data)
+			for (auto& item : _data())
 			{
 				if (tagTryCompare<__DataType>().compare(item, data))
 				{
@@ -229,11 +225,11 @@ namespace NS_JSTL
 		int lastIndexOf(__ConstDataRef data) const
 		{
 			int uIdx = 1;
-			for (auto& item : __SuperClass::m_data)
+			for (auto& item : _data())
 			{
 				if (tagTryCompare<__DataType>().compare(item, data))
 				{
-					return __SuperClass::m_data.size()-uIdx;
+					return _data().size()-uIdx;
 				}
 				uIdx++;
 			}
@@ -241,15 +237,15 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		void forEach(__CB_ConstDataRef_Pos fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			if (!fn)
+			if (!cb)
 			{
-				return;
+				return 0;
 			}
 
-			__SuperClass::forEach([&](__ConstDataRef data, TD_PosType pos) {
-				if (!fn(data, pos))
+			return __SuperClass::forEach([&](__ConstDataRef data, TD_PosType pos) {
+				if (!cb(data, pos))
 				{
 					return false;
 				}
@@ -267,28 +263,52 @@ namespace NS_JSTL
 			});
 		}
 
-		void forEach(__CB_bool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		TD_SizeType forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
 		{
-			if (!fn)
+			if (!cb)
 			{
-				return;
+				return 0;
 			}
 
-			forEach([&](__ConstDataRef data, TD_PosType pos) {
-				return fn(data);
-			}, (TD_PosType)startPos);
+			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
+				return cb((__DataRef)data, pos);
+			}, startPos, count);
 		}
 
-		int find(__CB_ConstDataRef_Pos fn, TD_PosType stratPos = 0) const
+		TD_SizeType forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			if (!fn)
+			if (!cb)
+			{
+				return 0;
+			}
+
+			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
+				return cb(data);
+			}, startPos, count);
+		}
+
+		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		{
+			if (!cb)
+			{
+				return 0;
+			}
+
+			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
+				return cb((__DataRef)data);
+			}, startPos, count);
+		}
+
+		int find(__CB_ConstRef_Pos cb, TD_PosType stratPos = 0) const
+		{
+			if (!cb)
 			{
 				return -1;
 			}
 
 			int iRet = -1;
 			forEach([&](__ConstDataRef data, TD_PosType pos) {
-				if (fn(data, pos))
+				if (cb(data, pos))
 				{
 					iRet = pos;
 					return false;
@@ -373,33 +393,71 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		bool pop(__CB_void fn=NULL)
+		bool pop(__CB_ConstRef_void cb = NULL)
 		{
-			if (__SuperClass::m_data.empty())
+			if (_data().empty())
 			{
 				return false;
 			}
 
-			if (fn)
+			if (cb)
 			{
-				fn(__SuperClass::m_data.back());
+				cb(_data().back());
 			}
 
-			__SuperClass::m_data.pop_back();
+			_data().pop_back();
 
 			return true;
 		}
 
-		bool shift(__CB_void fn=NULL)
+		bool pop(__DataRef data)
 		{
-			return pop_begin(fn);
+			if (_data().empty())
+			{
+				return false;
+			}
+
+			data = _data().back();
+			_data().pop_back();
+
+			return true;
+		}
+
+		bool shift(__CB_ConstRef_void cb = NULL)
+		{
+			if (_data().empty())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(_data().front());
+			}
+
+			_data().pop_front();
+
+			return true;
+		}
+
+		bool shift(__DataRef data)
+		{
+			if (_data().empty())
+			{
+				return false;
+			}
+
+			data = _data().front();
+			_data().pop_front();
+
+			return true;
 		}
 
 		template<typename... args>
 		TD_SizeType unshift(__ConstDataRef data, const args&... others)
 		{
 			(void)__SuperClass::extractDataTypeArgs([&](__ConstDataRef data) {
-				__SuperClass::m_data.push_front(data);
+				_data().push_front(data);
 				return true;
 			}, data, others...);
 
@@ -414,9 +472,9 @@ namespace NS_JSTL
 				return __SuperClass::size();
 			}
 
-			__SuperClass::m_data.insert(__SuperClass::m_data.begin(), container.begin(), container.end());
+			_data().insert(_data().begin(), container.begin(), container.end());
 
-			return __SuperClass::m_data.size();
+			return _data().size();
 		}
 
 		TD_SizeType unshift(__JSArray_InitList initList)
@@ -440,19 +498,19 @@ namespace NS_JSTL
 				return *this;
 			}
 
-			auto itr = __SuperClass::m_data.end();
-			if (pos < __SuperClass::m_data.size())
+			auto itr = _data().end();
+			if (pos < _data().size())
 			{
-				itr = __SuperClass::m_data.begin() + pos;
+				itr = _data().begin() + pos;
 			}
 
-			while (itr != __SuperClass::m_data.end() && nRemove)
+			while (itr != _data().end() && nRemove)
 			{
-				itr = __SuperClass::m_data.erase(itr);
+				itr = _data().erase(itr);
 				nRemove--;
 			}
 
-			__SuperClass::m_data.insert(itr, container.begin(), container.end());
+			_data().insert(itr, container.begin(), container.end());
 
 			return *this;
 		}
@@ -462,57 +520,60 @@ namespace NS_JSTL
 			return splice(pos, nRemove, initList);
 		}
 
-		JSArray& sort(__CB_Sort_T<__DataType> fn = NULL)
+		JSArray& sort(__CB_Sort_T<__DataType> cb = NULL)
 		{
-			std::sort(__SuperClass::m_data.begin(), __SuperClass::m_data.end(), tagTrySort<__DataType>(fn));
+			std::sort(_data().begin(), _data().end(), tagTrySort<__DataType>(cb));
 
 			return *this;
 		}
 
 		JSArray& reverse()
 		{
-			std::reverse(__SuperClass::m_data.begin(), __SuperClass::m_data.end());
+			std::reverse(_data().begin(), _data().end());
 
 			return *this;
 		}
 
-		string join(const string& strSplitor = ",")
+		string join(const string& strSplitor = ",") const
 		{
 			return __SuperClass::toString(strSplitor);
 		}
 
 	public:
 		template <typename T>
-		JSArray<T> map(__CB_T_RET<__ConstDataRef, T> fn) const
+		JSArray<T> map(__CB_T_RET<__ConstDataRef, T> cb) const
 		{
 			JSArray<T> arr;
 
-			if (fn)
+			if (cb)
 			{
-				for (auto&data : __SuperClass::m_data)
+				for (auto&data : _data())
 				{
-					arr.push(fn(data));
+					arr.push(cb(data));
 				}
 			}
 
 			return arr;
 		}
 
-		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
-		JSArray<__RET> map(__Function fn) const
+		template <typename CB, typename __RET = decltype(declval<CB>()(__DataType()))>
+		JSArray<__RET> map(const CB& cb) const
 		{
-			return map<__RET>(fn);
+			return map<__RET>(cb);
 		}
 
-		JSArray filter(__CB_bool fn) const
+		JSArray filter(__CB_ConstRef_bool cb) const
 		{
 			JSArray arr;
 
-			for (auto&data : __SuperClass::m_data)
+			if (cb)
 			{
-				if (fn(data))
+				for (auto&data : _data())
 				{
-					arr.push(data);
+					if (cb(data))
+					{
+						arr.push(data);
+					}
 				}
 			}
 
@@ -523,7 +584,7 @@ namespace NS_JSTL
 		{
 			JSMap<__DataType, TD_SizeType> mapItemSum;
 
-			for (auto&data : __SuperClass::m_data)
+			for (auto&data : _data())
 			{
 				mapItemSum[data]++;
 			}

@@ -4,6 +4,14 @@
 
 #include "util.h"
 
+#include <vector>
+#include <sstream>
+
+#include <initializer_list>
+#include <algorithm>
+
+using namespace std;
+
 namespace NS_JSTL
 {
 	typedef size_t TD_PosType;
@@ -24,40 +32,132 @@ namespace NS_JSTL
 	template <typename T>
 	using __CB_Data_Pos = const function<bool(T, TD_PosType)>&;
 
-	template<typename __DataType> class JSArray;
+	template <typename DATA>
+	class __ContainerOperator
+	{
+	public:
+		__ContainerOperator(DATA& data)
+			: m_data(data)
+		{
+		}
+
+	protected:
+		DATA& m_data;
+		
+	public:
+		template <typename CB>
+		bool getFront(const CB& cb)
+		{
+			auto itr = m_data.begin();
+			if (itr == m_data.end())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(*itr);
+			}
+
+			return true;
+		}
+
+		template <typename CB>
+		bool getBack(const CB& cb)
+		{
+			auto itr = m_data.rbegin();
+			if (itr == m_data.rend())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(*itr);
+			}
+
+			return true;
+		}
+
+		template <typename CB>
+		size_t forEach(const CB& cb)
+		{
+			if (!cb)
+			{
+				return 0;
+			}
+
+			size_t pos = 0;
+			for (auto&data : m_data)
+			{
+				if (!cb(data, pos))
+				{
+					break;
+				}
+
+				pos++;
+			}
+
+			return pos;
+		}
+	};
+
 
 	template<typename __DataType, typename __ContainerType, typename __KeyType = __DataType>
 	class ContainerT
 	{
-	private:
+	protected:
 		using __Data_InitList = __InitList<__DataType>;
 		using __Key_InitList = __InitList<__KeyType>;
 
+		using __DataRef = __DataType&;
 		using __ConstDataRef = const __DataType&;
 		using __ConstKeyRef = const __KeyType&;
 
-		using __CB_void = __CB_T_void<__ConstDataRef>;
-		using __CB_bool = __CB_T_bool<__ConstDataRef>;
+		using __CB_Ref_void = __CB_T_void<__DataRef>;
+		using __CB_Ref_bool = __CB_T_bool<__DataRef>;
+		using __CB_Ref_Pos = __CB_Data_Pos<__DataRef>;
 
-		using __CB_ConstDataRef_Pos = __CB_Data_Pos<__ConstDataRef>;
+		using __CB_ConstRef_void = __CB_T_void<__ConstDataRef>;
+		using __CB_ConstRef_bool = __CB_T_bool<__ConstDataRef>;
+		using __CB_ConstRef_Pos = __CB_Data_Pos<__ConstDataRef>;
 
 	protected:
 		ContainerT()
+			: m_ContainerOperator(m_data)
+			, m_ContainerReader(m_data)
 		{
 		}
 
 		template<typename T>
 		explicit ContainerT(const T& container)
 			: m_data(container.begin(), container.end())
+			, m_ContainerOperator(m_data)
+			, m_ContainerReader(m_data)
 		{
 		}
 
-	protected:
 		__ContainerType m_data;
 
 	protected:
+		using __ContainerOperatorType = __ContainerOperator<__ContainerType>;
+		__ContainerOperatorType m_ContainerOperator;
+		using __ContainerReaderType = __ContainerOperator<const __ContainerType>;
+		__ContainerReaderType m_ContainerReader;
+
+	protected:
+		__ContainerOperatorType& getContainerOperator()
+		{
+			return m_ContainerOperator;
+		}
+
+		__ContainerReaderType& getContainerOperator() const
+		{
+			return (__ContainerReaderType&)m_ContainerReader;
+		}
+
 		template<typename... args>
-		bool extractDataTypeArgs(__CB_bool cb, __ConstDataRef data, const args&... others)
+		static bool extractDataTypeArgs(__CB_ConstRef_bool cb, __ConstDataRef data, const args&... others)
 		{
 			return tagDynamicArgsExtractor<const __DataType>::extract([&](__ConstDataRef data) {
 				return cb(data);
@@ -65,7 +165,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		void extractDataTypeArgs(vector<__DataType>& vecArgs, __ConstDataRef data, const args&... others)
+		static void extractDataTypeArgs(vector<__DataType>& vecArgs, __ConstDataRef data, const args&... others)
 		{
 			extractDataTypeArgs([&](__ConstDataRef data) {
 				vecArgs.push_back(data);
@@ -74,7 +174,7 @@ namespace NS_JSTL
 		}
 		
 		template<typename... args>
-		bool extractKeyTypeArgs(__CB_T_bool<__ConstKeyRef> cb, __ConstKeyRef key, const args&... others)
+		static bool extractKeyTypeArgs(__CB_T_bool<__ConstKeyRef> cb, __ConstKeyRef key, const args&... others)
 		{
 			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__ConstKeyRef key) {
 				return cb(key);
@@ -82,7 +182,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __ConstKeyRef key, const args&... others)
+		static void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __ConstKeyRef key, const args&... others)
 		{
 			extractKeyTypeArgs([&](__ConstKeyRef key) {
 				vecArgs.push_back(key);
@@ -91,7 +191,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		bool checkIsSelf(const T& container)
+		bool checkIsSelf(const T& container) const
 		{
 			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
 		}
@@ -164,7 +264,41 @@ namespace NS_JSTL
 			return m_data.cend();
 		}
 
-		bool front(__CB_void fn=NULL) const
+		bool getFront(__CB_Ref_void cb)
+		{
+			return getContainerOperator().getFront(cb);
+		}
+
+		bool getFront(__CB_ConstRef_void cb) const
+		{
+			return getContainerOperator().getFront(cb);
+		}
+
+		bool getFront(__DataRef data) const
+		{
+			return getContainerOperator().getFront([&](__ConstDataRef back) {
+				data = back;
+			});
+		}
+
+		void getBack(__CB_Ref_void cb)
+		{
+			getContainerOperator().getBack(cb);
+		}
+
+		void getBack(__CB_ConstRef_void cb) const
+		{
+			getContainerOperator().getBack(cb);
+		}
+
+		bool getBack(__DataRef data) const
+		{
+			return getContainerOperator().getBack([&](__ConstDataRef back) {
+				data = back;
+			});
+		}
+
+		bool popFront(__CB_ConstRef_void cb = NULL)
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())
@@ -172,31 +306,16 @@ namespace NS_JSTL
 				return false;
 			}
 
-			if (fn)
+			if (cb)
 			{
-				fn(*itr);
+				cb(*itr);
 			}
+			m_data.erase(itr);
 
 			return true;
 		}
 
-		bool back(__CB_void fn)
-		{
-			auto itr = m_data.rbegin();
-			if (itr == m_data.rend())
-			{
-				return false;
-			}
-
-			if (fn)
-			{
-				fn(*itr);
-			}
-
-			return true;
-		}
-
-		bool popFront(__CB_void fn=NULL)
+		bool popFront(__DataRef data)
 		{
 			auto itr = m_data.begin();
 			if (itr == m_data.end())
@@ -204,10 +323,7 @@ namespace NS_JSTL
 				return false;
 			}
 
-			if (fn)
-			{
-				fn(*itr);
-			}
+			data = *itr;
 			m_data.erase(itr);
 
 			return true;
@@ -252,7 +368,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getInner(__ConstKeyRef key, const args&... others)
+		vector<__KeyType> getInner(__ConstKeyRef key, const args&... others) const
 		{
 			vector<__KeyType> vec;
 			extractKeyTypeArgs(vec, key, others...);
@@ -289,7 +405,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		vector<__KeyType> getOuter(__ConstKeyRef key, const args&... others)
+		vector<__KeyType> getOuter(__ConstKeyRef key, const args&... others) const
 		{
 			vector<__KeyType> vec;
 			extractKeyTypeArgs(vec, key, others...);
@@ -374,13 +490,18 @@ namespace NS_JSTL
 			return del<__Key_InitList>(initList);
 		}
 
-		TD_SizeType del(__CB_bool fn)
+		TD_SizeType del(__CB_ConstRef_bool cb)
 		{
+			if (!cb)
+			{
+				return 0;
+			}
+
 			TD_SizeType uRet = 0;
 
 			for (auto itr = m_data.begin(); itr != m_data.end();)
 			{
-				if (fn(*itr))
+				if (cb(*itr))
 				{
 					itr = m_data.erase(itr);
 					uRet++;
@@ -399,7 +520,7 @@ namespace NS_JSTL
 			m_data.clear();
 		}
 
-		string toString(const string& strSplitor = ",")
+		string toString(const string& strSplitor = ",") const
 		{
 			stringstream ss;
 			ss << '[';
@@ -410,22 +531,13 @@ namespace NS_JSTL
 					ss << strSplitor.c_str();
 				}
 
-				_tostring(ss, *itr);
+				_toString(ss, *itr);
 			}
 
 			ss << ']';
 			return ss.str();
 		}
-
-		//const __ContainerType& data() const
-		//{
-		//	return m_data;
-		//}
-		//__ContainerType& data()
-		//{
-		//	return m_data;
-		//}
-
+		
 	protected:
 		virtual TD_SizeType _add(__ConstDataRef data) = 0;
 
@@ -461,59 +573,34 @@ namespace NS_JSTL
 			return add<__Data_InitList>(initList);
 		}
 
-		virtual TD_SizeType _del(__ConstKeyRef keyk) = 0;
+		virtual TD_SizeType _del(__ConstKeyRef key) = 0;
 
-		virtual void _tostring(stringstream& ss, __ConstDataRef data) const
+		virtual void _toString(stringstream& ss, __ConstDataRef data) const
 		{
 			tagSSTryLMove(ss) << data;
 		}
 
 	public:
-		void forEach(__CB_ConstDataRef_Pos fn) const
+		TD_SizeType forEach(__CB_Ref_Pos cb)
 		{
-			if (!fn)
-			{
-				return;
-			}
-
-			TD_PosType pos = 0;
-			for (auto&data : m_data)
-			{
-				if (!fn(data, pos))
-				{
-					break;
-				}
-
-				pos++;
-			}
+			return getContainerOperator().forEach(cb);
 		}
 
-		bool find(__CB_ConstDataRef_Pos fn) const
+		TD_SizeType forEach(__CB_ConstRef_Pos cb) const
 		{
-			if (!fn)
+			return getContainerOperator().forEach(cb);
+		}
+
+		bool every(__CB_ConstRef_bool cb) const
+		{
+			if (!cb)
 			{
 				return false;
 			}
 
-			bool bRet = false;
-			forEach([&](__ConstDataRef data, TD_PosType pos) {
-				if (fn(data, pos))
-				{
-					bRet = true;
-					return false;
-				}
-
-				return true;
-			});
-
-			return bRet;
-		}
-
-		bool every(__CB_bool fn)
-		{
 			for (auto&data : m_data)
 			{
-				if (!fn(data))
+				if (!cb(data))
 				{
 					return false;
 				}
@@ -522,11 +609,16 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool some(__CB_bool fn)
+		bool some(__CB_ConstRef_bool cb) const
 		{
+			if (!cb)
+			{
+				return false;
+			}
+
 			for (auto&data : m_data)
 			{
-				if (fn(data))
+				if (cb(data))
 				{
 					return true;
 				}
@@ -535,13 +627,13 @@ namespace NS_JSTL
 			return false;
 		}
 
-		template<typename T, typename __Function>
-		T reduce(const T& stat, __Function fn)
+		template<typename T, typename CB>
+		T reduce(const T& stat, const CB& cb) const
 		{
 			T ret = stat;
 			for (auto&data : m_data)
 			{
-				ret = (T)fn(ret, data);
+				ret = (T)cb(ret, data);
 			}
 
 			return ret;

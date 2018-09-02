@@ -2,11 +2,7 @@
 #ifndef __Util_H
 #define __Util_H
 
-#include <initializer_list>
-#include <vector>
-#include <algorithm>
 #include <functional>
-#include <sstream>
 
 using namespace std;
 
@@ -43,18 +39,18 @@ namespace NS_JSTL
 	template <typename T>
 	struct tagTrySort
 	{
-		tagTrySort(__CB_Sort_T<T> fn = NULL)
-			: m_fn(fn)
+		tagTrySort(__CB_Sort_T<T> cb = NULL)
+			: m_cb(cb)
 		{
 		}
 
-		__CB_Sort_T<T> m_fn;
+		__CB_Sort_T<T> m_cb;
 
 		bool operator()(const T&t1, const T&t2)const
 		{
-			if (m_fn)
+			if (m_cb)
 			{
-				return m_fn(t1, t2);
+				return m_cb(t1, t2);
 			}
 
 			return _compare(t1, t2);
@@ -124,10 +120,10 @@ namespace NS_JSTL
 	class tagDynamicArgsExtractor
 	{
 	public:
-		using FN_ExtractCB = function<bool(__DataType&v)>;
+		using FN_ExtractCB = const function<bool(__DataType&v)>&;
 
 		template<typename... args>
-		static bool extract(const FN_ExtractCB& cb, __DataType&v, args&... others)
+		static bool extract(FN_ExtractCB cb, __DataType&v, args&... others)
 		{
 			if (!cb)
 			{
@@ -150,7 +146,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		static bool extract(const FN_ExtractCB& cb, __DataType&v)
+		static bool extract(FN_ExtractCB cb, __DataType&v)
 		{
 			return cb(v);
 		}

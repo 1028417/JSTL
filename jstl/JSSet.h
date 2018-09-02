@@ -10,10 +10,11 @@
 namespace NS_JSTL
 {
 	template<typename __DataType, template<typename...> class __SetType=set>
-	class JSSet : public ContainerT<__DataType, __SetType<__DataType>>
+	class JSSetT : public ContainerT<__DataType, __SetType<__DataType>>
 	{
-	private:
-		using __SuperClass = ContainerT <__DataType, __SetType<__DataType>>;
+	protected:
+		using __ContainerType = __SetType<__DataType>;
+		using __SuperClass = ContainerT<__DataType, __ContainerType>;
 
 		using __JSSet_InitList = __InitList<__DataType>;
 
@@ -22,87 +23,98 @@ namespace NS_JSTL
 		using __CB_void = __CB_T_void<__ConstDataRef>;
 		using __CB_bool = __CB_T_bool<__ConstDataRef>;
 
+	protected:
+		__ContainerType& _data()
+		{
+			return __SuperClass::m_data;
+		}
+
+		const __ContainerType& _data() const
+		{
+			return __SuperClass::m_data;
+		}
+
 	public:
-		JSSet()
+		JSSetT()
 		{
 		}
 
 		template<typename... args>
-		explicit JSSet(__ConstDataRef data, const args&... others)
+		explicit JSSetT(__ConstDataRef data, const args&... others)
 		{
 			__SuperClass::add(data, others...);
 		}
 
-		explicit JSSet(const JSSet& set)
+		explicit JSSetT(const JSSetT& set)
 			: __SuperClass(set)
 		{
 		}
 
-		JSSet(JSSet&& set)
+		JSSetT(JSSetT&& set)
 		{
 			__SuperClass::swap(set);
 		}
 
-		explicit JSSet(__JSSet_InitList initList)
+		explicit JSSetT(__JSSet_InitList initList)
 			: __SuperClass(initList)
 		{
 		}
 
 		template<typename T, typename _ITR = decltype(declval<T>().begin())>
-		explicit JSSet(const T& container)
+		explicit JSSetT(const T& container)
 			: __SuperClass(container)
 		{
 		}
 
-		JSSet& operator=(const JSSet& set)
+		JSSetT& operator=(const JSSetT& set)
 		{
 			__SuperClass::assign(set);
 			return *this;
 		}
 
-		JSSet& operator=(JSSet&& set)
+		JSSetT& operator=(JSSetT&& set)
 		{
 			__SuperClass::swap(set);
 			return *this;
 		}
 
-		JSSet& operator=(__JSSet_InitList initList)
+		JSSetT& operator=(__JSSet_InitList initList)
 		{
 			__SuperClass::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
-		JSSet& operator=(const T&t)
+		JSSetT& operator=(const T&t)
 		{
 			__SuperClass::assign(t);
 			return *this;
 		}
 
-	private:
+	protected:
 		TD_SizeType _add(__ConstDataRef data) override
 		{
-			__SuperClass::m_data.insert(data);
+			_data().insert(data);
 
-			return __SuperClass::m_data.size();
+			return _data().size();
 		}
 
 		TD_SizeType _del(__ConstDataRef data) override
 		{
-			auto itr = __SuperClass::m_data.find(data);
-			if (itr == __SuperClass::m_data.end())
+			auto itr = _data().find(data);
+			if (itr == _data().end())
 			{
 				return 0;
 			}
 
-			__SuperClass::m_data.erase(itr);
+			_data().erase(itr);
 
 			return 1;
 		}
 
 		bool _includes(__ConstDataRef data) const override
 		{
-			return __SuperClass::m_data.find(data) != __SuperClass::m_data.end();
+			return _data().find(data) != _data().end();
 		}
 
 	public:
@@ -125,36 +137,39 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSSet<T, __SetType> map(__CB_T_RET<__ConstDataRef, T> fn) const
+		JSSetT<T, __SetType> map(__CB_T_RET<__ConstDataRef, T> cb) const
 		{
-			JSSet<T, __SetType> ret;
+			JSSetT<T, __SetType> ret;
 
-			if (fn)
+			if (cb)
 			{
-				for (auto&data : __SuperClass::m_data)
+				for (auto&data : _data())
 				{
-					ret.add(fn(data));
+					ret.add(cb(data));
 				}
 			}
 
 			return ret;
 		}
 
-		template <typename __Function, typename __RET = decltype(declval<__Function>()(__DataType()))>
-		JSSet<__RET, __SetType> map(__Function fn) const
+		template <typename CB, typename __RET = decltype(declval<CB>()(__DataType()))>
+		JSSetT<__RET, __SetType> map(const CB& cb) const
 		{
-			return map<__RET>(fn);
+			return map<__RET>(cb);
 		}
 
-		JSSet filter(__CB_bool fn) const
+		JSSetT filter(__CB_bool cb) const
 		{
-			JSSet set;
+			JSSetT set;
 
-			for (auto&data : __SuperClass::m_data)
+			if (cb)
 			{
-				if (fn(data))
+				for (auto&data : _data())
 				{
-					set.add(data);
+					if (cb(data))
+					{
+						set.add(data);
+					}
 				}
 			}
 
@@ -163,7 +178,10 @@ namespace NS_JSTL
 	};
 
 	template <typename __DataType>
-	using JSUnsortSet = JSSet<__DataType, unordered_set>;
+	using JSSet = JSSetT<__DataType, set>;
+
+	template <typename __DataType>
+	using JSUnsortSet = JSSetT<__DataType, unordered_set>;
 }
 
 #endif // __JSSet_H

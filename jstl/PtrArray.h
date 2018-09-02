@@ -9,7 +9,7 @@ namespace NS_JSTL
 	template<typename __Type>
 	class PtrArray : public JSArray<__Type*>
 	{
-	private:
+	protected:
 		using __PtrType = __Type*;
 
 		using __SuperClass = JSArray<__PtrType>;
@@ -89,7 +89,7 @@ namespace NS_JSTL
 			return *this;
 		}
 
-	private:
+	protected:
 		TD_SizeType _add(__ConstPtrRef ptr) override
 		{
 			return __SuperClass::_add(ptr);
@@ -111,7 +111,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		bool get(TD_PosType pos, __CB_RefType_void fn) const
+		bool get(TD_PosType pos, __CB_RefType_void cb) const
 		{
 			__PtrType ptr = NULL;
 			if (!__SuperClass::get(pos, ptr))
@@ -124,9 +124,9 @@ namespace NS_JSTL
 				return false;
 			}
 
-			if (fn)
+			if (cb)
 			{
-				fn(*ptr);
+				cb(*ptr);
 			}
 
 			return true;
@@ -225,7 +225,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		PtrArray concat(__RefType ref, args&... others)
+		PtrArray concat(__RefType ref, args&... others) const
 		{
 			PtrArray arr(*this);
 			arr.push(ref, others...);
@@ -321,9 +321,9 @@ namespace NS_JSTL
 		}
 
 	public:
-		void forEach(__CB_RefType_Pos fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_RefType_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			if (!fn)
+			if (!cb)
 			{
 				return;
 			}
@@ -336,7 +336,7 @@ namespace NS_JSTL
 					continue;
 				}
 
-				if (!fn(*ptr, pos))
+				if (!cb(*ptr, pos))
 				{
 					break;
 				}
@@ -352,21 +352,21 @@ namespace NS_JSTL
 			}
 		}
 
-		void forEach(__CB_RefType_bool fn, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_RefType_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			if (!fn)
+			if (!cb)
 			{
 				return;
 			}
 
 			forEach([&](__RefType data, TD_PosType pos) {
-				return fn(data);
+				return cb(data);
 			}, (TD_PosType)startPos);
 		}
 
-		int find(__CB_RefType_Pos fn, TD_PosType stratPos = 0) const
+		int find(__CB_RefType_Pos cb, TD_PosType stratPos = 0) const
 		{
-			if (!fn)
+			if (!cb)
 			{
 				return -1;
 			}
@@ -377,7 +377,7 @@ namespace NS_JSTL
 					return false;
 				}
 
-				return fn(*ptr, pos);
+				return cb(*ptr, pos);
 			});
 		}
 
@@ -414,66 +414,66 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		bool front(__CB_RefType_void fn = NULL) const
+		bool getFront(__CB_RefType_void cb = NULL) const
 		{
-			return __SuperClass::front([&](__ConstPtrRef ptr) {
+			return __SuperClass::getFront([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
-					if (fn)
+					if (cb)
 					{
-						fn(ptr);
+						cb(ptr);
 					}
 				}
 			});
 		}
 
-		bool back(__CB_RefType_void fn = NULL) const
+		bool getBack(__CB_RefType_void cb = NULL) const
 		{
-			return __SuperClass::back([&](__ConstPtrRef ptr) {
+			return __SuperClass::getBack([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
-					if (fn)
+					if (cb)
 					{
-						fn(ptr);
+						cb(ptr);
 					}
 				}
 			});
 		}
 
-		bool pop(__CB_RefType_void fn = NULL)
+		bool pop(__CB_RefType_void cb = NULL)
 		{
 			return __SuperClass::pop([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
-					if (fn)
+					if (cb)
 					{
-						fn(ptr);
+						cb(ptr);
 					}
 				}
 			});
 		}
 
-		bool shift(__CB_RefType_void fn = NULL)
+		bool shift(__CB_RefType_void cb = NULL)
 		{
 			return __SuperClass::shift([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
-					if (fn)
+					if (cb)
 					{
-						fn(ptr);
+						cb(ptr);
 					}
 				}
 			});
 		}
 
-		PtrArray& sort(__CB_Sort_RefType fn)
+		PtrArray& sort(__CB_Sort_RefType cb)
 		{
-            if (fn)
+            if (cb)
             {
                 __SuperClass::sort([&](__ConstPtrRef ptr1, __ConstPtrRef ptr2) {
                     if (NULL != ptr1 && NULL != ptr2)
                     {
-                        return fn(*ptr1, *ptr2);
+                        return cb(*ptr1, *ptr2);
                     }
 
                     return false;
@@ -485,68 +485,86 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSArray<T> map(__CB_T_RET<__RefType, T> fn) const
+		JSArray<T> map(__CB_T_RET<__RefType, T> cb) const
 		{
 			JSArray<T> arr;
 
-			forEach([&](__RefType ref) {
-				arr.push(fn(ref));
-				return true;
-			});
+			if (cb)
+			{
+				forEach([&](__RefType ref) {
+					arr.push(cb(ref));
+					return true;
+				});
+			}
 
 			return arr;
 		}
 
-		template <typename __Function, typename __RET = decltype(declval<__Function>()(declval<__RefType>()))>
-		JSArray<__RET> map(__Function fn) const
+		template <typename CB, typename __RET = decltype(declval<CB>()(declval<__RefType>()))>
+		JSArray<__RET> map(const CB& cb) const
 		{
-			return map<__RET>(fn);
+			return map<__RET>(cb);
 		}
 
-		PtrArray filter(__CB_RefType_bool fn) const
+		PtrArray filter(__CB_RefType_bool cb) const
 		{
-			PtrArray arr = __SuperClass::filter([&](__ConstPtrRef ptr) {
-				if (NULL == ptr)
-				{
-					return false;
-				}
+			PtrArray arr;
+			
+			if (cb)
+			{
+				arr = __SuperClass::filter([&](__ConstPtrRef ptr) {
+					if (NULL == ptr)
+					{
+						return false;
+					}
 
-				return fn(*ptr);
-			});
+					return cb(*ptr);
+				});
+			}
 
 			return arr;
 		}
 
-		bool every(__CB_RefType_bool fn)
+		bool every(__CB_RefType_bool cb) const
 		{
+			if (!cb)
+			{
+				return false;
+			}
+
 			return __SuperClass::every([&](__ConstPtrRef ptr) {
 				if (NULL == ptr)
 				{
 					return false;
 				}
 
-				return fn(*ptr);
+				return cb(*ptr);
 			});
 		}
 
-		bool some(__CB_RefType_bool fn)
+		bool some(__CB_RefType_bool cb) const
 		{
+			if (!cb)
+			{
+				return false;
+			}
+
 			return __SuperClass::some([&](__ConstPtrRef ptr) {
 				if (NULL == ptr)
 				{
 					return false;
 				}
 
-				return fn(*ptr);
+				return cb(*ptr);
 			});
 		}
 
-		template<typename T, typename __Function>
-		T reduce(const T& stat, __Function fn)
+		template<typename T, typename CB>
+		T reduce(const T& stat, const CB& cb) const
 		{
 			T ret = stat;
 			forEach([&](__RefType ref) {
-				ret = (T)fn(ret, ref);
+				ret = (T)cb(ret, ref);
 			});
 
 			return ret;
