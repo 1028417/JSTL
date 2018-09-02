@@ -125,7 +125,7 @@ int main()
 	qq.push( { 12,2,3 });
 	JSArray<int> arr2;
 	arr2 = arr.map([](float i) {return i * 2; });
-	auto ff = arr.reduce(2.0f, [](const float& a1, const int& a2) {return a1+a2; });
+	auto ff = arr.reduce([](const float& a1, const int& a2) {return a1+a2; });
 
 	JSArray<int> arr3 = arr2.slice(6, 3);
 
@@ -254,5 +254,16 @@ int main()
 	JSArray<int> jahss(5, 5, 5, 5);
 	JSSet<int> afrdg(5, 5, 5, 4);
 	bool bbb = afrdg.includes(5);
+
+	int t = reduce(afrdg, [](int a, int b) {
+		return a + b;
+	});
+
+	t= afrdg.reduce([](int a, int b) {
+		return a + b;
+	});
+
+	afrdg + afrdg;
+
 	return 0;
 }

@@ -35,6 +35,19 @@ namespace NS_JSTL
 		}
 
 	public:
+		//JSSetT operator+ (const ContainerT &lhs) const {}
+
+		JSSetT& operator+= (const ContainerT &lhs) {
+			return *this;
+		}
+
+		friend JSSetT operator+ (const JSSetT &lhs, const JSSetT &rhs)
+		{
+			JSSetT set(rhs);
+
+			return set;
+		}
+
 		JSSetT()
 		{
 		}
@@ -152,10 +165,10 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		template <typename CB, typename __RET = decltype(declval<CB>()(__DataType()))>
-		JSSetT<__RET, __SetType> map(const CB& cb) const
+		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
+		JSSetT<RET, __SetType> map(const CB& cb) const
 		{
-			return map<__RET>(cb);
+			return map<RET>(cb);
 		}
 
 		JSSetT filter(__CB_bool cb) const

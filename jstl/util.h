@@ -154,6 +154,50 @@ namespace NS_JSTL
 
 	template <typename T, typename _RetType, typename _ITR = decltype(declval<T>().begin())>
 	_RetType checkContainer();
+
+	template <typename T, typename C>
+	T reduce(const C& container, const function<T(const T& t1, const T& t2)>& cb)
+	{
+		if (!cb)
+		{
+			return T();
+		}
+
+		auto itr = container.begin();
+		if (itr == container.end())
+		{
+			return T();
+		}
+
+		auto itrPrev = itr;
+		itr++;
+		if (itr == container.end())
+		{
+			return *itrPrev;
+		}
+
+		T ret = cb(*itrPrev, *itr);
+		while (true)
+		{
+			itr++;
+			if (itr == container.end())
+			{
+				break;
+			}
+
+			ret = cb(ret, *itr);
+		}
+				
+		return ret;
+	}
+
+#define __remove_constref(_type) std::remove_const<std::remove_reference<_type>::type>::type
+
+	template <typename C, typename CB, typename T = __remove_constref(decltype(*(declval<C>().begin()))) >
+	T reduce(const C& container, const CB& cb)
+	{
+		return reduce<T, C>(container, cb);
+	}
 }
 
 #endif // __Util_H

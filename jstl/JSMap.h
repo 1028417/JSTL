@@ -61,14 +61,14 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		explicit JSMapT(const T& container, const function<__ValueType(__KeyType)>& fn)
+		explicit JSMapT(const T& keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			set(container, fn);
+			set(keys, cb);
 		}
 
-		explicit JSMapT(__Key_InitList initList, const function<__ValueType(__KeyType)>& fn)
+		explicit JSMapT(__Key_InitList keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			set(initList, fn);
+			set(keys, cb);
 		}
 
 		explicit JSMapT(const JSMapT& map)
@@ -262,22 +262,22 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		TD_SizeType set(const T& container, const function<__ValueType(__KeyType)>& fn)
+		TD_SizeType set(const T& container, const function<__ValueType(__KeyType)>& cb)
 		{
-			if (fn)
+			if (cb)
 			{
 				for (auto& key : container)
 				{
-					this->set(key, fn(key));
+					this->set(key, cb(key));
 				}
 			}
 
 			return _data().size();
 		}
 
-		TD_SizeType set(__Key_InitList initList, const function<__ValueType(__KeyType)>& fn)
+		TD_SizeType set(__Key_InitList keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			return set<__Key_InitList>(initList, fn);
+			return set<__Key_InitList>(keys, cb);
 		}
 
 	public:
@@ -297,10 +297,10 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		template <typename CB, typename __RET = decltype(declval<CB>()(__KeyType(), __ValueType()))>
-		JSMapT<__KeyType, __RET, __MapType> map(const CB& cb) const
+		template <typename CB, typename RET = decltype(declval<CB>()(__KeyType(), __ValueType()))>
+		JSMapT<__KeyType, RET, __MapType> map(const CB& cb) const
 		{
-			return map<__RET>(cb);
+			return map<RET>(cb);
 		}
 
 		JSMapT filter(__CB_CRK_CRV_bool cb) const

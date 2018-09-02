@@ -500,10 +500,10 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		template <typename CB, typename __RET = decltype(declval<CB>()(declval<__RefType>()))>
-		JSArray<__RET> map(const CB& cb) const
+		template <typename CB, typename RET = decltype(declval<CB>()(declval<__RefType>()))>
+		JSArray<RET> map(const CB& cb) const
 		{
-			return map<__RET>(cb);
+			return map<RET>(cb);
 		}
 
 		PtrArray filter(__CB_RefType_bool cb) const
@@ -557,17 +557,6 @@ namespace NS_JSTL
 
 				return cb(*ptr);
 			});
-		}
-
-		template<typename T, typename CB>
-		T reduce(const T& stat, const CB& cb) const
-		{
-			T ret = stat;
-			forEach([&](__RefType ref) {
-				ret = (T)cb(ret, ref);
-			});
-
-			return ret;
 		}
 	};
 

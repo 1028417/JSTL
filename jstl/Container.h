@@ -20,8 +20,8 @@ namespace NS_JSTL
 	template <typename T>
 	using __InitList = const initializer_list<T>&;
 
-	template <typename T, typename __RET>
-	using __CB_T_RET = const function<__RET(const T&v)>&;
+	template <typename T, typename RET>
+	using __CB_T_RET = const function<RET(const T&v)>&;
 
 	template <typename T>
 	using __CB_T_void = __CB_T_RET<T, void>;
@@ -137,15 +137,14 @@ namespace NS_JSTL
 		{
 		}
 
+	protected:
 		__ContainerType m_data;
 
-	protected:
 		using __ContainerOperatorType = __ContainerOperator<__ContainerType>;
 		__ContainerOperatorType m_ContainerOperator;
 		using __ContainerReaderType = __ContainerOperator<const __ContainerType>;
 		__ContainerReaderType m_ContainerReader;
 
-	protected:
 		__ContainerOperatorType& getContainerOperator()
 		{
 			return m_ContainerOperator;
@@ -154,6 +153,51 @@ namespace NS_JSTL
 		__ContainerReaderType& getContainerOperator() const
 		{
 			return (__ContainerReaderType&)m_ContainerReader;
+		}
+
+	protected:
+		virtual TD_SizeType _add(__ConstDataRef data) = 0;
+
+		virtual TD_SizeType _del(__ConstKeyRef key) = 0;
+
+		virtual bool _includes(__ConstKeyRef key) const = 0;
+
+		virtual void _toString(stringstream& ss, __ConstDataRef data) const
+		{
+			tagSSTryLMove(ss) << data;
+		}
+
+	protected:
+		template<typename... args>
+		TD_SizeType add(__ConstDataRef data, const args&... others)
+		{
+			(void)extractDataTypeArgs([&](__ConstDataRef data) {
+				_add(data);
+				return true;
+			}, data, others...);
+
+			return size();
+		}
+
+		template<typename T>
+		decltype(checkContainer<T, TD_SizeType>()) add(const T& container)
+		{
+			if (checkIsSelf(container))
+			{
+				return size();
+			}
+
+			for (auto&data : container)
+			{
+				_add(data);
+			}
+
+			return size();
+		}
+
+		TD_SizeType add(__Data_InitList initList)
+		{
+			return add<__Data_InitList>(initList);
 		}
 
 		template<typename... args>
@@ -329,8 +373,6 @@ namespace NS_JSTL
 			return true;
 		}
 
-		virtual bool _includes(__ConstKeyRef key) const = 0;
-
 		template<typename... args>
 		bool includes(__ConstDataRef data, const args&... others)
 		{
@@ -398,9 +440,9 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		vector<__KeyType> getInner(__Key_InitList initList) const
+		vector<__KeyType> getInner(__Key_InitList keys) const
 		{
-			vector<__KeyType> vec(initList);
+			vector<__KeyType> vec(keys);
 			return getInner(vec);
 		}
 
@@ -435,9 +477,9 @@ namespace NS_JSTL
 			return ret;
 		}
 
-		vector<__KeyType> getOuter(__Key_InitList initList) const
+		vector<__KeyType> getOuter(__Key_InitList keys) const
 		{
-			vector<__KeyType> vec(initList);
+			vector<__KeyType> vec(keys);
 			return getOuter(vec);
 		}
 
@@ -485,9 +527,9 @@ namespace NS_JSTL
 			return uRet;
 		}
 
-		TD_SizeType del(__Key_InitList initList)
+		TD_SizeType del(__Key_InitList keys)
 		{
-			return del<__Key_InitList>(initList);
+			return del<__Key_InitList>(keys);
 		}
 
 		TD_SizeType del(__CB_ConstRef_bool cb)
@@ -538,48 +580,6 @@ namespace NS_JSTL
 			return ss.str();
 		}
 		
-	protected:
-		virtual TD_SizeType _add(__ConstDataRef data) = 0;
-
-		template<typename... args>
-		TD_SizeType add(__ConstDataRef data, const args&... others)
-		{
-			(void)extractDataTypeArgs([&](__ConstDataRef data) {
-				_add(data);
-				return true;
-			}, data, others...);
-
-			return size();
-		}
-
-		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) add(const T& container)
-		{
-			if (checkIsSelf(container))
-			{
-				return size();
-			}
-
-			for (auto&data : container)
-			{
-				_add(data);
-			}
-
-			return size();
-		}
-
-		TD_SizeType add(__Data_InitList initList)
-		{
-			return add<__Data_InitList>(initList);
-		}
-
-		virtual TD_SizeType _del(__ConstKeyRef key) = 0;
-
-		virtual void _toString(stringstream& ss, __ConstDataRef data) const
-		{
-			tagSSTryLMove(ss) << data;
-		}
-
 	public:
 		TD_SizeType forEach(__CB_Ref_Pos cb)
 		{
@@ -627,16 +627,9 @@ namespace NS_JSTL
 			return false;
 		}
 
-		template<typename T, typename CB>
-		T reduce(const T& stat, const CB& cb) const
+		__DataType reduce(const function<__DataType(__ConstDataRef, __ConstDataRef)>& cb) const
 		{
-			T ret = stat;
-			for (auto&data : m_data)
-			{
-				ret = (T)cb(ret, data);
-			}
-
-			return ret;
+			return ::reduce<__DataType, ContainerT>(*this, cb);
 		}
 	};
 }

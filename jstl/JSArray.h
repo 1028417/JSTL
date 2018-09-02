@@ -10,6 +10,55 @@
 
 namespace NS_JSTL
 {
+	template <typename DATA>
+	class __ArrayOperator
+	{
+	public:
+		__ArrayOperator(DATA& data)
+			: m_data(data)
+		{
+		}
+
+	protected:
+		DATA& m_data;
+
+	public:
+		template <typename CB>
+		size_t forEach(const CB& cb, size_t startPos, size_t count)
+		{
+			if (!cb)
+			{
+				return 0;
+			}
+
+			if (startPos >= m_data.size())
+			{
+				return 0;
+			}
+
+			size_t uRet = 0;
+			for (auto pos = startPos; pos < m_data.size(); pos++)
+			{
+				if (!cb(m_data[pos], pos))
+				{
+					break;
+				}
+				uRet++;
+
+				if (count > 0)
+				{
+					count--;
+					if (0 == count)
+					{
+						break;
+					}
+				}
+			}
+
+			return uRet;
+		}
+	};
+
 	template<typename __DataType>
 	class JSArray : public  ContainerT<__DataType, deque<__DataType>>
 	{
@@ -32,6 +81,21 @@ namespace NS_JSTL
 		using __CB_ConstRef_Pos = __CB_Data_Pos<__ConstDataRef>;
 
 	protected:
+		using __ArrayOperatorType = __ArrayOperator<__ContainerType>;
+		__ArrayOperatorType m_ArrayOperator;
+		using __ContainerReaderType = __ArrayOperator<const __ContainerType>;
+		__ContainerReaderType m_ArrayReader;
+
+		__ArrayOperatorType& getArrayOperator()
+		{
+			return m_ArrayOperator;
+		}
+
+		__ContainerReaderType& getArrayOperator() const
+		{
+			return (__ContainerReaderType&)m_ArrayReader;
+		}
+
 		__ContainerType& _data()
 		{
 			return __SuperClass::m_data;
@@ -51,33 +115,45 @@ namespace NS_JSTL
 		}
 
 		JSArray()
+			: m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 		}
 
 		template<typename... args>
 		explicit JSArray(__ConstDataRef data, const args&... others)
+			: m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 			__SuperClass::add(data, others...);
 		}
 
 		explicit JSArray(const JSArray& arr)
 			: __SuperClass(arr)
+			, m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 		}
 
 		JSArray(JSArray&& arr)
+			: m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 			__SuperClass::swap(arr);
 		}
 
 		explicit JSArray(__JSArray_InitList initList)
 			: __SuperClass(initList)
+			, m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 		}
 
 		template<typename T, typename _ITR = decltype(declval<T>().begin())>
 		explicit JSArray(const T& container)
 			: __SuperClass(container)
+			, m_ArrayOperator(m_data)
+			, m_ArrayReader(m_data)
 		{
 		}
 
@@ -237,41 +313,25 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
-		{
-			if (!cb)
-			{
-				return 0;
-			}
-
-			return __SuperClass::forEach([&](__ConstDataRef data, TD_PosType pos) {
-				if (!cb(data, pos))
-				{
-					return false;
-				}
-
-				if (0 < count)
-				{
-					count--;
-					if (0 == count)
-					{
-						return false;
-					}
-				}
-
-				return true;
-			});
-		}
-
 		TD_SizeType forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
 		{
+			return getArrayOperator().forEach(cb, startPos, count);
+		}
+
+		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		{
+			return getArrayOperator().forEach(cb, startPos, count);
+		}
+		
+		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		{
 			if (!cb)
 			{
 				return 0;
 			}
 
-			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
-				return cb((__DataRef)data, pos);
+			return forEach([&](__DataRef data, TD_PosType pos) {
+				return cb(data);
 			}, startPos, count);
 		}
 
@@ -282,20 +342,8 @@ namespace NS_JSTL
 				return 0;
 			}
 
-			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
+			return forEach([&](__ConstDataRef data, TD_PosType pos) {
 				return cb(data);
-			}, startPos, count);
-		}
-
-		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
-		{
-			if (!cb)
-			{
-				return 0;
-			}
-
-			return this->forEach([&](__ConstDataRef data, TD_PosType pos) {
-				return cb((__DataRef)data);
 			}, startPos, count);
 		}
 
@@ -556,10 +604,10 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		template <typename CB, typename __RET = decltype(declval<CB>()(__DataType()))>
-		JSArray<__RET> map(const CB& cb) const
+		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
+		JSArray<RET> map(const CB& cb) const
 		{
-			return map<__RET>(cb);
+			return map<RET>(cb);
 		}
 
 		JSArray filter(__CB_ConstRef_bool cb) const
