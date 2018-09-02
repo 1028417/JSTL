@@ -149,7 +149,7 @@ namespace NS_JSTL
 
 			if (pos < 0)
 			{
-				return size + pos;
+				return (int)size + pos;
 			}
 			else
 			{
@@ -195,15 +195,15 @@ namespace NS_JSTL
 
 		bool get(TD_PosType pos, __DataRef data)
 		{
-			return get([&](__DataRef refData) {
-				data = refData;
+			return get([&](__DataRef _data) {
+				data = _data;
 			});
 		}
 		
 		bool set(TD_PosType pos, __ConstDataRef& data)
 		{
-			return get([&](__DataRef refData) {
-				refData = data;
+			return get([&](__DataRef _data) {
+				_data = data;
 			});
 		}
 
@@ -340,7 +340,7 @@ namespace NS_JSTL
 			JSArray arr;
 
 			startPos = _checkPos(startPos);
-			endPos = _checkPos(startPos);
+			endPos = _checkPos(endPos);
 
 			if (startPos >= 0 && endPos >=0 && startPos <= endPos)
 			{

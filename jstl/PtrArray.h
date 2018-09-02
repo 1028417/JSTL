@@ -401,7 +401,7 @@ namespace NS_JSTL
 			PtrArray arr;
 
 			startPos = __SuperClass::_checkPos(startPos);
-			endPos = __SuperClass::_checkPos(startPos);
+			endPos = __SuperClass::_checkPos(endPos);
 
 			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
 			{

@@ -127,7 +127,11 @@ int main()
 	arr2 = arr.map([](float i) {return i * 2; });
 	auto ff = arr.reduce(2.0f, [](const float& a1, const int& a2) {return a1+a2; });
 
-	auto arr3 = arr2.slice(6, 3);
+	JSArray<int> arr3 = arr2.slice(6, 3);
+
+	JSMap<int, int> ooo({1}, [](int key) {
+		return key*2;
+	});
 
 	map<int, int> tm;
 	JSMap<int,int> mmm(tm);
@@ -162,7 +166,7 @@ int main()
 	JSMap<int, int> ts1;
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
-	JSArray<int> ts2(7.9, 4);
+	JSArray<int> ts2(7,7.9, 4);
 	ts2.getFront([](int&) {});
 	((const JSArray<int>&)ts2).getFront([](const int&) {});
 

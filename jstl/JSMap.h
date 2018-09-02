@@ -23,6 +23,8 @@ namespace NS_JSTL
 		using __DataType = pair<__KeyType const, __ValueType>;
 		using __JSMap_InitList = __InitList<__DataType>;
 
+		using __Key_InitList = __InitList<__KeyType>;
+
 		using __ConstKeyRef = const __KeyType&;
 
 		using __ValueRef = __ValueType&;
@@ -56,6 +58,17 @@ namespace NS_JSTL
 	public:
 		JSMapT()
 		{
+		}
+
+		template <typename T>
+		explicit JSMapT(const T& container, const function<__ValueType(__KeyType)>& fn)
+		{
+			set(container, fn);
+		}
+
+		explicit JSMapT(__Key_InitList initList, const function<__ValueType(__KeyType)>& fn)
+		{
+			set(initList, fn);
 		}
 
 		explicit JSMapT(const JSMapT& map)
@@ -246,6 +259,25 @@ namespace NS_JSTL
 		TD_SizeType set(__JSMap_InitList initList)
 		{
 			return set<__JSMap_InitList>(initList);
+		}
+
+		template <typename T>
+		TD_SizeType set(const T& container, const function<__ValueType(__KeyType)>& fn)
+		{
+			if (fn)
+			{
+				for (auto& key : container)
+				{
+					this->set(key, fn(key));
+				}
+			}
+
+			return _data().size();
+		}
+
+		TD_SizeType set(__Key_InitList initList, const function<__ValueType(__KeyType)>& fn)
+		{
+			return set<__Key_InitList>(initList, fn);
 		}
 
 	public:

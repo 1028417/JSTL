@@ -276,8 +276,8 @@ namespace NS_JSTL
 
 		bool getFront(__DataRef data) const
 		{
-			return getContainerOperator().getFront([&](__ConstDataRef back) {
-				data = back;
+			return getContainerOperator().getFront([&](__ConstDataRef _data) {
+				data = _data;
 			});
 		}
 
@@ -293,8 +293,8 @@ namespace NS_JSTL
 
 		bool getBack(__DataRef data) const
 		{
-			return getContainerOperator().getBack([&](__ConstDataRef back) {
-				data = back;
+			return getContainerOperator().getBack([&](__ConstDataRef _data) {
+				data = _data;
 			});
 		}
 
