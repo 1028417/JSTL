@@ -115,45 +115,45 @@ namespace NS_JSTL
 		}
 
 		JSArray()
-			: m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			: m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 		}
 
 		template<typename... args>
 		explicit JSArray(__ConstDataRef data, const args&... others)
-			: m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			: m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 			__SuperClass::add(data, others...);
 		}
 
 		explicit JSArray(const JSArray& arr)
 			: __SuperClass(arr)
-			, m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			, m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 		}
 
 		JSArray(JSArray&& arr)
-			: m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			: m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 			__SuperClass::swap(arr);
 		}
 
 		explicit JSArray(__JSArray_InitList initList)
 			: __SuperClass(initList)
-			, m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			, m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 		}
 
 		template<typename T, typename _ITR = decltype(declval<T>().begin())>
 		explicit JSArray(const T& container)
 			: __SuperClass(container)
-			, m_ArrayOperator(m_data)
-			, m_ArrayReader(m_data)
+			, m_ArrayOperator(_data())
+			, m_ArrayReader(_data())
 		{
 		}
 
@@ -245,7 +245,7 @@ namespace NS_JSTL
 			{
 				return false;
 			}
-			
+
 			if (cb)
 			{
 				cb(_data()[pos]);
@@ -275,7 +275,7 @@ namespace NS_JSTL
 				data = _data;
 			});
 		}
-		
+
 		bool set(TD_PosType pos, __ConstDataRef& data)
 		{
 			return get([&](__DataRef _data) {
@@ -322,7 +322,7 @@ namespace NS_JSTL
 		{
 			return getArrayOperator().forEach(cb, startPos, count);
 		}
-		
+
 		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
 		{
 			if (!cb)

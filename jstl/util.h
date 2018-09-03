@@ -187,13 +187,12 @@ namespace NS_JSTL
 
 			ret = cb(ret, *itr);
 		}
-				
+
 		return ret;
 	}
 
-#define __remove_constref(_type) std::remove_const<std::remove_reference<_type>::type>::type
-
-	template <typename C, typename CB, typename T = __remove_constref(decltype(*(declval<C>().begin()))) >
+	template <typename C, typename CB, typename T
+		= decltype(declval<CB>()(*(declval<C>().begin()), *(declval<C>().begin())))>
 	T reduce(const C& container, const CB& cb)
 	{
 		return reduce<T, C>(container, cb);

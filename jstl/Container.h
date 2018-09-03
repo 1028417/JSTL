@@ -43,7 +43,7 @@ namespace NS_JSTL
 
 	protected:
 		DATA& m_data;
-		
+
 	public:
 		template <typename CB>
 		bool getFront(const CB& cb)
@@ -168,6 +168,12 @@ namespace NS_JSTL
 		}
 
 	protected:
+		template <typename T>
+		ContainerT& operator+= (const T& rhs)
+		{
+			return *this;
+		}
+
 		template<typename... args>
 		TD_SizeType add(__ConstDataRef data, const args&... others)
 		{
@@ -216,7 +222,7 @@ namespace NS_JSTL
 				return true;
 			}, data, others...);
 		}
-		
+
 		template<typename... args>
 		static bool extractKeyTypeArgs(__CB_T_bool<__ConstKeyRef> cb, __ConstKeyRef key, const args&... others)
 		{
@@ -579,7 +585,7 @@ namespace NS_JSTL
 			ss << ']';
 			return ss.str();
 		}
-		
+
 	public:
 		TD_SizeType forEach(__CB_Ref_Pos cb)
 		{
@@ -629,7 +635,7 @@ namespace NS_JSTL
 
 		__DataType reduce(const function<__DataType(__ConstDataRef, __ConstDataRef)>& cb) const
 		{
-			return ::reduce<__DataType, ContainerT>(*this, cb);
+			return NS_JSTL::reduce<__DataType, __ContainerType >(m_data, cb);
 		}
 	};
 }

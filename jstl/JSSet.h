@@ -37,7 +37,10 @@ namespace NS_JSTL
 	public:
 		//JSSetT operator+ (const ContainerT &lhs) const {}
 
-		JSSetT& operator+= (const ContainerT &lhs) {
+		template <typename T>
+		JSSetT& operator+= (const T& rhs)
+		{
+			__SuperClass::operator+=(rhs);
 			return *this;
 		}
 
