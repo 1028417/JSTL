@@ -60,7 +60,7 @@ namespace NS_JSTL
 	};
 
 	template<typename __DataType>
-	class JSArray : public  ContainerT<__DataType, deque<__DataType>>
+	class JSArray : public ContainerT<__DataType, deque<__DataType>>
 	{
 	protected:
 		using __ContainerType = deque<__DataType>;
@@ -142,7 +142,7 @@ namespace NS_JSTL
 			__SuperClass::swap(arr);
 		}
 
-		explicit JSArray(__JSArray_InitList initList)
+		JSArray(__JSArray_InitList initList)
 			: __SuperClass(initList)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
@@ -239,6 +239,49 @@ namespace NS_JSTL
 		}
 
 	public:
+		template <typename T>
+		JSArray& operator+= (const T& rhs)
+		{
+			__SuperClass::add(rhs);
+			return *this;
+		}
+
+		JSArray& operator+= (__JSArray_InitList rhs)
+		{
+			__SuperClass::add(rhs);
+			return *this;
+		}
+
+		template <typename T>
+		JSArray& operator-= (const T& rhs)
+		{
+			__SuperClass::del(rhs);
+			return *this;
+		}
+
+		JSArray& operator-= (__JSArray_InitList rhs)
+		{
+			__SuperClass::del(rhs);
+			return *this;
+		}
+
+		template<typename... args>
+		TD_SizeType push(__ConstDataRef data, const args&... others)
+		{
+			return __SuperClass::add(data, others...);
+		}
+
+		template<typename T>
+		TD_SizeType push(const T& container)
+		{
+			return __SuperClass::add(container);
+		}
+
+		TD_SizeType push(__JSArray_InitList initList)
+		{
+			return __SuperClass::add(initList);
+		}
+
 		bool get(TD_PosType pos, __CB_Ref_void cb)
 		{
 			if (pos >= _data().size())
@@ -296,149 +339,6 @@ namespace NS_JSTL
 			}
 
 			return -1;
-		}
-
-		int lastIndexOf(__ConstDataRef data) const
-		{
-			int uIdx = 1;
-			for (auto& item : _data())
-			{
-				if (tagTryCompare<__DataType>().compare(item, data))
-				{
-					return _data().size()-uIdx;
-				}
-				uIdx++;
-			}
-
-			return -1;
-		}
-
-		TD_SizeType forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
-		{
-			return getArrayOperator().forEach(cb, startPos, count);
-		}
-
-		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
-		{
-			return getArrayOperator().forEach(cb, startPos, count);
-		}
-
-		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
-		{
-			if (!cb)
-			{
-				return 0;
-			}
-
-			return forEach([&](__DataRef data, TD_PosType pos) {
-				return cb(data);
-			}, startPos, count);
-		}
-
-		TD_SizeType forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
-		{
-			if (!cb)
-			{
-				return 0;
-			}
-
-			return forEach([&](__ConstDataRef data, TD_PosType pos) {
-				return cb(data);
-			}, startPos, count);
-		}
-
-		int find(__CB_ConstRef_Pos cb, TD_PosType stratPos = 0) const
-		{
-			if (!cb)
-			{
-				return -1;
-			}
-
-			int iRet = -1;
-			forEach([&](__ConstDataRef data, TD_PosType pos) {
-				if (cb(data, pos))
-				{
-					iRet = pos;
-					return false;
-				}
-
-				return true;
-			});
-
-			return iRet;
-		}
-
-		JSArray slice(int startPos) const
-		{
-			JSArray arr;
-
-			startPos = _checkPos(startPos);
-			if (startPos >= 0)
-			{
-				forEach([&](__ConstDataRef data) {
-					arr.push(data);
-				}, (TD_PosType)startPos);
-			}
-
-			return arr;
-		}
-
-		JSArray slice(int startPos, int endPos) const
-		{
-			JSArray arr;
-
-			startPos = _checkPos(startPos);
-			endPos = _checkPos(endPos);
-
-			if (startPos >= 0 && endPos >=0 && startPos <= endPos)
-			{
-				forEach([&](__ConstDataRef data) {
-					arr.push(data);
-					return true;
-				}, (TD_PosType)startPos, TD_SizeType(endPos-startPos+1));
-			}
-
-			return arr;
-		}
-
-		template<typename... args>
-		TD_SizeType push(__ConstDataRef data, const args&... others)
-		{
-			return __SuperClass::add(data, others...);
-		}
-
-		template<typename T>
-		TD_SizeType push(const T& container)
-		{
-			return __SuperClass::add(container);
-		}
-
-		TD_SizeType push(__JSArray_InitList initList)
-		{
-			return __SuperClass::add(initList);
-		}
-
-		template<typename... args>
-		JSArray concat(__ConstDataRef data, const args&... others) const
-		{
-			JSArray arr(*this);
-			arr.push(data, others...);
-			return arr;
-		}
-
-		template<typename T>
-		JSArray concat(const T& container) const
-		{
-			JSArray arr(*this);
-			arr.push(container);
-			return arr;
-		}
-
-		JSArray concat(__JSArray_InitList initList) const
-		{
-			JSArray arr(*this);
-			arr.push(initList);
-			return arr;
 		}
 
 		bool pop(__CB_ConstRef_void cb = NULL)
@@ -515,12 +415,10 @@ namespace NS_JSTL
 		template<typename T>
 		TD_SizeType unshift(const T& container)
 		{
-			if (__SuperClass::checkIsSelf(container))
+			if (!__SuperClass::checkIsSelf(container))
 			{
-				return __SuperClass::size();
+				_data().insert(_data().begin(), container.begin(), container.end());
 			}
-
-			_data().insert(_data().begin(), container.begin(), container.end());
 
 			return _data().size();
 		}
@@ -528,6 +426,132 @@ namespace NS_JSTL
 		TD_SizeType unshift(__JSArray_InitList initList)
 		{
 			return unshift<__JSArray_InitList>(initList);
+		}
+
+		int lastIndexOf(__ConstDataRef data) const
+		{
+			int uIdx = 1;
+			for (auto& item : _data())
+			{
+				if (tagTryCompare<__DataType>().compare(item, data))
+				{
+					return _data().size()-uIdx;
+				}
+				uIdx++;
+			}
+
+			return -1;
+		}
+
+		TD_SizeType forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		{
+			return getArrayOperator().forEach(cb, startPos, count);
+		}
+
+		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		{
+			return getArrayOperator().forEach(cb, startPos, count);
+		}
+
+		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		{
+			if (!cb)
+			{
+				return 0;
+			}
+
+			return forEach([&](__DataRef data, TD_PosType pos) {
+				return cb(data);
+			}, startPos, count);
+		}
+
+		TD_SizeType forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		{
+			if (!cb)
+			{
+				return 0;
+			}
+
+			return forEach([&](__ConstDataRef data, TD_PosType pos) {
+				return cb(data);
+			}, startPos, count);
+		}
+
+		int find(__CB_ConstRef_Pos cb, TD_PosType stratPos = 0) const
+		{
+			if (!cb)
+			{
+				return -1;
+			}
+
+			int iRet = -1;
+			forEach([&](__ConstDataRef data, TD_PosType pos) {
+				if (cb(data, pos))
+				{
+					iRet = pos;
+					return false;
+				}
+
+				return true;
+			});
+
+			return iRet;
+		}
+
+		template<typename... args>
+		JSArray concat(__ConstDataRef data, const args&... others) const
+		{
+			JSArray arr(*this);
+			arr.push(data, others...);
+			return arr;
+		}
+
+		template<typename T>
+		JSArray concat(const T& container) const
+		{
+			JSArray arr(*this);
+			arr.push(container);
+			return arr;
+		}
+
+		JSArray concat(__JSArray_InitList initList) const
+		{
+			JSArray arr(*this);
+			arr.push(initList);
+			return arr;
+		}
+
+		JSArray slice(int startPos) const
+		{
+			JSArray arr;
+
+			startPos = _checkPos(startPos);
+			if (startPos >= 0)
+			{
+				forEach([&](__ConstDataRef data) {
+					arr.push(data);
+				}, (TD_PosType)startPos);
+			}
+
+			return arr;
+		}
+
+		JSArray slice(int startPos, int endPos) const
+		{
+			JSArray arr;
+
+			startPos = _checkPos(startPos);
+			endPos = _checkPos(endPos);
+
+			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
+			{
+				forEach([&](__ConstDataRef data) {
+					arr.push(data);
+					return true;
+				}, (TD_PosType)startPos, TD_SizeType(endPos - startPos + 1));
+			}
+
+			return arr;
 		}
 
 		template<typename... args>

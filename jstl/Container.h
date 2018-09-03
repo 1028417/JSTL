@@ -106,7 +106,8 @@ namespace NS_JSTL
 	template<typename __DataType, typename __ContainerType, typename __KeyType = __DataType>
 	class ContainerT
 	{
-	protected:
+	public:
+		typedef __InitList<__DataType> _____Y;
 		using __Data_InitList = __InitList<__DataType>;
 		using __Key_InitList = __InitList<__KeyType>;
 
@@ -168,12 +169,6 @@ namespace NS_JSTL
 		}
 
 	protected:
-		template <typename T>
-		ContainerT& operator+= (const T& rhs)
-		{
-			return *this;
-		}
-
 		template<typename... args>
 		TD_SizeType add(__ConstDataRef data, const args&... others)
 		{

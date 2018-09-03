@@ -263,7 +263,59 @@ int main()
 		return a + b;
 	});
 
-	afrdg + afrdg;
-	afrdg += 5;
+	JSSet<int> sstt={1,2};
+	sstt -= afrdg;
+	sstt += {5};
+
+	PtrArray<int> zqq11((int*)nullptr);
+	PtrArray<int> zqq211({nullptr, nullptr, nullptr});
+	PtrArray<int> zqq311(*(int*)nullptr);
+	PtrArray<int> zqq161(jahss);
+	PtrArray<int> zqq711(zqq161);
+
+	PtrArray<int> popopo;
+	popopo += (int*)nullptr;
+	popopo += {nullptr, nullptr, nullptr};
+	popopo += *(int*)nullptr;
+	popopo += jahss;
+	popopo += popopo;
+
+	popopo = ((int*)nullptr);
+	popopo = { nullptr, nullptr, nullptr };
+	popopo = (*(int*)nullptr);
+	popopo = jahss;
+	popopo = zqq161;
+
+	popopo.unshift((int*)nullptr);
+	popopo.unshift({ nullptr, nullptr, nullptr });
+	popopo.unshift(*(int*)nullptr);
+	popopo.unshift(jahss);
+	popopo.unshift(zqq161);
+
+	popopo.assign((int*)nullptr);
+	popopo.assign({ nullptr, nullptr, nullptr });
+	popopo.assign(*(int*)nullptr);
+	popopo.assign(jahss);
+	popopo.assign(zqq161);
+	
+
+	popopo.push( (int*)nullptr);
+	popopo.push({nullptr, nullptr, nullptr});
+	popopo.push(*(int*)nullptr);
+	popopo.push(jahss);
+
+	popopo -= (int*)nullptr;
+	popopo -= {nullptr, nullptr, nullptr};
+	popopo -= popopo;
+
+	popopo.del( (int*)nullptr);
+	popopo.del( {nullptr, nullptr, nullptr});
+	popopo.del( popopo);
+
+	ConstPtrArray<int> ccccc;
+	ccccc.push(ccccc);
+	ccccc += ccccc;
+	ccccc += sstt;
+	
 	return 0;
 }

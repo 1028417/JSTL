@@ -81,7 +81,7 @@ namespace NS_JSTL
 			__SuperClass::swap(map);
 		}
 
-		explicit JSMapT(__JSMap_InitList initList)
+		JSMapT(__JSMap_InitList initList)
 			: __SuperClass(initList)
 		{
 		}
@@ -246,12 +246,10 @@ namespace NS_JSTL
 		template<typename T>
 		TD_SizeType set(const T& container)
 		{
-			if (__SuperClass::checkIsSelf(container))
+			if (!__SuperClass::checkIsSelf(container))
 			{
-				return __SuperClass::size();
+				_data().insert(container.begin(), container.end());
 			}
-
-			_data().insert(container.begin(), container.end());
 
 			return _data().size();
 		}

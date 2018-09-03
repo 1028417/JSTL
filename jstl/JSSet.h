@@ -35,22 +35,6 @@ namespace NS_JSTL
 		}
 
 	public:
-		//JSSetT operator+ (const ContainerT &lhs) const {}
-
-		template <typename T>
-		JSSetT& operator+= (const T& rhs)
-		{
-			__SuperClass::operator+=(rhs);
-			return *this;
-		}
-
-		friend JSSetT operator+ (const JSSetT &lhs, const JSSetT &rhs)
-		{
-			JSSetT set(rhs);
-
-			return set;
-		}
-
 		JSSetT()
 		{
 		}
@@ -71,7 +55,7 @@ namespace NS_JSTL
 			__SuperClass::swap(set);
 		}
 
-		explicit JSSetT(__JSSet_InitList initList)
+		JSSetT(__JSSet_InitList initList)
 			: __SuperClass(initList)
 		{
 		}
@@ -134,6 +118,32 @@ namespace NS_JSTL
 		}
 
 	public:
+		template <typename T>
+		JSSetT& operator+= (const T& rhs)
+		{
+			__SuperClass::add(rhs);
+			return *this;
+		}
+
+		JSSetT& operator+= (__JSSet_InitList rhs)
+		{
+			__SuperClass::add(rhs);
+			return *this;
+		}
+
+		template <typename T>
+		JSSetT& operator-= (const T& rhs)
+		{
+			__SuperClass::del(rhs);
+			return *this;
+		}
+
+		JSSetT& operator-= (__JSSet_InitList rhs)
+		{
+			__SuperClass::del(rhs);
+			return *this;
+		}
+
 		template<typename... args>
 		TD_SizeType add(__ConstDataRef data, const args&... others)
 		{
