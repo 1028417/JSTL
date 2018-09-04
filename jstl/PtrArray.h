@@ -6,23 +6,26 @@
 
 namespace NS_JSTL
 {
+#define __PtrArraySuper JSArray<__Type*>
+
 	template<typename __Type>
-	class PtrArray : public JSArray<__Type*>
+	class PtrArray : public __PtrArraySuper
 	{
+	private:
+		using __Super = __PtrArraySuper;
+
 	protected:
 		using __PtrType = __Type*;
 
-		using __SuperClass = JSArray<__PtrType>;
-
-		using __PtrArray_InitList = __InitList<__PtrType>;
+		using __InitList_Ptr = InitList_T<__PtrType>;
 
 		using __RefType = __Type&;
 		using __ConstPtrRef = const __PtrType&;
 
-		using __CB_RefType_void = __CB_T_void<__RefType>;
-		using __CB_RefType_bool = __CB_T_bool<__RefType>;
+		using __CB_RefType_void = CB_T_void<__RefType>;
+		using __CB_RefType_bool = CB_T_bool<__RefType>;
 
-		using __CB_RefType_Pos = __CB_Data_Pos<__RefType>;
+		using __CB_RefType_Pos = CB_T_Pos<__RefType>;
 
 		using __CB_Sort_RefType = __CB_Sort_T<__Type>;
 
@@ -33,7 +36,7 @@ namespace NS_JSTL
 
 		template<typename... args>
 		explicit PtrArray(__ConstPtrRef ptr, const args&... others)
-			: __SuperClass(ptr, others...)
+			: __Super(ptr, others...)
 		{
 		}
 
@@ -44,17 +47,17 @@ namespace NS_JSTL
 		}
 
 		explicit PtrArray(const PtrArray& arr)
-			: __SuperClass(arr)
+			: __Super(arr)
 		{
 		}
 
 		PtrArray(PtrArray&& arr)
 		{
-			__SuperClass::swap(arr);
+			__Super::swap(arr);
 		}
 
-		PtrArray(__PtrArray_InitList initList)
-			: __SuperClass(initList)
+		PtrArray(__InitList_Ptr initList)
+			: __Super(initList)
 		{
 		}
 
@@ -72,17 +75,17 @@ namespace NS_JSTL
 
 		PtrArray& operator=(const PtrArray& arr)
 		{
-			__SuperClass::assign(arr);
+			__Super::assign(arr);
 			return *this;
 		}
 
 		PtrArray& operator=(PtrArray&& arr)
 		{
-			__SuperClass::swap(arr);
+			__Super::swap(arr);
 			return *this;
 		}
 
-		PtrArray& operator=(__PtrArray_InitList initList)
+		PtrArray& operator=(__InitList_Ptr initList)
 		{
 			assign(initList);
 			return *this;
@@ -105,27 +108,27 @@ namespace NS_JSTL
 	protected:
 		//TD_SizeType _add(__ConstPtrRef ptr) override
 		//{
-		//	return __SuperClass::_add(ptr);
+		//	return __Super::_add(ptr);
 		//}
 
 		TD_SizeType _add(__PtrType ptr)
 		{
-			return __SuperClass::_add(ptr);
+			return __Super::_add(ptr);
 		}
 
 		TD_SizeType _add(__RefType ref)
 		{
-			return __SuperClass::_add(&ref);
+			return __Super::_add(&ref);
 		}
 
 		void _unshift(__ConstPtrRef ptr)
 		{
-			__SuperClass::unshift(ptr);
+			__Super::unshift(ptr);
 		}
 
 		void _unshift(__RefType ref)
 		{
-			__SuperClass::unshift(&ref);
+			__Super::unshift(&ref);
 		}
 
 	public:
@@ -159,7 +162,7 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		PtrArray& operator+= (__PtrArray_InitList rhs)
+		PtrArray& operator+= (__InitList_Ptr rhs)
 		{
 			this->push(rhs);
 			
@@ -169,20 +172,20 @@ namespace NS_JSTL
 		template <typename T>
 		PtrArray& operator-= (const T& rhs)
 		{
-			__SuperClass::del(rhs);
+			__Super::del(rhs);
 			return *this;
 		}
 
-		PtrArray& operator-= (__PtrArray_InitList rhs)
+		PtrArray& operator-= (__InitList_Ptr rhs)
 		{
-			__SuperClass::del(rhs);
+			__Super::del(rhs);
 			return *this;
 		}
 
 		bool get(TD_PosType pos, __CB_RefType_void cb) const
 		{
 			__PtrType ptr = NULL;
-			if (!__SuperClass::get(pos, ptr))
+			if (!__Super::get(pos, ptr))
 			{
 				return false;
 			}
@@ -202,43 +205,43 @@ namespace NS_JSTL
 
 		bool set(TD_PosType pos, __ConstPtrRef ptr)
 		{
-			return __SuperClass::set(pos, ptr);
+			return __Super::set(pos, ptr);
 		}
 
 		bool set(TD_PosType pos, __RefType data)
 		{
-			return __SuperClass::set(pos, &data);
+			return __Super::set(pos, &data);
 		}
 
 		template<typename... args>
 		PtrArray& assign(__ConstPtrRef ptr, const args&... others)
 		{
-			__SuperClass::assign(ptr, others...);
+			__Super::assign(ptr, others...);
 			return *this;
 		}
 
 		template<typename... args>
 		PtrArray& assign(__RefType ref, args&... others)
 		{
-			__SuperClass::clear();
+			__Super::clear();
 
 			push(ref, others...);
 
 			return *this;
 		}
 
-		PtrArray& assign(__PtrArray_InitList initList)
+		PtrArray& assign(__InitList_Ptr initList)
 		{
-			__SuperClass::assign(initList);
+			__Super::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
 		PtrArray& assign(T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
-				__SuperClass::clear();
+				__Super::clear();
 
 				push(container);
 			}
@@ -249,9 +252,9 @@ namespace NS_JSTL
 		template <typename T>
 		PtrArray& assign(const T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
-				__SuperClass::clear();
+				__Super::clear();
 
 				push(container);
 			}
@@ -262,7 +265,7 @@ namespace NS_JSTL
 		template<typename... args>
 		TD_SizeType push(__ConstPtrRef ptr, const args&... others)
 		{
-			return __SuperClass::push(ptr, others...);
+			return __Super::push(ptr, others...);
 		}
 
 		template<typename... args>
@@ -273,14 +276,14 @@ namespace NS_JSTL
 				return true;
 			}, ref, others...);
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
 
 		template<typename T>
 		decltype(checkContainer<T, TD_SizeType>()) push(T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				for (auto&data : container)
 				{
@@ -288,13 +291,13 @@ namespace NS_JSTL
 				}
 			}
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
 		template<typename T>
 		decltype(checkContainer<T, TD_SizeType>()) push(const T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				for (auto&data : container)
 				{
@@ -302,18 +305,18 @@ namespace NS_JSTL
 				}
 			}
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
-		TD_SizeType push(__PtrArray_InitList initList)
+		TD_SizeType push(__InitList_Ptr initList)
 		{
-			return __SuperClass::push(initList);
+			return __Super::push(initList);
 		}
 
 		template<typename... args>
 		PtrArray concat(__ConstPtrRef ptr, const args&... others) const
 		{
-			return PtrArray(__SuperClass::concat(ptr, others...));
+			return PtrArray(__Super::concat(ptr, others...));
 		}
 
 		template<typename... args>
@@ -340,32 +343,32 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		PtrArray concat(__PtrArray_InitList initList) const
+		PtrArray concat(__InitList_Ptr initList) const
 		{
-			return PtrArray(__SuperClass::concat(initList));
+			return PtrArray(__Super::concat(initList));
 		}
 
 		template<typename... args>
 		TD_SizeType unshift(__ConstPtrRef ptr, const args&... others)
 		{
-			return __SuperClass::unshift(ptr, others...);
+			return __Super::unshift(ptr, others...);
 		}
 
 		template<typename... args>
 		TD_SizeType unshift(__RefType ref, args&... others)
 		{
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
-				__SuperClass::unshift({ &ref });
+				__Super::unshift({ &ref });
 				return true;
 			}, ref, others...);
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
 		template<typename T>
 		decltype(checkContainer<T, TD_SizeType>()) unshift(T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				for (auto&data : container)
 				{
@@ -373,13 +376,13 @@ namespace NS_JSTL
 				}
 			}
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
 		template<typename T>
 		decltype(checkContainer<T, TD_SizeType>()) unshift(const T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				for (auto&data : container)
 				{
@@ -387,19 +390,19 @@ namespace NS_JSTL
 				}
 			}
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
-		TD_SizeType unshift(__PtrArray_InitList initList)
+		TD_SizeType unshift(__InitList_Ptr initList)
 		{
-			return __SuperClass::unshift(initList);
+			return __Super::unshift(initList);
 		}
 
 		PtrArray slice(int startPos) const
 		{
 			PtrArray arr;
 
-			startPos = __SuperClass::_checkPos(startPos);
+			startPos = __Super::_checkPos(startPos);
 			if (startPos >= 0)
 			{
 				forEach([&](__RefType data) {
@@ -414,8 +417,8 @@ namespace NS_JSTL
 		{
 			PtrArray arr;
 
-			startPos = __SuperClass::_checkPos(startPos);
-			endPos = __SuperClass::_checkPos(endPos);
+			startPos = __Super::_checkPos(startPos);
+			endPos = __Super::_checkPos(endPos);
 
 			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
 			{
@@ -431,7 +434,7 @@ namespace NS_JSTL
 		template<typename... args>
 		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __ConstPtrRef v, const args&... others)
 		{
-			__SuperClass::splice(pos, nRemove, v, others...);
+			__Super::splice(pos, nRemove, v, others...);
 
 			return *this;
 		}
@@ -445,7 +448,7 @@ namespace NS_JSTL
 				return true;
 			}, ref, others...);
 
-			__SuperClass::splice(pos, nRemove, vec);
+			__Super::splice(pos, nRemove, vec);
 
 			return *this;
 		}
@@ -453,7 +456,7 @@ namespace NS_JSTL
 		template<typename T>
 		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, T& container)
 		{
-			__SuperClass::splice(pos, nRemove, container);
+			__Super::splice(pos, nRemove, container);
 
 			return *this;
 		}
@@ -461,21 +464,21 @@ namespace NS_JSTL
 		template<typename T>
 		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, const T& container)
 		{
-			__SuperClass::splice(pos, nRemove, container);
+			__Super::splice(pos, nRemove, container);
 
 			return *this;
 		}
 
-		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __PtrArray_InitList initList)
+		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove, __InitList_Ptr initList)
 		{
-			__SuperClass::splice(pos, nRemove, initList);
+			__Super::splice(pos, nRemove, initList);
 
 			return *this;
 		}
 
 		PtrArray& splice(TD_PosType pos, TD_SizeType nRemove)
 		{
-			__SuperClass::splice(pos, nRemove, ((__PtrArray_InitList) {}));
+			__Super::splice(pos, nRemove, ((__InitList_Ptr) {}));
 
 			return *this;
 		}
@@ -488,9 +491,9 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (TD_PosType pos = startPos; pos < __SuperClass::size(); pos++)
+			for (TD_PosType pos = startPos; pos < __Super::size(); pos++)
 			{
-				auto ptr = __SuperClass::at(pos);
+				auto ptr = __Super::at(pos);
 				if (NULL == ptr)
 				{
 					continue;
@@ -531,7 +534,7 @@ namespace NS_JSTL
 				return -1;
 			}
 
-			return __SuperClass::forEach([&](__ConstPtrRef ptr, TD_PosType pos) {
+			return __Super::forEach([&](__ConstPtrRef ptr, TD_PosType pos) {
 				if (NULL == ptr)
 				{
 					return false;
@@ -543,7 +546,7 @@ namespace NS_JSTL
 
 		bool getFront(__CB_RefType_void cb = NULL) const
 		{
-			return __SuperClass::getFront([&](__ConstPtrRef ptr) {
+			return __Super::getFront([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
 					if (cb)
@@ -556,7 +559,7 @@ namespace NS_JSTL
 
 		bool getBack(__CB_RefType_void cb = NULL) const
 		{
-			return __SuperClass::getBack([&](__ConstPtrRef ptr) {
+			return __Super::getBack([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
 					if (cb)
@@ -569,7 +572,7 @@ namespace NS_JSTL
 
 		bool pop(__CB_RefType_void cb = NULL)
 		{
-			return __SuperClass::pop([&](__ConstPtrRef ptr) {
+			return __Super::pop([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
 					if (cb)
@@ -582,7 +585,7 @@ namespace NS_JSTL
 
 		bool shift(__CB_RefType_void cb = NULL)
 		{
-			return __SuperClass::shift([&](__ConstPtrRef ptr) {
+			return __Super::shift([&](__ConstPtrRef ptr) {
 				if (NULL != ptr)
 				{
 					if (cb)
@@ -597,7 +600,7 @@ namespace NS_JSTL
 		{
             if (cb)
             {
-                __SuperClass::sort([&](__ConstPtrRef ptr1, __ConstPtrRef ptr2) {
+                __Super::sort([&](__ConstPtrRef ptr1, __ConstPtrRef ptr2) {
                     if (NULL != ptr1 && NULL != ptr2)
                     {
                         return cb(*ptr1, *ptr2);
@@ -612,7 +615,7 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSArray<T> map(__CB_T_RET<__RefType, T> cb) const
+		JSArray<T> map(CB_T_Ret<__RefType, T> cb) const
 		{
 			JSArray<T> arr;
 
@@ -639,7 +642,7 @@ namespace NS_JSTL
 			
 			if (cb)
 			{
-				arr = __SuperClass::filter([&](__ConstPtrRef ptr) {
+				arr = __Super::filter([&](__ConstPtrRef ptr) {
 					if (NULL == ptr)
 					{
 						return false;
@@ -659,7 +662,7 @@ namespace NS_JSTL
 				return false;
 			}
 
-			return __SuperClass::every([&](__ConstPtrRef ptr) {
+			return __Super::every([&](__ConstPtrRef ptr) {
 				if (NULL == ptr)
 				{
 					return false;
@@ -676,7 +679,7 @@ namespace NS_JSTL
 				return false;
 			}
 
-			return __SuperClass::some([&](__ConstPtrRef ptr) {
+			return __Super::some([&](__ConstPtrRef ptr) {
 				if (NULL == ptr)
 				{
 					return false;

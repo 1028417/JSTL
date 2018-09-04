@@ -13,46 +13,52 @@ namespace NS_JSTL
 {
 	template<typename __DataType> class JSArray;
 
+#define __JSMapSuper ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>
+
 	template<typename __KeyType, typename __ValueType, template<typename...> typename __MapType> class JSMapT
-		: public ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>
+		: public __JSMapSuper
 	{
+	private:
+		using __Super = __JSMapSuper;
+
+#ifdef __gcc__
 	protected:
-		using __ContainerType = __MapType<__KeyType, __ValueType>;
-		using __SuperClass = ContainerT<pair<__KeyType const, __ValueType>, __ContainerType, __KeyType>;
+		__UsingSuperType(__ContainerType);
 
-		using __DataType = pair<__KeyType const, __ValueType>;
-		using __JSMap_InitList = __InitList<__DataType>;
+		__UsingSuperType(__DataType);
 
-		using __Key_InitList = __InitList<__KeyType>;
+		__UsingSuperType(__InitList);
+		__UsingSuperType(__InitList_Key);
+		
+		__UsingSuperType(__KeyConstRef);
+#endif
 
-		using __ConstKeyRef = const __KeyType&;
-
+	protected:
 		using __ValueRef = __ValueType&;
-		using __ConstValueRef = const __ValueType&;
+		using __ValueConstRef = const __ValueType&;
+
+		//template <typename T> using __CB_KeyCR_ValueR_T = const function<T(__KeyConstRef, __ValueRef)>&;
+		//using __CB_KeyCR_ValueR_bool = __CB_KeyCR_ValueR_T<bool>;
+		//using __CB_KeyCR_ValueR_void = __CB_KeyCR_ValueR_T<void>;
 
 		template <typename T>
-		using __CB_CRK_RV_T = const function<T(__ConstKeyRef, __ValueRef)>&;
-		using __CB_CRK_RV_void = __CB_CRK_RV_T<void>;
-		using __CB_CRK_RV_bool = __CB_CRK_RV_T<bool>;
+		using __CB_KeyCR_ValueCR_T = const function<T(__KeyConstRef, __ValueConstRef)>&;
+		using __CB_KeyCR_ValueCR_bool = __CB_KeyCR_ValueCR_T<bool>;
+		//using __CB_KeyCR_ValueCR_void = __CB_KeyCR_ValueCR_T<void>;
 
-		template <typename T>
-		using __CB_CRK_CRV_T = const function<T(__ConstKeyRef, __ConstValueRef)>&;
-		using __CB_CRK_CRV_void = __CB_CRK_CRV_T<void>;
-		using __CB_CRK_CRV_bool = __CB_CRK_CRV_T<bool>;
-
-		using __CB_RV_CRK_void = const function<void(__ValueRef, __ConstKeyRef)>&;
-		using __CB_CRV_CRK_void = const function<void(__ConstValueRef, __ConstKeyRef)>&;
-		using __CB_CRV_CRK_bool = const function<bool(__ConstValueRef, __ConstKeyRef)>&;
+		using __CB_ValueR_KeyCR_void = const function<void(__ValueRef, __KeyConstRef)>&;
+		using __CB_ValueCR_KeyCR_bool = const function<bool(__ValueConstRef, __KeyConstRef)>&;
+		using __CB_ValueCR_KeyCR_void = const function<void(__ValueConstRef, __KeyConstRef)>&;
 
 	protected:
 		__ContainerType& _data()
 		{
-			return __SuperClass::m_data;
+			return __Super::m_data;
 		}
 
 		const __ContainerType& _data() const
 		{
-			return __SuperClass::m_data;
+			return __Super::m_data;
 		}
 
 	public:
@@ -66,54 +72,54 @@ namespace NS_JSTL
 			set(keys, cb);
 		}
 
-		explicit JSMapT(__Key_InitList keys, const function<__ValueType(__KeyType)>& cb)
+		explicit JSMapT(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
 			set(keys, cb);
 		}
 
 		explicit JSMapT(const JSMapT& map)
-			: __SuperClass(map)
+			: __Super(map)
 		{
 		}
 
 		JSMapT(JSMapT&& map)
 		{
-			__SuperClass::swap(map);
+			__Super::swap(map);
 		}
 
-		JSMapT(__JSMap_InitList initList)
-			: __SuperClass(initList)
+		JSMapT(__InitList initList)
+			: __Super(initList)
 		{
 		}
 
 		template<typename T>
 		explicit JSMapT(const T& container)
-			: __SuperClass(container)
+			: __Super(container)
 		{
 		}
 
 		JSMapT& operator=(const JSMapT& map)
 		{
-			__SuperClass::assign(map);
+			__Super::assign(map);
 			return *this;
 		}
 
 		JSMapT& operator=(JSMapT&& map)
 		{
-			__SuperClass::swap(map);
+			__Super::swap(map);
 			return *this;
 		}
 
-		JSMapT& operator=(__JSMap_InitList initList)
+		JSMapT& operator=(__InitList initList)
 		{
-			__SuperClass::assign(initList);
+			__Super::assign(initList);
 			return *this;
 		}
 
 		template<typename T>
 		JSMapT& operator=(const T&t)
 		{
-			__SuperClass::assign(t);
+			__Super::assign(t);
 			return *this;
 		}
 
@@ -125,7 +131,7 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType _del(__ConstKeyRef key) override
+		TD_SizeType _del(__KeyConstRef key) override
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -138,7 +144,7 @@ namespace NS_JSTL
 			return 1;
 		}
 
-		bool _includes(__ConstKeyRef key) const override
+		bool _includes(__KeyConstRef key) const override
 		{
 			return _data().find(key) != _data().end();
 		}
@@ -149,7 +155,7 @@ namespace NS_JSTL
 		}
 
 	public:
-		bool get(__ConstKeyRef key, __CB_RV_CRK_void cb)
+		bool get(__KeyConstRef key, __CB_ValueR_KeyCR_void cb)
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -165,7 +171,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool get(__ConstKeyRef key, __CB_CRV_CRK_void cb) const
+		bool get(__KeyConstRef key, __CB_ValueCR_KeyCR_void cb) const
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -181,7 +187,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool findValue(__CB_CRV_CRK_bool cb) const
+		bool findValue(__CB_ValueCR_KeyCR_bool cb) const
 		{
 			if (!cb)
 			{
@@ -199,7 +205,7 @@ namespace NS_JSTL
 			return false;
 		}
 		
-		JSArray<__KeyType> keys(__CB_CRK_CRV_bool cb = NULL) const
+		JSArray<__KeyType> keys(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__KeyType> arr;
 			for (auto& pr : _data())
@@ -218,7 +224,7 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSArray<__ValueType> values(__CB_CRK_CRV_bool cb = NULL) const
+		JSArray<__ValueType> values(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__ValueType> arr;
 			for (auto& pr : _data())
@@ -237,7 +243,7 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMapT& set(__ConstKeyRef key, __ConstValueRef value)
+		JSMapT& set(__KeyConstRef key, __ValueConstRef value)
 		{
 			_data()[key] = value;
 			return *this;
@@ -246,7 +252,7 @@ namespace NS_JSTL
 		template<typename T>
 		TD_SizeType set(const T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				_data().insert(container.begin(), container.end());
 			}
@@ -254,9 +260,9 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__JSMap_InitList initList)
+		TD_SizeType set(__InitList initList)
 		{
-			return set<__JSMap_InitList>(initList);
+			return set<__InitList>(initList);
 		}
 
 		template <typename T>
@@ -273,14 +279,14 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__Key_InitList keys, const function<__ValueType(__KeyType)>& cb)
+		TD_SizeType set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			return set<__Key_InitList>(keys, cb);
+			return set<__InitList_Key>(keys, cb);
 		}
 
 	public:
 		template <typename T>
-		JSMapT<__KeyType, T, __MapType> map(__CB_CRK_CRV_T<T> cb) const
+		JSMapT<__KeyType, T, __MapType> map(__CB_KeyCR_ValueCR_T<T> cb) const
 		{
 			JSMapT<__KeyType, T, __MapType> ret;
 
@@ -301,7 +307,7 @@ namespace NS_JSTL
 			return map<RET>(cb);
 		}
 
-		JSMapT filter(__CB_CRK_CRV_bool cb) const
+		JSMapT filter(__CB_KeyCR_ValueCR_bool cb) const
 		{
 			JSMapT ret;
 

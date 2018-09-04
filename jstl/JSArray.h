@@ -6,6 +6,8 @@
 
 #include <deque>
 
+#include <algorithm>
+
 #include "JSMap.h"
 
 namespace NS_JSTL
@@ -58,27 +60,31 @@ namespace NS_JSTL
 			return uRet;
 		}
 	};
+	
+#define __JSArraySuper ContainerT<__DataType, deque<__DataType>>
 
-	template<typename __DataType>
-	class JSArray : public ContainerT<__DataType, deque<__DataType>>
+	template<typename __DataType> class JSArray : public __JSArraySuper
 	{
+	private:
+		using __Super = __JSArraySuper;
+
+#ifdef __gcc__
 	protected:
-		using __ContainerType = deque<__DataType>;
-		using __SuperClass = ContainerT<__DataType, __ContainerType>;
+		__UsingSuperType(__ContainerType);
 
-		using __JSArray_InitList = __InitList<__DataType>;
+		__UsingSuperType(__InitList);
 
-		using __DataRef = __DataType&;
-		using __ConstDataRef = const __DataType&;
+		__UsingSuperType(__DataRef);
+		__UsingSuperType(__DataConstRef);
 
-		using __CB_Ref_void = __CB_T_void<__DataRef>;
-		using __CB_Ref_bool = __CB_T_bool<__DataRef>;
+		__UsingSuperType(__CB_Ref_void);
+		__UsingSuperType(__CB_Ref_bool);
+		__UsingSuperType(__CB_Ref_Pos);
 
-		using __CB_ConstRef_void = __CB_T_void<__ConstDataRef>;
-		using __CB_ConstRef_bool = __CB_T_bool<__ConstDataRef>;
-
-		using __CB_Ref_Pos = __CB_Data_Pos<__DataRef>;
-		using __CB_ConstRef_Pos = __CB_Data_Pos<__ConstDataRef>;
+		__UsingSuperType(__CB_ConstRef_void);
+		__UsingSuperType(__CB_ConstRef_bool);
+		__UsingSuperType(__CB_ConstRef_Pos);
+#endif
 
 	protected:
 		using __ArrayOperatorType = __ArrayOperator<__ContainerType>;
@@ -98,16 +104,16 @@ namespace NS_JSTL
 
 		__ContainerType& _data()
 		{
-			return __SuperClass::m_data;
+			return __Super::m_data;
 		}
 
 		const __ContainerType& _data() const
 		{
-			return __SuperClass::m_data;
+			return __Super::m_data;
 		}
 
 	public:
-		static JSArray init(TD_SizeType size, __ConstDataRef data)
+		static JSArray init(TD_SizeType size, __DataConstRef data)
 		{
 			JSArray arr;
 			arr.m_data.assign(size, data);
@@ -121,15 +127,15 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		explicit JSArray(__ConstDataRef data, const args&... others)
+		explicit JSArray(__DataConstRef data, const args&... others)
 			: m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
-			__SuperClass::add(data, others...);
+			__Super::add(data, others...);
 		}
 
 		explicit JSArray(const JSArray& arr)
-			: __SuperClass(arr)
+			: __Super(arr)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
@@ -139,11 +145,11 @@ namespace NS_JSTL
 			: m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
-			__SuperClass::swap(arr);
+			__Super::swap(arr);
 		}
 
-		JSArray(__JSArray_InitList initList)
-			: __SuperClass(initList)
+		JSArray(__InitList initList)
+			: __Super(initList)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
@@ -151,7 +157,7 @@ namespace NS_JSTL
 
 		template<typename T, typename _ITR = decltype(declval<T>().begin())>
 		explicit JSArray(const T& container)
-			: __SuperClass(container)
+			: __Super(container)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
@@ -159,37 +165,37 @@ namespace NS_JSTL
 
 		JSArray& operator=(const JSArray& arr)
 		{
-			__SuperClass::assign(arr);
+			__Super::assign(arr);
 			return *this;
 		}
 
 		JSArray& operator=(JSArray&& arr)
 		{
-			__SuperClass::swap(arr);
+			__Super::swap(arr);
 			return *this;
 		}
 
-		JSArray& operator=(__JSArray_InitList initList)
+		JSArray& operator=(__InitList initList)
 		{
-			__SuperClass::assign(initList);
+			__Super::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
 		JSArray& operator=(const T&t)
 		{
-			__SuperClass::assign(t);
+			__Super::assign(t);
 			return *this;
 		}
 
 	protected:
-		TD_SizeType _add(__ConstDataRef data) override
+		TD_SizeType _add(__DataConstRef data) override
 		{
 			_data().push_back(data);
 			return _data().size();
 		}
 
-		TD_SizeType _del(__ConstDataRef data) override
+		TD_SizeType _del(__DataConstRef data) override
 		{
 			TD_SizeType uRet = 0;
 
@@ -210,14 +216,14 @@ namespace NS_JSTL
 			return uRet;
 		}
 
-		bool _includes(__ConstDataRef data) const override
+		bool _includes(__DataConstRef data) const override
 		{
 			return indexOf(data) >= 0;
 		}
 
 		int _checkPos(int pos) const
 		{
-			auto size = __SuperClass::size();
+			auto size = __Super::size();
 			if (0 == size)
 			{
 				return -1;
@@ -242,44 +248,44 @@ namespace NS_JSTL
 		template <typename T>
 		JSArray& operator+= (const T& rhs)
 		{
-			__SuperClass::add(rhs);
+			__Super::add(rhs);
 			return *this;
 		}
 
-		JSArray& operator+= (__JSArray_InitList rhs)
+		JSArray& operator+= (__InitList rhs)
 		{
-			__SuperClass::add(rhs);
+			__Super::add(rhs);
 			return *this;
 		}
 
 		template <typename T>
 		JSArray& operator-= (const T& rhs)
 		{
-			__SuperClass::del(rhs);
+			__Super::del(rhs);
 			return *this;
 		}
 
-		JSArray& operator-= (__JSArray_InitList rhs)
+		JSArray& operator-= (__InitList rhs)
 		{
-			__SuperClass::del(rhs);
+			__Super::del(rhs);
 			return *this;
 		}
 
 		template<typename... args>
-		TD_SizeType push(__ConstDataRef data, const args&... others)
+		TD_SizeType push(__DataConstRef data, const args&... others)
 		{
-			return __SuperClass::add(data, others...);
+			return __Super::add(data, others...);
 		}
 
 		template<typename T>
 		TD_SizeType push(const T& container)
 		{
-			return __SuperClass::add(container);
+			return __Super::add(container);
 		}
 
-		TD_SizeType push(__JSArray_InitList initList)
+		TD_SizeType push(__InitList initList)
 		{
-			return __SuperClass::add(initList);
+			return __Super::add(initList);
 		}
 
 		bool get(TD_PosType pos, __CB_Ref_void cb)
@@ -319,14 +325,14 @@ namespace NS_JSTL
 			});
 		}
 
-		bool set(TD_PosType pos, __ConstDataRef& data)
+		bool set(TD_PosType pos, __DataConstRef& data)
 		{
 			return get([&](__DataRef _data) {
 				_data = data;
 			});
 		}
 
-		int indexOf(__ConstDataRef data) const
+		int indexOf(__DataConstRef data) const
 		{
 			int uIdx = 0;
 			for (auto& item : _data())
@@ -402,20 +408,20 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType unshift(__ConstDataRef data, const args&... others)
+		TD_SizeType unshift(__DataConstRef data, const args&... others)
 		{
-			(void)__SuperClass::extractDataTypeArgs([&](__ConstDataRef data) {
+			(void)__Super::extractDataTypeArgs([&](__DataConstRef data) {
 				_data().push_front(data);
 				return true;
 			}, data, others...);
 
-			return __SuperClass::size();
+			return __Super::size();
 		}
 
 		template<typename T>
 		TD_SizeType unshift(const T& container)
 		{
-			if (!__SuperClass::checkIsSelf(container))
+			if (!__Super::checkIsSelf(container))
 			{
 				_data().insert(_data().begin(), container.begin(), container.end());
 			}
@@ -423,12 +429,12 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType unshift(__JSArray_InitList initList)
+		TD_SizeType unshift(__InitList initList)
 		{
-			return unshift<__JSArray_InitList>(initList);
+			return unshift<__InitList>(initList);
 		}
 
-		int lastIndexOf(__ConstDataRef data) const
+		int lastIndexOf(__DataConstRef data) const
 		{
 			int uIdx = 1;
 			for (auto& item : _data())
@@ -472,7 +478,7 @@ namespace NS_JSTL
 				return 0;
 			}
 
-			return forEach([&](__ConstDataRef data, TD_PosType pos) {
+			return forEach([&](__DataConstRef data, TD_PosType pos) {
 				return cb(data);
 			}, startPos, count);
 		}
@@ -485,7 +491,7 @@ namespace NS_JSTL
 			}
 
 			int iRet = -1;
-			forEach([&](__ConstDataRef data, TD_PosType pos) {
+			forEach([&](__DataConstRef data, TD_PosType pos) {
 				if (cb(data, pos))
 				{
 					iRet = pos;
@@ -499,7 +505,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray concat(__ConstDataRef data, const args&... others) const
+		JSArray concat(__DataConstRef data, const args&... others) const
 		{
 			JSArray arr(*this);
 			arr.push(data, others...);
@@ -514,7 +520,7 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSArray concat(__JSArray_InitList initList) const
+		JSArray concat(__InitList initList) const
 		{
 			JSArray arr(*this);
 			arr.push(initList);
@@ -528,7 +534,7 @@ namespace NS_JSTL
 			startPos = _checkPos(startPos);
 			if (startPos >= 0)
 			{
-				forEach([&](__ConstDataRef data) {
+				forEach([&](__DataConstRef data) {
 					arr.push(data);
 				}, (TD_PosType)startPos);
 			}
@@ -545,7 +551,7 @@ namespace NS_JSTL
 
 			if (startPos >= 0 && endPos >= 0 && startPos <= endPos)
 			{
-				forEach([&](__ConstDataRef data) {
+				forEach([&](__DataConstRef data) {
 					arr.push(data);
 					return true;
 				}, (TD_PosType)startPos, TD_SizeType(endPos - startPos + 1));
@@ -555,7 +561,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __ConstDataRef data, const args&... others)
+		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __DataConstRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
 			extractDataTypeArgs(vecData, data, others...);
@@ -565,7 +571,7 @@ namespace NS_JSTL
 		template<typename T>
 		JSArray& splice(TD_PosType pos, TD_SizeType nRemove = 0, const T& container = {})
 		{
-			if (__SuperClass::checkIsSelf(container))
+			if (__Super::checkIsSelf(container))
 			{
 				return *this;
 			}
@@ -587,7 +593,7 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __JSArray_InitList initList)
+		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __InitList initList)
 		{
 			return splice(pos, nRemove, initList);
 		}
@@ -608,12 +614,12 @@ namespace NS_JSTL
 
 		string join(const string& strSplitor = ",") const
 		{
-			return __SuperClass::toString(strSplitor);
+			return __Super::toString(strSplitor);
 		}
 
 	public:
 		template <typename T>
-		JSArray<T> map(__CB_T_RET<__ConstDataRef, T> cb) const
+		JSArray<T> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
 			JSArray<T> arr;
 

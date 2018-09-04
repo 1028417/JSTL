@@ -9,9 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="jstl\Container.h">
-      <Filter>jstl</Filter>
-    </ClInclude>
     <ClInclude Include="jstl\JSArray.h">
       <Filter>jstl</Filter>
     </ClInclude>
@@ -25,6 +22,12 @@
       <Filter>jstl</Filter>
     </ClInclude>
     <ClInclude Include="jstl\PtrArray.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\define.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\Container.h">
       <Filter>jstl</Filter>
     </ClInclude>
   </ItemGroup>
