@@ -149,6 +149,37 @@ namespace NS_JSTL
 			__Super::del(rhs);
 			return *this;
 		}
+		
+		template <typename T>
+		JSSetT operator+ (const T& rhs)
+		{
+			JSSetT set(*this);
+			set += rhs;
+			return set;
+		}
+
+		template <typename T>
+		JSSetT operator- (const T& rhs)
+		{
+			JSSetT set(*this);
+			set -= rhs;
+			return set;
+		}
+
+		template <typename T>
+		JSSetT operator& (const T& rhs)
+		{
+			JSSetT set;
+			JSSetT other(rhs);
+			for (auto& data : _data())
+			{
+				if (other.includes(data))
+				{
+					set.add(data);
+				}
+			}
+			return set;
+		}
 
 		template<typename... args>
 		TD_SizeType add(__DataConstRef data, const args&... others)
@@ -171,17 +202,17 @@ namespace NS_JSTL
 		template <typename T>
 		JSSetT<T, __SetType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
-			JSSetT<T, __SetType> ret;
+			JSSetT<T, __SetType> set;
 
 			if (cb)
 			{
 				for (auto&data : _data())
 				{
-					ret.add(cb(data));
+					set.add(cb(data));
 				}
 			}
 
-			return ret;
+			return set;
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>

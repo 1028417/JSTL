@@ -230,12 +230,6 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		PtrArray& assign(__InitList_Ptr initList)
-		{
-			__Super::assign(initList);
-			return *this;
-		}
-
 		template <typename T>
 		PtrArray& assign(T& container)
 		{
@@ -259,6 +253,12 @@ namespace NS_JSTL
 				push(container);
 			}
 
+			return *this;
+		}
+
+		PtrArray& assign(__InitList_Ptr initList)
+		{
+			__Super::assign(initList);
 			return *this;
 		}
 
@@ -316,7 +316,9 @@ namespace NS_JSTL
 		template<typename... args>
 		PtrArray concat(__ConstPtrRef ptr, const args&... others) const
 		{
-			return PtrArray(__Super::concat(ptr, others...));
+			PtrArray arr(*this);
+			arr.push(ptr, others...);
+			return arr;
 		}
 
 		template<typename... args>
@@ -345,7 +347,9 @@ namespace NS_JSTL
 
 		PtrArray concat(__InitList_Ptr initList) const
 		{
-			return PtrArray(__Super::concat(initList));
+			PtrArray arr(*this);
+			arr.push(initList);
+			return arr;
 		}
 
 		template<typename... args>
@@ -358,7 +362,7 @@ namespace NS_JSTL
 		TD_SizeType unshift(__RefType ref, args&... others)
 		{
 			(void)tagDynamicArgsExtractor<__RefType>::extract([&](__RefType ref) {
-				__Super::unshift({ &ref });
+				_unshift(ref);
 				return true;
 			}, ref, others...);
 

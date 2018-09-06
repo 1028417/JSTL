@@ -155,6 +155,48 @@ namespace NS_JSTL
 		}
 
 	public:
+		template <typename T>
+		JSMapT& operator+= (const T& rhs)
+		{
+			__Super::add(rhs);
+			return *this;
+		}
+
+		JSMapT& operator+= (__InitList rhs)
+		{
+			__Super::add(rhs);
+			return *this;
+		}
+
+		template <typename T>
+		JSMapT& operator-= (const T& keys)
+		{
+			__Super::del(keys);
+			return *this;
+		}
+
+		JSMapT& operator-= (__InitList_Key keys)
+		{
+			__Super::del(keys);
+			return *this;
+		}
+
+		template <typename T>
+		JSMapT operator+ (const T& rhs)
+		{
+			JSMapT map(*this);
+			map += rhs;
+			return map;
+		}
+
+		template <typename T>
+		JSMapT operator- (const T& rhs)
+		{
+			JSMapT map(*this);
+			map -= rhs;
+			return map;
+		}
+
 		bool get(__KeyConstRef key, __CB_ValueR_KeyCR_void cb)
 		{
 			auto itr = _data().find(key);
@@ -288,17 +330,17 @@ namespace NS_JSTL
 		template <typename T>
 		JSMapT<__KeyType, T, __MapType> map(__CB_KeyCR_ValueCR_T<T> cb) const
 		{
-			JSMapT<__KeyType, T, __MapType> ret;
+			JSMapT<__KeyType, T, __MapType> map;
 
 			if (cb)
 			{
 				for (auto& pr : _data())
 				{
-					ret.set(pr.first, cb(pr.first, pr.second));
+					map.set(pr.first, cb(pr.first, pr.second));
 				}
 			}
 
-			return ret;
+			return map;
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__KeyType(), __ValueType()))>
@@ -309,7 +351,7 @@ namespace NS_JSTL
 
 		JSMapT filter(__CB_KeyCR_ValueCR_bool cb) const
 		{
-			JSMapT ret;
+			JSMapT map;
 
 			if (cb)
 			{
@@ -317,12 +359,12 @@ namespace NS_JSTL
 				{
 					if (cb(pr.first, pr.second))
 					{
-						ret.set(pr.first, pr.second);
+						map.set(pr.first, pr.second);
 					}
 				}
 			}
 
-			return ret;
+			return map;
 		}
 	};
 

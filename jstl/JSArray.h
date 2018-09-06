@@ -271,6 +271,70 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		friend JSArray operator& (const JSArray& lhs, const JSArray& rhs)
+		{
+			JSArray arr;
+			for (auto& data : lhs)
+			{
+				if (rhs.includes(data))
+				{
+					arr.push(data);
+				}
+			}
+
+			return arr;
+		}
+
+		template <typename T>
+		friend JSArray operator& (const T& lhs, const JSArray& rhs)
+		{
+			return JSArray(lhs) & rhs;
+		}
+		
+		template <typename T>
+		friend JSArray operator& (const JSArray& lhs, const T& rhs)
+		{
+			return lhs & JSArray(rhs);
+		}
+
+		friend JSArray operator+ (const JSArray& lhs, const JSArray& rhs)
+		{
+			JSArray arr(lhs);
+			arr += rhs;
+			return arr;
+		}
+
+		template <typename T>
+		friend JSArray operator+ (const JSArray& lhs, const T& rhs)
+		{
+			return lhs + JSArray(rhs);
+		}
+
+		template <typename T>
+		friend JSArray operator+ (const T& lhs, const JSArray& rhs)
+		{
+			return JSArray(lhs) + rhs;
+		}
+
+		friend JSArray operator- (const JSArray& lhs, const JSArray& rhs)
+		{
+			JSArray arr(lhs);
+			arr -= rhs;
+			return arr;
+		}
+
+		template <typename T>
+		friend JSArray operator- (const JSArray& lhs, const T& rhs)
+		{
+			return lhs - JSArray(rhs);
+		}
+
+		template <typename T>
+		friend JSArray operator- (const T& lhs, const JSArray& rhs)
+		{
+			return JSArray(lhs) - rhs;
+		}
+		
 		template<typename... args>
 		TD_SizeType push(__DataConstRef data, const args&... others)
 		{
