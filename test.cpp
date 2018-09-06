@@ -317,5 +317,9 @@ int main()
 	ccccc += ccccc;
 	ccccc += sstt;
 	
+	JSUnsortSet<int> oiuy{4,4,5,5,3,3};
+	oiuy-vector<int>();
+	oiuy - oiuy;
+	JSUnsortSet<int> qafjdjsd = oiuy&qq;
 	return 0;
 }

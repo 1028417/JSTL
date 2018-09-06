@@ -357,7 +357,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		bool includes(__DataConstRef data, const args&... others)
+		bool includes(__DataConstRef data, const args&... others) const
 		{
 			bool bRet = true;
 
