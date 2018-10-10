@@ -21,7 +21,7 @@ namespace NS_JSTL
 	private:
 		using __Super = __JSMapSuper;
 
-#ifdef __gcc__
+#ifndef _MSC_VER
 	protected:
 		__UsingSuperType(__ContainerType);
 

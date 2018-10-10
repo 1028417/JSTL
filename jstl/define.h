@@ -29,6 +29,4 @@ using CB_T_Pos = const function<bool(T, TD_PosType)>&;
 #define __SuperType(T) typename __Super::T
 #define __UsingSuperType(T) using T = __SuperType(T)
 
-#define __gcc__
-
 #endif // __define_h

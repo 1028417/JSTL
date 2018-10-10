@@ -106,11 +106,6 @@ namespace NS_JSTL
 		}
 
 	protected:
-		//TD_SizeType _add(__ConstPtrRef ptr) override
-		//{
-		//	return __Super::_add(ptr);
-		//}
-
 		TD_SizeType _add(__PtrType ptr)
 		{
 			return __Super::_add(ptr);

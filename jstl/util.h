@@ -130,14 +130,42 @@ namespace NS_JSTL
 				return false;
 			}
 
-			if (!extract(cb, v))
+			return _extract(cb, true, v, others...);
+		}
+
+		template<typename... args>
+		static bool extractReverse(FN_ExtractCB cb, __DataType&v, args&... others)
+		{
+			if (!cb)
 			{
 				return false;
 			}
 
+			return _extract(cb, false, v, others...);
+		}
+
+		template<typename... args>
+		static bool _extract(FN_ExtractCB cb, bool bForward, __DataType&v, args&... others)
+		{
+			if (bForward)
+			{
+				if (!_extract(cb, bForward, v))
+				{
+					return false;
+				}
+			}
+
 			if (sizeof...(others))
 			{
-				if (!extract(cb, others...))
+				if (!_extract(cb, bForward, others...))
+				{
+					return false;
+				}
+			}
+
+			if (!bForward)
+			{
+				if (!_extract(cb, bForward, v))
 				{
 					return false;
 				}
@@ -146,7 +174,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		static bool extract(FN_ExtractCB cb, __DataType&v)
+		static bool _extract(FN_ExtractCB cb, bool bForward, __DataType&v)
 		{
 			return cb(v);
 		}

@@ -61,14 +61,14 @@ namespace NS_JSTL
 		}
 	};
 	
-#define __JSArraySuper ContainerT<__DataType, deque<__DataType>>
+#define __JSArraySuper ContainerT<__DataType, vector<__DataType>>
 
 	template<typename __DataType> class JSArray : public __JSArraySuper
 	{
 	private:
 		using __Super = __JSArraySuper;
 
-#ifdef __gcc__
+#ifndef _MSC_VER
 	protected:
 		__UsingSuperType(__ContainerType);
 
@@ -474,8 +474,8 @@ namespace NS_JSTL
 		template<typename... args>
 		TD_SizeType unshift(__DataConstRef data, const args&... others)
 		{
-			(void)__Super::extractDataTypeArgs([&](__DataConstRef data) {
-				_data().push_front(data);
+			return tagDynamicArgsExtractor<const __DataType>::extractReverse([&](__DataConstRef data) {
+				_data().insert(_data().begin(), data);
 				return true;
 			}, data, others...);
 
