@@ -60,25 +60,21 @@ namespace NS_JSTL
 		}
 
 		template <typename CB>
-		size_t forEach(const CB& cb)
+		void forEach(const CB& cb)
 		{
 			if (!cb)
 			{
-				return 0;
+				return;
 			}
 
 			size_t pos = 0;
 			for (auto&data : m_data)
 			{
-				if (!cb(data, pos))
+				if (!cb(data, pos++))
 				{
 					break;
 				}
-
-				pos++;
 			}
-
-			return pos;
 		}
 	};
 
@@ -564,14 +560,14 @@ namespace NS_JSTL
 		}
 
 	public:
-		TD_SizeType forEach(__CB_Ref_Pos cb)
+		void forEach(__CB_Ref_Pos cb)
 		{
-			return getContainerOperator().forEach(cb);
+			getContainerOperator().forEach(cb);
 		}
 
-		TD_SizeType forEach(__CB_ConstRef_Pos cb) const
+		void forEach(__CB_ConstRef_Pos cb) const
 		{
-			return getContainerOperator().forEach(cb);
+			getContainerOperator().forEach(cb);
 		}
 
 		bool every(__CB_ConstRef_bool cb) const

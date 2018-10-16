@@ -26,26 +26,24 @@ namespace NS_JSTL
 
 	public:
 		template <typename CB>
-		size_t forEach(const CB& cb, size_t startPos, size_t count)
+		void forEach(const CB& cb, size_t startPos, size_t count)
 		{
 			if (!cb)
 			{
-				return 0;
+				return;
 			}
 
 			if (startPos >= m_data.size())
 			{
-				return 0;
+				return;
 			}
 
-			size_t uRet = 0;
 			for (auto pos = startPos; pos < m_data.size(); pos++)
 			{
 				if (!cb(m_data[pos], pos))
 				{
 					break;
 				}
-				uRet++;
 
 				if (count > 0)
 				{
@@ -56,8 +54,6 @@ namespace NS_JSTL
 					}
 				}
 			}
-
-			return uRet;
 		}
 	};
 	
@@ -513,36 +509,36 @@ namespace NS_JSTL
 			return -1;
 		}
 
-		TD_SizeType forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		void forEach(__CB_Ref_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0)
 		{
-			return getArrayOperator().forEach(cb, startPos, count);
+			getArrayOperator().forEach(cb, startPos, count);
 		}
 
-		TD_SizeType forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_ConstRef_Pos cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
-			return getArrayOperator().forEach(cb, startPos, count);
+			getArrayOperator().forEach(cb, startPos, count);
 		}
 
-		TD_SizeType forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
+		void forEach(__CB_Ref_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0)
 		{
 			if (!cb)
 			{
-				return 0;
+				return;
 			}
 
-			return forEach([&](__DataRef data, TD_PosType pos) {
+			forEach([&](__DataRef data, TD_PosType pos) {
 				return cb(data);
 			}, startPos, count);
 		}
 
-		TD_SizeType forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
+		void forEach(__CB_ConstRef_bool cb, TD_PosType startPos = 0, TD_SizeType count = 0) const
 		{
 			if (!cb)
 			{
-				return 0;
+				return;
 			}
 
-			return forEach([&](__DataConstRef data, TD_PosType pos) {
+			forEach([&](__DataConstRef data, TD_PosType pos) {
 				return cb(data);
 			}, startPos, count);
 		}

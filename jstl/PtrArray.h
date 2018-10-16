@@ -533,14 +533,21 @@ namespace NS_JSTL
 				return -1;
 			}
 
-			return __Super::forEach([&](__ConstPtrRef ptr, TD_PosType pos) {
-				if (NULL == ptr)
+			int iRet = -1;
+			
+			__Super::forEach([&](__ConstPtrRef ptr, TD_PosType pos) {
+				if (NULL != ptr)
 				{
-					return false;
+					if (cb(*ptr, pos))
+					{
+						iRet = pos;
+					}
 				}
 
-				return cb(*ptr, pos);
+				return true;
 			});
+
+			return iRet;
 		}
 
 		bool getFront(__CB_RefType_void cb = NULL) const

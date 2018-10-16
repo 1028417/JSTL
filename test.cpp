@@ -1,8 +1,5 @@
 
-#include "jstl/JSArray.h"
-#include "jstl/PtrArray.h"
-#include "jstl/JSSet.h"
-#include "jstl/JSMap.h"
+#include "jstl/jstl.h"
 using namespace NS_JSTL;
 
 #include <list>

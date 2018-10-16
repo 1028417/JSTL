@@ -30,5 +30,8 @@
     <ClInclude Include="jstl\Container.h">
       <Filter>jstl</Filter>
     </ClInclude>
+    <ClInclude Include="jstl\jstl.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

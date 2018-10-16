@@ -46,9 +46,13 @@ namespace NS_JSTL
 		using __CB_KeyCR_ValueCR_bool = __CB_KeyCR_ValueCR_T<bool>;
 		//using __CB_KeyCR_ValueCR_void = __CB_KeyCR_ValueCR_T<void>;
 
-		using __CB_ValueR_KeyCR_void = const function<void(__ValueRef, __KeyConstRef)>&;
+		using __CB_ValueR_void = const function<void(__ValueRef)>&;
+		using __CB_ValueCR_void = const function<void(__ValueConstRef)>&;
+
+		using __CB_ValueR_bool = const function<bool(__ValueRef)>&;
+		using __CB_ValueCR_bool = const function<bool(__ValueConstRef)>&;
+
 		using __CB_ValueCR_KeyCR_bool = const function<bool(__ValueConstRef, __KeyConstRef)>&;
-		using __CB_ValueCR_KeyCR_void = const function<void(__ValueConstRef, __KeyConstRef)>&;
 
 	protected:
 		__ContainerType& _data()
@@ -197,7 +201,7 @@ namespace NS_JSTL
 			return map;
 		}
 
-		bool get(__KeyConstRef key, __CB_ValueR_KeyCR_void cb)
+		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -207,13 +211,13 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				cb(itr->second, itr->first);
+				cb(itr->second);
 			}
 
 			return true;
 		}
 
-		bool get(__KeyConstRef key, __CB_ValueCR_KeyCR_void cb) const
+		bool get(__KeyConstRef key, __CB_ValueCR_void cb) const
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -223,30 +227,60 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				cb(itr->second, itr->first);
+				cb(itr->second);
 			}
 
 			return true;
 		}
 
-		bool findValue(__CB_ValueCR_KeyCR_bool cb) const
+		void forEach(__CB_ValueCR_KeyCR_bool cb) const
 		{
 			if (!cb)
 			{
-				return false;
+				return;
 			}
 
 			for (auto& pr : _data())
 			{
-				if (cb(pr.second, pr.first))
+				if (!cb(pr.second, pr.first))
 				{
-					return true;
+					break;
 				}
 			}
-
-			return false;
 		}
-		
+
+		void forEachValue(__CB_ValueR_bool cb)
+		{
+			if (!cb)
+			{
+				return;
+			}
+
+			for (auto& pr : _data())
+			{
+				if (!cb(pr.second))
+				{
+					break;
+				}
+			}
+		}
+
+		void forEachValue(__CB_ValueCR_bool cb) const
+		{
+			if (!cb)
+			{
+				return;
+			}
+
+			for (auto& pr : _data())
+			{
+				if (!cb(pr.second))
+				{
+					break;
+				}
+			}
+		}
+
 		JSArray<__KeyType> keys(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__KeyType> arr;

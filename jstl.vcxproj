@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="jstl\Container.h" />
     <ClInclude Include="jstl\define.h" />
+    <ClInclude Include="jstl\jstl.h" />
     <ClInclude Include="jstl\PtrArray.h" />
     <ClInclude Include="jstl\JSArray.h" />
     <ClInclude Include="jstl\JSMap.h" />
