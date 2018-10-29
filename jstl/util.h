@@ -2,8 +2,6 @@
 #ifndef __Util_H
 #define __Util_H
 
-#include <functional>
-
 using namespace std;
 
 namespace NS_JSTL

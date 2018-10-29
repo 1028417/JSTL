@@ -6,8 +6,6 @@
 
 #include "util.h"
 
-#include <vector>
-
 #include <sstream>
 
 namespace NS_JSTL

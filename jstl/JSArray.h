@@ -4,8 +4,6 @@
 
 #include "Container.h"
 
-#include <deque>
-
 #include <algorithm>
 
 #include "JSMap.h"
@@ -57,9 +55,10 @@ namespace NS_JSTL
 		}
 	};
 	
-#define __JSArraySuper ContainerT<__DataType, vector<__DataType>>
+#define __JSArraySuper ContainerT<__DataType, __BaseType<__DataType>>
 
-	template<typename __DataType> class JSArray : public __JSArraySuper
+	template<typename __DataType, template<typename...> class __BaseType>
+	class JSArrayT : public __JSArraySuper
 	{
 	private:
 		using __Super = __JSArraySuper;
@@ -109,42 +108,42 @@ namespace NS_JSTL
 		}
 
 	public:
-		static JSArray init(TD_SizeType size, __DataConstRef data)
+		static JSArrayT init(TD_SizeType size, __DataConstRef data)
 		{
-			JSArray arr;
+			JSArrayT arr;
 			arr.m_data.assign(size, data);
 			return arr;
 		}
 
-		JSArray()
+		JSArrayT()
 			: m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
 		}
 
 		template<typename... args>
-		explicit JSArray(__DataConstRef data, const args&... others)
+		explicit JSArrayT(__DataConstRef data, const args&... others)
 			: m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
 			__Super::add(data, others...);
 		}
 
-		explicit JSArray(const JSArray& arr)
+		explicit JSArrayT(const JSArrayT& arr)
 			: __Super(arr)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
 		}
 
-		JSArray(JSArray&& arr)
+		JSArrayT(JSArrayT&& arr)
 			: m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
 			__Super::swap(arr);
 		}
 
-		JSArray(__InitList initList)
+		JSArrayT(__InitList initList)
 			: __Super(initList)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
@@ -152,33 +151,33 @@ namespace NS_JSTL
 		}
 
 		template<typename T, typename _ITR = decltype(declval<T>().begin())>
-		explicit JSArray(const T& container)
+		explicit JSArrayT(const T& container)
 			: __Super(container)
 			, m_ArrayOperator(_data())
 			, m_ArrayReader(_data())
 		{
 		}
 
-		JSArray& operator=(const JSArray& arr)
+		JSArrayT& operator=(const JSArrayT& arr)
 		{
 			__Super::assign(arr);
 			return *this;
 		}
 
-		JSArray& operator=(JSArray&& arr)
+		JSArrayT& operator=(JSArrayT&& arr)
 		{
 			__Super::swap(arr);
 			return *this;
 		}
 
-		JSArray& operator=(__InitList initList)
+		JSArrayT& operator=(__InitList initList)
 		{
 			__Super::assign(initList);
 			return *this;
 		}
 
 		template <typename T>
-		JSArray& operator=(const T&t)
+		JSArrayT& operator=(const T&t)
 		{
 			__Super::assign(t);
 			return *this;
@@ -242,34 +241,34 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSArray& operator+= (const T& rhs)
+		JSArrayT& operator+= (const T& rhs)
 		{
 			__Super::add(rhs);
 			return *this;
 		}
 
-		JSArray& operator+= (__InitList rhs)
+		JSArrayT& operator+= (__InitList rhs)
 		{
 			__Super::add(rhs);
 			return *this;
 		}
 
 		template <typename T>
-		JSArray& operator-= (const T& rhs)
+		JSArrayT& operator-= (const T& rhs)
 		{
 			__Super::del(rhs);
 			return *this;
 		}
 
-		JSArray& operator-= (__InitList rhs)
+		JSArrayT& operator-= (__InitList rhs)
 		{
 			__Super::del(rhs);
 			return *this;
 		}
 
-		friend JSArray operator& (const JSArray& lhs, const JSArray& rhs)
+		friend JSArrayT operator& (const JSArrayT& lhs, const JSArrayT& rhs)
 		{
-			JSArray arr;
+			JSArrayT arr;
 			for (auto& data : lhs)
 			{
 				if (rhs.includes(data))
@@ -282,53 +281,53 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		friend JSArray operator& (const T& lhs, const JSArray& rhs)
+		friend JSArrayT operator& (const T& lhs, const JSArrayT& rhs)
 		{
-			return JSArray(lhs) & rhs;
+			return JSArrayT(lhs) & rhs;
 		}
 		
 		template <typename T>
-		friend JSArray operator& (const JSArray& lhs, const T& rhs)
+		friend JSArrayT operator& (const JSArrayT& lhs, const T& rhs)
 		{
-			return lhs & JSArray(rhs);
+			return lhs & JSArrayT(rhs);
 		}
 
-		friend JSArray operator+ (const JSArray& lhs, const JSArray& rhs)
+		friend JSArrayT operator+ (const JSArrayT& lhs, const JSArrayT& rhs)
 		{
-			JSArray arr(lhs);
+			JSArrayT arr(lhs);
 			arr += rhs;
 			return arr;
 		}
 
 		template <typename T>
-		friend JSArray operator+ (const JSArray& lhs, const T& rhs)
+		friend JSArrayT operator+ (const JSArrayT& lhs, const T& rhs)
 		{
-			return lhs + JSArray(rhs);
+			return lhs + JSArrayT(rhs);
 		}
 
 		template <typename T>
-		friend JSArray operator+ (const T& lhs, const JSArray& rhs)
+		friend JSArrayT operator+ (const T& lhs, const JSArrayT& rhs)
 		{
-			return JSArray(lhs) + rhs;
+			return JSArrayT(lhs) + rhs;
 		}
 
-		friend JSArray operator- (const JSArray& lhs, const JSArray& rhs)
+		friend JSArrayT operator- (const JSArrayT& lhs, const JSArrayT& rhs)
 		{
-			JSArray arr(lhs);
+			JSArrayT arr(lhs);
 			arr -= rhs;
 			return arr;
 		}
 
 		template <typename T>
-		friend JSArray operator- (const JSArray& lhs, const T& rhs)
+		friend JSArrayT operator- (const JSArrayT& lhs, const T& rhs)
 		{
-			return lhs - JSArray(rhs);
+			return lhs - JSArrayT(rhs);
 		}
 
 		template <typename T>
-		friend JSArray operator- (const T& lhs, const JSArray& rhs)
+		friend JSArrayT operator- (const T& lhs, const JSArrayT& rhs)
 		{
-			return JSArray(lhs) - rhs;
+			return JSArrayT(lhs) - rhs;
 		}
 		
 		template<typename... args>
@@ -565,31 +564,31 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray concat(__DataConstRef data, const args&... others) const
+		JSArrayT concat(__DataConstRef data, const args&... others) const
 		{
-			JSArray arr(*this);
+			JSArrayT arr(*this);
 			arr.push(data, others...);
 			return arr;
 		}
 
 		template<typename T>
-		JSArray concat(const T& container) const
+		JSArrayT concat(const T& container) const
 		{
-			JSArray arr(*this);
+			JSArrayT arr(*this);
 			arr.push(container);
 			return arr;
 		}
 
-		JSArray concat(__InitList initList) const
+		JSArrayT concat(__InitList initList) const
 		{
-			JSArray arr(*this);
+			JSArrayT arr(*this);
 			arr.push(initList);
 			return arr;
 		}
 
-		JSArray slice(int startPos) const
+		JSArrayT slice(int startPos) const
 		{
-			JSArray arr;
+			JSArrayT arr;
 
 			startPos = _checkPos(startPos);
 			if (startPos >= 0)
@@ -602,9 +601,9 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSArray slice(int startPos, int endPos) const
+		JSArrayT slice(int startPos, int endPos) const
 		{
-			JSArray arr;
+			JSArrayT arr;
 
 			startPos = _checkPos(startPos);
 			endPos = _checkPos(endPos);
@@ -621,7 +620,7 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __DataConstRef data, const args&... others)
+		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove, __DataConstRef data, const args&... others)
 		{
 			vector<__DataType> vecData;
 			extractDataTypeArgs(vecData, data, others...);
@@ -629,7 +628,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove = 0, const T& container = {})
+		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove = 0, const T& container = {})
 		{
 			if (__Super::checkIsSelf(container))
 			{
@@ -653,19 +652,19 @@ namespace NS_JSTL
 			return *this;
 		}
 
-		JSArray& splice(TD_PosType pos, TD_SizeType nRemove, __InitList initList)
+		JSArrayT& splice(TD_PosType pos, TD_SizeType nRemove, __InitList initList)
 		{
 			return splice(pos, nRemove, initList);
 		}
 
-		JSArray& sort(__CB_Sort_T<__DataType> cb = NULL)
+		JSArrayT& sort(__CB_Sort_T<__DataType> cb = NULL)
 		{
 			std::sort(_data().begin(), _data().end(), tagTrySort<__DataType>(cb));
 
 			return *this;
 		}
 
-		JSArray& reverse()
+		JSArrayT& reverse()
 		{
 			std::reverse(_data().begin(), _data().end());
 
@@ -679,9 +678,9 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSArray<T> map(CB_T_Ret<__DataConstRef, T> cb) const
+		JSArrayT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
-			JSArray<T> arr;
+			JSArrayT<T, __BaseType> arr;
 
 			if (cb)
 			{
@@ -695,14 +694,14 @@ namespace NS_JSTL
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
-		JSArray<RET> map(const CB& cb) const
+		JSArrayT<RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}
 
-		JSArray filter(__CB_ConstRef_bool cb) const
+		JSArrayT filter(__CB_ConstRef_bool cb) const
 		{
-			JSArray arr;
+			JSArrayT arr;
 
 			if (cb)
 			{
@@ -730,7 +729,7 @@ namespace NS_JSTL
 			return mapItemSum;
 		}
 
-		void sum(JSMap<__DataType, TD_SizeType>& mapItemSum, JSMap<TD_SizeType, JSArray<__DataType>>& mapSumItem) const
+		void sum(JSMap<__DataType, TD_SizeType>& mapItemSum, JSMap<TD_SizeType, JSArrayT>& mapSumItem) const
 		{
 			mapItemSum = itemSum();
 
@@ -740,10 +739,10 @@ namespace NS_JSTL
 			}
 		}
 
-		JSMap<TD_SizeType, JSArray<__DataType>> sumItem() const
+		JSMap<TD_SizeType, JSArrayT> sumItem() const
 		{
 			JSMap<__DataType, TD_SizeType> mapItemSum;
-			JSMap<TD_SizeType, JSArray<__DataType>> mapSumItem;
+			JSMap<TD_SizeType, JSArrayT> mapSumItem;
 			sum(mapItemSum, mapSumItem);
 			return mapSumItem;
 		}

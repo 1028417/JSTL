@@ -9,9 +9,9 @@
 
 namespace NS_JSTL
 {
-#define __JSSetSuper ContainerT<__DataType, __SetType<__DataType>>
+#define __JSSetSuper ContainerT<__DataType, __BaseType<__DataType>>
 
-	template<typename __DataType, template<typename...> class __SetType=set>
+	template<typename __DataType, template<typename...> class __BaseType>
 	class JSSetT : public __JSSetSuper
 	{
 	private:
@@ -200,9 +200,9 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSSetT<T, __SetType> map(CB_T_Ret<__DataConstRef, T> cb) const
+		JSSetT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
-			JSSetT<T, __SetType> set;
+			JSSetT<T, __BaseType> set;
 
 			if (cb)
 			{
@@ -216,7 +216,7 @@ namespace NS_JSTL
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
-		JSSetT<RET, __SetType> map(const CB& cb) const
+		JSSetT<RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}

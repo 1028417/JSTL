@@ -1,8 +1,11 @@
 
-#ifndef __define_h
-#define __define_h
+#ifndef __Define_H
+#define __Define_H
 
 #include <initializer_list>
+
+#include <vector>
+#include <deque>
 
 #include <functional>
 
@@ -27,9 +30,19 @@ namespace NS_JSTL
 
 	template <typename T>
 	using CB_T_Pos = const function<bool(T, TD_PosType)>&;
+
+	template<typename __DataType, template<typename...> class __BaseType> class JSArrayT;
+	template <typename __DataType, template<typename...> class __BaseType = vector>
+	using JSArray = JSArrayT<__DataType, __BaseType>;
+	
+	template <typename __DataType>
+	using Vector = JSArray<__DataType, vector>;
+
+	template <typename __DataType>
+	using Deque = JSArray<__DataType, deque>;
 }
 
 #define __SuperType(T) typename __Super::T
 #define __UsingSuperType(T) using T = __SuperType(T)
 
-#endif // __define_h
+#endif // __Define_H

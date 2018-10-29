@@ -11,11 +11,10 @@
  
 namespace NS_JSTL
 {
-	template<typename __DataType> class JSArray;
+#define __JSMapSuper ContainerT<pair<__KeyType const, __ValueType>, __BaseType<__KeyType, __ValueType>, __KeyType>
 
-#define __JSMapSuper ContainerT<pair<__KeyType const, __ValueType>, __MapType<__KeyType, __ValueType>, __KeyType>
-
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __MapType> class JSMapT
+	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType>
+	class JSMapT
 		: public __JSMapSuper
 	{
 	private:
@@ -362,9 +361,9 @@ namespace NS_JSTL
 
 	public:
 		template <typename T>
-		JSMapT<__KeyType, T, __MapType> map(__CB_KeyCR_ValueCR_T<T> cb) const
+		JSMapT<__KeyType, T, __BaseType> map(__CB_KeyCR_ValueCR_T<T> cb) const
 		{
-			JSMapT<__KeyType, T, __MapType> map;
+			JSMapT<__KeyType, T, __BaseType> map;
 
 			if (cb)
 			{
@@ -378,7 +377,7 @@ namespace NS_JSTL
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__KeyType(), __ValueType()))>
-		JSMapT<__KeyType, RET, __MapType> map(const CB& cb) const
+		JSMapT<__KeyType, RET, __BaseType> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}
