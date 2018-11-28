@@ -35,6 +35,22 @@ namespace NS_JSTL
 	using __CB_Sort_T = const function<bool(const T&t1, const T&t2)>&;
 
 	template <typename T>
+	struct tagSortT
+	{
+		tagSortT(__CB_Sort_T<T> cb)
+			: m_cb(cb)
+		{
+		}
+
+		__CB_Sort_T<T> m_cb;
+
+		bool operator()(const T&t1, const T&t2)const
+		{
+			return m_cb(t1, t2);
+		}
+	};
+
+	template <typename T>
 	struct tagTrySort
 	{
 		tagTrySort(__CB_Sort_T<T> cb = NULL)

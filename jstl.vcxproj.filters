@@ -18,19 +18,19 @@
     <ClInclude Include="jstl\JSSet.h">
       <Filter>jstl</Filter>
     </ClInclude>
-    <ClInclude Include="jstl\util.h">
-      <Filter>jstl</Filter>
-    </ClInclude>
     <ClInclude Include="jstl\PtrArray.h">
-      <Filter>jstl</Filter>
-    </ClInclude>
-    <ClInclude Include="jstl\define.h">
       <Filter>jstl</Filter>
     </ClInclude>
     <ClInclude Include="jstl\Container.h">
       <Filter>jstl</Filter>
     </ClInclude>
     <ClInclude Include="jstl\jstl.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\_util.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
+    <ClInclude Include="jstl\_define.h">
       <Filter>jstl</Filter>
     </ClInclude>
   </ItemGroup>

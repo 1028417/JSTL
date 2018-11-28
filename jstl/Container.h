@@ -2,10 +2,6 @@
 #ifndef __ContainerType_H
 #define __ContainerType_H
 
-#include "define.h"
-
-#include "util.h"
-
 #include <sstream>
 
 namespace NS_JSTL

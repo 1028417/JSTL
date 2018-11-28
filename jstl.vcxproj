@@ -160,13 +160,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="jstl\Container.h" />
-    <ClInclude Include="jstl\define.h" />
+    <ClInclude Include="jstl\_define.h" />
     <ClInclude Include="jstl\jstl.h" />
     <ClInclude Include="jstl\PtrArray.h" />
     <ClInclude Include="jstl\JSArray.h" />
     <ClInclude Include="jstl\JSMap.h" />
     <ClInclude Include="jstl\JSSet.h" />
-    <ClInclude Include="jstl\util.h" />
+    <ClInclude Include="jstl\_util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
