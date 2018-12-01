@@ -48,12 +48,16 @@
 		<Unit filename="jstl/PtrArray.h">
 			<Option virtualFolder="jstl/" />
 		</Unit>
+		<Unit filename="jstl/_define.h">
+			<Option virtualFolder="jstl/" />
+		</Unit>
+		<Unit filename="jstl/_util.h">
+			<Option virtualFolder="jstl/" />
+		</Unit>
 		<Unit filename="jstl/jstl.h">
 			<Option virtualFolder="jstl/" />
 		</Unit>
-		<Unit filename="jstl/util.h">
-			<Option virtualFolder="jstl/" />
-		</Unit>
+		<Unit filename="jstl/ptrcontainer.h" />
 		<Unit filename="test.cpp" />
 		<Extensions>
 			<code_completion />

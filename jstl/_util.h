@@ -2,7 +2,7 @@
 #ifndef __Util_H
 #define __Util_H
 
-using namespace std;
+#include "_define.h"
 
 namespace NS_JSTL
 {
@@ -32,9 +32,6 @@ namespace NS_JSTL
 	};
 
 	template <typename T>
-	using __CB_Sort_T = const function<bool(const T&t1, const T&t2)>&;
-
-	template <typename T>
 	struct tagSortT
 	{
 		tagSortT(__CB_Sort_T<T> cb)
@@ -44,9 +41,9 @@ namespace NS_JSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&t1, const T&t2)const
+		bool operator()(const T&lhs, const T&rhs)const
 		{
-			return m_cb(t1, t2);
+			return m_cb(lhs, rhs);
 		}
 	};
 
@@ -60,20 +57,20 @@ namespace NS_JSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&t1, const T&t2)const
+		bool operator()(const T&lhs, const T&rhs)const
 		{
 			if (m_cb)
 			{
-				return m_cb(t1, t2);
+				return m_cb(lhs, rhs);
 			}
 
-			return _compare(t1, t2);
+			return _compare(lhs, rhs);
 		}
 
 		template <typename U>
-		static auto _compare(const U&t1, const U&t2) -> decltype(declval<U>() < declval<U>())
+		static auto _compare(const U&lhs, const U&rhs) -> decltype(declval<U>() < declval<U>())
 		{
-			return t1 < t2;
+			return lhs < rhs;
 		}
 
 		static bool _compare(...)
@@ -194,7 +191,8 @@ namespace NS_JSTL
 		}
 	};
 
-	template <typename T, typename _RetType, typename _ITR = decltype(declval<T>().begin())>
+	template <typename T, typename _RetType
+		, typename _ITR = decltype(declval<T>().begin())>
 	_RetType checkContainer();
 
 	template <typename T, typename C>

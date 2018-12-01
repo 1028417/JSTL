@@ -6,9 +6,12 @@
 
 namespace NS_JSTL
 {
-#define __PtrArraySuper JSArray<__Type*>
+#define __PtrArraySuper JSArrayT<__Type*, __BaseType>
 
-	template<typename __Type>
+	template <class _PtrType>
+	using ptrlistT = ptrcontainerT<list, _PtrType>;
+
+	template<typename __Type, template<typename...> class __BaseType = ptrlistT>
 	class PtrArray : public __PtrArraySuper
 	{
 	private:
@@ -606,10 +609,10 @@ namespace NS_JSTL
 		{
             if (cb)
             {
-                __Super::sort([&](__ConstPtrRef ptr1, __ConstPtrRef ptr2) {
-                    if (NULL != ptr1 && NULL != ptr2)
+                __Super::sort([&](__ConstPtrRef lhs, __ConstPtrRef rhs) {
+                    if (NULL != lhs && NULL != rhs)
                     {
-                        return cb(*ptr1, *ptr2);
+                        return cb(*lhs, *rhs);
                     }
 
                     return false;

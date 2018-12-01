@@ -2,8 +2,6 @@
 #include "jstl/jstl.h"
 using namespace NS_JSTL;
 
-#include <list>
-
 typedef size_t TD_CardNum;
 
 enum ECardPattern

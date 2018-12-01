@@ -51,7 +51,7 @@ namespace NS_JSTL
 		using __CB_ValueR_bool = const function<bool(__ValueRef)>&;
 		using __CB_ValueCR_bool = const function<bool(__ValueConstRef)>&;
 
-		using __CB_ValueCR_KeyCR_bool = const function<bool(__ValueConstRef, __KeyConstRef)>&;
+		using __CB_ValueR_DelConfirm = const function<E_DelConfirm(__ValueRef)>&;
 
 	protected:
 		__ContainerType& _data()
@@ -200,6 +200,11 @@ namespace NS_JSTL
 			return map;
 		}
 
+		__ValueType& get(__KeyConstRef key)
+		{
+			return _data()[key];
+		}
+
 		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
 			auto itr = _data().find(key);
@@ -232,20 +237,34 @@ namespace NS_JSTL
 			return true;
 		}
 
-		void forEach(__CB_ValueCR_KeyCR_bool cb) const
+		bool del_one(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		{
+			auto itr = _data().find(key);
+			if (itr == _data().end())
+			{
+				return false;
+			}
+
+			if (cb)
+			{
+				cb(itr->second);
+			}
+
+			_data().erase(itr);
+
+			return true;
+		}
+
+		TD_SizeType del_some(__CB_ValueR_DelConfirm cb)
 		{
 			if (!cb)
 			{
-				return;
+				return 0;
 			}
 
-			for (auto& pr : _data())
-			{
-				if (!cb(pr.second, pr.first))
-				{
-					break;
-				}
-			}
+			return __Super::del([&](__DataType& data) {
+				return cb(data.second);
+			});
 		}
 
 		void forEachValue(__CB_ValueR_bool cb)
@@ -318,10 +337,9 @@ namespace NS_JSTL
 			return arr;
 		}
 
-		JSMapT& set(__KeyConstRef key, __ValueConstRef value)
+		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
-			_data()[key] = value;
-			return *this;
+			return _data()[key] = value;
 		}
 
 		template<typename T>

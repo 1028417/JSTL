@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <list>
+
 namespace NS_JSTL
 {
 	template <typename DATA>
@@ -52,26 +54,14 @@ namespace NS_JSTL
 
 			return true;
 		}
-
-		template <typename CB>
-		void forEach(const CB& cb)
-		{
-			if (!cb)
-			{
-				return;
-			}
-
-			size_t pos = 0;
-			for (auto&data : m_data)
-			{
-				if (!cb(data, pos++))
-				{
-					break;
-				}
-			}
-		}
 	};
-
+	
+	enum class E_DelConfirm
+	{
+		DC_Yes
+		, DC_No
+		, DC_Abort
+	};
 
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
 	class ContainerT
@@ -95,7 +85,9 @@ namespace NS_JSTL
 		using __CB_ConstRef_bool = CB_T_bool<__DataConstRef>;
 		using __CB_ConstRef_Pos = CB_T_Pos<__DataConstRef>;
 
-	protected:
+		using __CB_Ref_DelConfirm = CB_T_Ret<__DataRef, E_DelConfirm>;
+		
+	public:
 		ContainerT()
 			: m_ContainerOperator(m_data)
 			, m_ContainerReader(m_data)
@@ -129,18 +121,28 @@ namespace NS_JSTL
 		}
 
 	protected:
-		virtual TD_SizeType _add(__DataConstRef data) = 0;
+		virtual TD_SizeType _add(__DataConstRef data)
+		{
+			m_data.insert(m_data.end(), data);
+			return 1;
+		}
 
-		virtual TD_SizeType _del(__KeyConstRef key) = 0;
+		virtual TD_SizeType _del(__KeyConstRef key)
+		{
+			return 0;
+		}
 
-		virtual bool _includes(__KeyConstRef key) const = 0;
+		virtual bool _includes(__KeyConstRef key) const
+		{
+			return false;
+		}
 
 		virtual void _toString(stringstream& ss, __DataConstRef data) const
 		{
 			tagSSTryLMove(ss) << data;
 		}
-
-	protected:
+	
+	public:
 		template<typename... args>
 		TD_SizeType add(__DataConstRef data, const args&... others)
 		{
@@ -172,7 +174,8 @@ namespace NS_JSTL
 		{
 			return add<__InitList>(initList);
 		}
-
+		
+	protected:
 		template<typename... args>
 		static bool extractDataTypeArgs(__CB_ConstRef_bool cb, __DataConstRef data, const args&... others)
 		{
@@ -253,12 +256,23 @@ namespace NS_JSTL
 		}
 
 	public:
-		TD_SizeType size() const
+		operator bool() const
 		{
-			return m_data.size();
+			return !m_data.empty();
 		}
 
-		TD_SizeType length() const
+		template <typename T>
+		T erase(T& itr)
+		{
+			return itr = m_data.erase(itr);
+		}
+
+		void clear()
+		{
+			m_data.clear();
+		}
+
+		TD_SizeType size() const
 		{
 			return m_data.size();
 		}
@@ -456,12 +470,6 @@ namespace NS_JSTL
 			return getOuter(vec);
 		}
 
-		template <typename T>
-		T erase(T& itr)
-		{
-			return itr = m_data.erase(itr);
-		}
-
 		template<typename... args>
 		TD_SizeType del(__KeyConstRef key, const args&... others)
 		{
@@ -505,7 +513,7 @@ namespace NS_JSTL
 			return del<__InitList_Key>(keys);
 		}
 
-		TD_SizeType del(__CB_ConstRef_bool cb)
+		TD_SizeType del(__CB_Ref_DelConfirm cb)
 		{
 			if (!cb)
 			{
@@ -516,23 +524,25 @@ namespace NS_JSTL
 
 			for (auto itr = m_data.begin(); itr != m_data.end();)
 			{
-				if (cb(*itr))
+				auto eRet = cb(*itr);
+				
+				if (E_DelConfirm::DC_No == eRet)
 				{
-					itr = m_data.erase(itr);
-					uRet++;
+					itr++;
 				}
 				else
 				{
-					itr++;
+					itr = m_data.erase(itr);
+					uRet++;
+					
+					if (E_DelConfirm::DC_Abort == eRet)
+					{
+						break;
+					}
 				}
 			}
 
 			return uRet;
-		}
-
-		void clear()
-		{
-			m_data.clear();
 		}
 
 		string toString(const string& strSplitor = ",") const
@@ -554,16 +564,6 @@ namespace NS_JSTL
 		}
 
 	public:
-		void forEach(__CB_Ref_Pos cb)
-		{
-			getContainerOperator().forEach(cb);
-		}
-
-		void forEach(__CB_ConstRef_Pos cb) const
-		{
-			getContainerOperator().forEach(cb);
-		}
-
 		bool every(__CB_ConstRef_bool cb) const
 		{
 			if (!cb)
@@ -605,6 +605,12 @@ namespace NS_JSTL
 			return NS_JSTL::reduce<__DataType, __ContainerType >(m_data, cb);
 		}
 	};
+
+	template <template<typename...> typename __BaseType, class __DataType>
+	using Container = ContainerT<__DataType, __BaseType<__DataType>>;
+
+	template <class __DataType>
+	using ListT = Container<list, __DataType>;
 }
 
 #endif //__ContainerType_H

@@ -2,9 +2,9 @@
 #ifndef __JSTL_H
 #define __JSTL_H
 
-#include "_define.h"
-
 #include "_util.h"
+
+#include "ptrcontainer.h"
 
 #include "JSArray.h"
 #include "PtrArray.h"

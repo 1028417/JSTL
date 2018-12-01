@@ -27,10 +27,13 @@
     <ClInclude Include="jstl\jstl.h">
       <Filter>jstl</Filter>
     </ClInclude>
+    <ClInclude Include="jstl\_define.h">
+      <Filter>jstl</Filter>
+    </ClInclude>
     <ClInclude Include="jstl\_util.h">
       <Filter>jstl</Filter>
     </ClInclude>
-    <ClInclude Include="jstl\_define.h">
+    <ClInclude Include="jstl\ptrcontainer.h">
       <Filter>jstl</Filter>
     </ClInclude>
   </ItemGroup>

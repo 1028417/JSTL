@@ -4,9 +4,9 @@
 
 #include "Container.h"
 
-#include <algorithm>
-
 #include "JSMap.h"
+
+#include <deque>
 
 namespace NS_JSTL
 {
@@ -747,6 +747,12 @@ namespace NS_JSTL
 			return mapSumItem;
 		}
 	};
+
+	template <typename __DataType>
+	using VectorT = JSArrayT<__DataType, vector>;
+
+	template <typename __DataType>
+	using DequeT = JSArrayT<__DataType, deque>;
 }
 
 #endif // __JSArray_H
