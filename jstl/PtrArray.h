@@ -4,14 +4,13 @@
 
 #include "JSArray.h"
 
+#include "ptrcontainer.h"
+
 namespace NS_JSTL
 {
 #define __PtrArraySuper JSArrayT<__Type*, __BaseType>
 
-	template <class _PtrType>
-	using ptrlistT = ptrcontainerT<list, _PtrType>;
-
-	template<typename __Type, template<typename...> class __BaseType = ptrlistT>
+	template<typename __Type, template<typename...> class __BaseType = ptrvectorT>
 	class PtrArray : public __PtrArraySuper
 	{
 	private:

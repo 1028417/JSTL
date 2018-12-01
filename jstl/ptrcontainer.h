@@ -5,24 +5,56 @@
 #include <list>
 using namespace std;
 
-template <template<typename...> typename __BaseType, class _PtrType>
-class ptrcontainerT : public __BaseType<_PtrType>
+template <typename T>
+class GetType
 {
-	using _RefType = decltype(*declval<_PtrType>());
+public:
+	typedef T type;
+	typedef T& type_ref;
+	typedef T* type_pointer;
+};
 
-	using __Super = __BaseType<_PtrType>;
+template<typename T>
+class GetType<T&>
+{
+public:
+	typedef typename remove_reference<T>::type type;
+	typedef typename remove_reference<T>::type_ref type_ref;
+	typedef typename remove_reference<T>::type_pointer type_pointer;
+};
+
+template<typename T>
+class GetType<T*>
+{
+public:
+	typedef typename remove_reference<T>::type type;
+	typedef typename remove_reference<T>::type_ref type_ref;
+	typedef typename remove_reference<T>::type_pointer type_pointer;
+};
+
+template <template<typename...> typename __BaseType, class __PtrType>
+class ptrcontainerT : public __BaseType<__PtrType>
+{
+private:
+	using __Super = __BaseType<__PtrType>;
+
+protected:
+	using __Type = typename remove_reference<decltype(*(__PtrType)NULL)>::type;
+	using __RefType = __Type&;
+	using __ConstRef = const __Type&;
+	using __ConstPtr = const __Type*;
 
 public:
 	ptrcontainerT()
 	{
 	}
 
-	ptrcontainerT(_PtrType ptr)
+	ptrcontainerT(__PtrType ptr)
 	{
 		add(ptr);
 	}
 
-	ptrcontainerT(_RefType& ref)
+	ptrcontainerT(__RefType ref)
 	{
 		add(ref);
 	}
@@ -39,12 +71,12 @@ public:
 	{
 	}
 
-	ptrcontainerT(const list<_PtrType>& container)
+	ptrcontainerT(const list<__PtrType>& container)
 		: __Super(container.begin(), container.end())
 	{
 	}
 
-	ptrcontainerT(const vector<_PtrType>& container)
+	ptrcontainerT(const vector<__PtrType>& container)
 		: __Super(container.begin(), container.end())
 	{
 	}
@@ -98,17 +130,17 @@ public:
 	}
 
 public:
-	void add(_PtrType ptr)
+	void add(__PtrType ptr)
 	{
 		push_back(ptr);
 	}
 
-	void add(_RefType& ref)
+	void add(__RefType ref)
 	{
 		push_back(&ref);
 	}
 
-	void del(_PtrType ptr)
+	void del(__ConstPtr ptr)
 	{
 		auto itr = std::find(__Super::begin(), __Super::end(), ptr);
 		if (itr != __Super::end())
@@ -117,13 +149,9 @@ public:
 		}
 	}
 
-	void del(const _RefType& ref)
+	void del(__ConstRef ref)
 	{
-		auto itr = std::find(__Super::begin(), __Super::end(), &ref);
-		if (itr != __Super::end())
-		{
-			erase(itr);
-		}
+		del(&ref);
 	}
 
 private:
@@ -141,7 +169,7 @@ private:
 	{
 		for (auto& ptr : container)
 		{
-			auto newPtr = dynamic_cast<_PtrType>(ptr);
+			auto newPtr = dynamic_cast<__PtrType>(ptr);
 			if (NULL != newPtr)
 			{
 				add(newPtr);
@@ -215,10 +243,16 @@ public:
 	}
 };
 
-template <class _RefType>
-using ptrlist = ptrcontainerT<list, _RefType*>;
+template <class __PtrType>
+using ptrvectorT = ptrcontainerT<vector, __PtrType>;
 
-template <class _RefType>
-using ptrvector = ptrcontainerT<vector, _RefType*>;
+template <class __Type>
+using ptrvector = ptrvectorT<__Type*>;
+
+template <class __PtrType>
+using ptrlistT = ptrcontainerT<list, __PtrType>;
+
+template <class __Type>
+using ptrlist = ptrlistT<__Type*>;
 
 #endif // __ptrcontainer_H

@@ -4,8 +4,6 @@
 
 #include "_util.h"
 
-#include "ptrcontainer.h"
-
 #include "JSArray.h"
 #include "PtrArray.h"
 
