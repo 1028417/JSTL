@@ -250,14 +250,14 @@ namespace NS_JSTL
 			return trySort(lhs, rhs);
 		};
 
-		function<void(size_t, size_t)> fnSort;
-		fnSort = [&](size_t begin, size_t end) {
+		function<void(int, int)> fnSort;
+		fnSort = [&](int begin, int end) {
 			if (begin >= end) {
 				return;
 			}
 
-			size_t i = begin;
-			size_t j = end;
+			int i = begin;
+			int j = end;
 			T n = lpData[begin];
 
 			do {
