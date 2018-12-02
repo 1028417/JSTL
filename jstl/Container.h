@@ -121,13 +121,13 @@ namespace NS_JSTL
 		}
 
 	protected:
-		virtual TD_SizeType _add(__DataConstRef data)
+		virtual size_t _add(__DataConstRef data)
 		{
 			m_data.insert(m_data.end(), data);
 			return 1;
 		}
 
-		virtual TD_SizeType _del(__KeyConstRef key)
+		virtual size_t _del(__KeyConstRef key)
 		{
 			return 0;
 		}
@@ -144,7 +144,7 @@ namespace NS_JSTL
 	
 	public:
 		template<typename... args>
-		TD_SizeType add(__DataConstRef data, const args&... others)
+		size_t add(__DataConstRef data, const args&... others)
 		{
 			(void)extractDataTypeArgs([&](__DataConstRef data) {
 				_add(data);
@@ -155,7 +155,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, TD_SizeType>()) add(const T& container)
+		decltype(checkContainer<T, size_t>()) add(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
@@ -170,7 +170,7 @@ namespace NS_JSTL
 			return size();
 		}
 
-		TD_SizeType add(__InitList initList)
+		size_t add(__InitList initList)
 		{
 			return add<__InitList>(initList);
 		}
@@ -272,7 +272,7 @@ namespace NS_JSTL
 			m_data.clear();
 		}
 
-		TD_SizeType size() const
+		size_t size() const
 		{
 			return m_data.size();
 		}
@@ -471,9 +471,9 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		TD_SizeType del(__KeyConstRef key, const args&... others)
+		size_t del(__KeyConstRef key, const args&... others)
 		{
-			TD_SizeType uRet = 0;
+			size_t uRet = 0;
 
 			(void)extractKeyTypeArgs([&](__KeyConstRef key) {
 				uRet += _del(key);
@@ -484,16 +484,16 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		decltype(checkContainer<T, TD_SizeType>()) del(const T& container)
+		decltype(checkContainer<T, size_t>()) del(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
-				TD_SizeType uRet = this->size();
+				size_t uRet = this->size();
 				this->clear();
 				return uRet;
 			}
 
-			TD_SizeType uRet = 0;
+			size_t uRet = 0;
 
 			for (auto&data : container)
 			{
@@ -508,19 +508,19 @@ namespace NS_JSTL
 			return uRet;
 		}
 
-		TD_SizeType del(__InitList_Key keys)
+		size_t del(__InitList_Key keys)
 		{
 			return del<__InitList_Key>(keys);
 		}
 
-		TD_SizeType del(__CB_Ref_DelConfirm cb)
+		size_t del(__CB_Ref_DelConfirm cb)
 		{
 			if (!cb)
 			{
 				return 0;
 			}
 
-			TD_SizeType uRet = 0;
+			size_t uRet = 0;
 
 			for (auto itr = m_data.begin(); itr != m_data.end();)
 			{

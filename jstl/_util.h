@@ -57,7 +57,7 @@ namespace NS_JSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&lhs, const T&rhs)const
+		bool operator()(const T&lhs, const T&rhs) const
 		{
 			if (m_cb)
 			{
@@ -236,6 +236,66 @@ namespace NS_JSTL
 	T reduce(const C& container, const CB& cb)
 	{
 		return reduce<T, C>(container, cb);
+	}
+
+	template <typename T>
+	void QSort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
+	{
+		tagTrySort<T> trySort;
+		auto fnCompare = [&](T& lhs, T& rhs) {
+			if (cb) {
+				return cb(lhs, rhs);
+			}
+
+			return trySort(lhs, rhs);
+		};
+
+		function<void(size_t, size_t)> fnSort;
+		fnSort = [&](size_t begin, size_t end) {
+			if (begin >= end) {
+				return;
+			}
+
+			size_t i = begin;
+			size_t j = end;
+			T n = lpData[begin];
+
+			do {
+				do {
+					if (fnCompare(lpData[j], n)) {
+						lpData[i] = lpData[j];
+						i++;
+						break;
+					}
+					j--;
+				} while (i < j);
+
+				while (i < j) {
+					if (fnCompare(n, lpData[i])) {
+						lpData[j] = lpData[i];
+						j--;
+						break;
+					}
+					i++;
+				}
+			} while (i < j);
+
+			lpData[i] = n;
+
+			fnSort(begin, i - 1);
+			fnSort(i + 1, end);
+		};
+		fnSort(0, size - 1);
+	}
+
+	template <typename T>
+	void QSort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
+	{
+		size_t size = vecData.size();
+		if (size > 1)
+		{
+			QSort<T>(&vecData.front(), size, cb);
+		}
 	}
 }
 

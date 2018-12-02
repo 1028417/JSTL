@@ -127,14 +127,14 @@ namespace NS_JSTL
 		}
 
 	protected:
-		TD_SizeType _add(const __DataType& pr) override
+		size_t _add(const __DataType& pr) override
 		{
 			_data().insert(pr);
 
 			return _data().size();
 		}
 
-		TD_SizeType _del(__KeyConstRef key) override
+		size_t _del(__KeyConstRef key) override
 		{
 			auto itr = _data().find(key);
 			if (itr == _data().end())
@@ -255,7 +255,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		TD_SizeType del_some(__CB_ValueR_DelConfirm cb)
+		size_t del_some(__CB_ValueR_DelConfirm cb)
 		{
 			if (!cb)
 			{
@@ -343,7 +343,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		TD_SizeType set(const T& container)
+		size_t set(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
@@ -353,13 +353,13 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__InitList initList)
+		size_t set(__InitList initList)
 		{
 			return set<__InitList>(initList);
 		}
 
 		template <typename T>
-		TD_SizeType set(const T& container, const function<__ValueType(__KeyType)>& cb)
+		size_t set(const T& container, const function<__ValueType(__KeyType)>& cb)
 		{
 			if (cb)
 			{
@@ -372,7 +372,7 @@ namespace NS_JSTL
 			return _data().size();
 		}
 
-		TD_SizeType set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
+		size_t set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
 			return set<__InitList_Key>(keys, cb);
 		}

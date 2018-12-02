@@ -15,7 +15,6 @@ using namespace std;
 namespace NS_JSTL
 {
 	typedef size_t TD_PosType;
-	typedef size_t TD_SizeType;
 
 	template <typename T>
 	using InitList_T = const initializer_list<T>&;
