@@ -52,7 +52,7 @@ namespace NS_JSTL
 	using CB_T_Pos = const function<bool(T, TD_PosType)>&;
 
 	template <typename T>
-	using __CB_Sort_T = const function<bool(const T&lhs, const T&rhs)>&;
+	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
 
 	template<typename __DataType, template<typename...> class __BaseType> class JSArrayT;
 	template <typename __DataType, template<typename...> class __BaseType = vector>

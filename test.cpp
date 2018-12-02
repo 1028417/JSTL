@@ -88,21 +88,28 @@ bool enumCardPattern(ECardPattern eCardPattern, TD_CardNum uBaseCardNum = 0, siz
 	return enumCardPattern(eCardPattern, uCardPatternFlag, mapCardSum, uBaseCardNum, uContinuityCount, retCardPattern);
 }
 
+
+JSMap<int, set<int>> sss()
+{
+	return JSMap<int, set<int>>();
+}
+
 int main()
 {
 	JSMap<int, set<int>> jjhh;
+	jjhh = jjhh;
 
 	struct tag {};
 	JSArray<tag> qqta{ {},{},{},{} };
 	auto idof = qqta.indexOf({});
-	qqta.sort();
+	qqta.QSort();
 	auto strsk = qqta.toString();
 	
 	JSArray<int> qq;
 	qq= { 12,2,3 };
 	qq = 1;
 	auto aaaa = qq.indexOf({2});
-	qq.sort();
+	qq.QSort();
 	auto aaaaaaa = qq.toString();
 	qq.unshift({ 1 });
 	qq.unshift(1);
@@ -130,6 +137,7 @@ int main()
 
 	map<int, int> tm;
 	JSMap<int,int> mmm(tm);
+	mmm = { {1,1} };
 	mmm = tm;
 	mmm.keys();
 	mmm.getInner(1);
@@ -173,7 +181,7 @@ int main()
 		t = 7;
 	}
 
-	ts2.sort();
+	ts2.QSort();
 	ts2.concat(9);
 	ts2.concat({ 9 });
 	ts2.concat(9, 9);
@@ -236,7 +244,8 @@ int main()
 	ConstPtrArray111.push(PtrArray111);
 	ConstPtrArray111.concat(PtrArray111);
 
-	ConstPtrArray<int> ConstPtrArray222(ConstPtrArray111);
+	ConstPtrArray<int> ConstPtrArray222;
+	ConstPtrArray222 = ((const ConstPtrArray<int>&)ConstPtrArray111);
 	ConstPtrArray222.push(ConstPtrArray111);
 	ConstPtrArray222.concat(ConstPtrArray111);
 	ConstPtrArray222.push(nullptr);
@@ -268,13 +277,16 @@ int main()
 	PtrArray<int> zqq161(jahss);
 	PtrArray<int> zqq711(zqq161);
 
-	PtrArray<int> popopo;
+	int yyy = 7;
+	list<int*> l;
+	PtrArray<int> popopo(l);
+	popopo = yyy;
 	popopo += (int*)nullptr;
 	popopo += {nullptr, nullptr, nullptr};
 	popopo += *(int*)nullptr;
 	popopo += jahss;
 	popopo += popopo;
-
+	popopo = l;
 	popopo = ((int*)nullptr);
 	popopo = { nullptr, nullptr, nullptr };
 	popopo = (*(int*)nullptr);

@@ -8,54 +8,6 @@
 
 namespace NS_JSTL
 {
-	template <typename DATA>
-	class __ContainerOperator
-	{
-	public:
-		__ContainerOperator(DATA& data)
-			: m_data(data)
-		{
-		}
-
-	protected:
-		DATA& m_data;
-
-	public:
-		template <typename CB>
-		bool getFront(const CB& cb)
-		{
-			auto itr = m_data.begin();
-			if (itr == m_data.end())
-			{
-				return false;
-			}
-
-			if (cb)
-			{
-				cb(*itr);
-			}
-
-			return true;
-		}
-
-		template <typename CB>
-		bool getBack(const CB& cb)
-		{
-			auto itr = m_data.rbegin();
-			if (itr == m_data.rend())
-			{
-				return false;
-			}
-
-			if (cb)
-			{
-				cb(*itr);
-			}
-
-			return true;
-		}
-	};
-	
 	enum class E_DelConfirm
 	{
 		DC_Yes
@@ -65,10 +17,11 @@ namespace NS_JSTL
 
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
 	class ContainerT
-	{
+	{		
 	protected:
 		using __DataType = __DataType__;
 		using __ContainerType = __ContainerType__;
+		__ContainerType m_data;
 
 		using __InitList = InitList_T<__DataType>;
 		using __InitList_Key = InitList_T<__KeyType>;
@@ -86,38 +39,67 @@ namespace NS_JSTL
 		using __CB_ConstRef_Pos = CB_T_Pos<__DataConstRef>;
 
 		using __CB_Ref_DelConfirm = CB_T_Ret<__DataRef, E_DelConfirm>;
-		
-	public:
-		ContainerT()
-			: m_ContainerOperator(m_data)
-			, m_ContainerReader(m_data)
+
+	private:
+		template <typename DATA> class __ContainerOperatorT
 		{
-		}
+		public:
+			__ContainerOperatorT(DATA& data)
+				: m_data(data)
+			{
+			}
 
-		template<typename T>
-		explicit ContainerT(const T& container)
-			: m_data(container.begin(), container.end())
-			, m_ContainerOperator(m_data)
-			, m_ContainerReader(m_data)
-		{
-		}
+		protected:
+			DATA& m_data;
 
-	protected:
-		__ContainerType m_data;
+		public:
+			template <typename CB>
+			bool getFront(const CB& cb)
+			{
+				auto itr = m_data.begin();
+				if (itr == m_data.end())
+				{
+					return false;
+				}
 
-		using __ContainerOperatorType = __ContainerOperator<__ContainerType>;
-		__ContainerOperatorType m_ContainerOperator;
-		using __ContainerReaderType = __ContainerOperator<const __ContainerType>;
-		__ContainerReaderType m_ContainerReader;
+				if (cb)
+				{
+					cb(*itr);
+				}
 
-		__ContainerOperatorType& getContainerOperator()
+				return true;
+			}
+
+			template <typename CB>
+			bool getBack(const CB& cb)
+			{
+				auto itr = m_data.rbegin();
+				if (itr == m_data.rend())
+				{
+					return false;
+				}
+
+				if (cb)
+				{
+					cb(*itr);
+				}
+
+				return true;
+			}
+		};
+
+		using __ContainerOperator = __ContainerOperatorT<__ContainerType>;
+		__ContainerOperator m_ContainerOperator = __ContainerOperator(m_data);
+		__ContainerOperator& getContainerOperator()
 		{
 			return m_ContainerOperator;
 		}
 
-		__ContainerReaderType& getContainerOperator() const
+		using __ContainerReader = __ContainerOperatorT<const __ContainerType>;
+		__ContainerReader m_ContainerReader = __ContainerReader(m_data);
+		__ContainerReader& getContainerOperator() const
 		{
-			return (__ContainerReaderType&)m_ContainerReader;
+			return (__ContainerReader&)m_ContainerReader;
 		}
 
 	protected:
@@ -141,8 +123,117 @@ namespace NS_JSTL
 		{
 			tagSSTryLMove(ss) << data;
 		}
-	
+
 	public:
+		ContainerT()
+		{
+		}
+
+		template<typename... args>
+		explicit ContainerT(__DataConstRef data, const args&... others)
+		{
+			add(data, others...);
+		}
+
+		ContainerT(ContainerT&& container)
+		{
+			swap(container);
+		}
+
+		explicit ContainerT(const ContainerT& container)
+			: m_data(container.begin(), container.end())
+		{
+		}
+
+		ContainerT(__InitList initList)
+			: m_data(initList.begin(), initList.end())
+		{
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		explicit ContainerT(const T& container)
+			: m_data(container.begin(), container.end())
+		{
+		}
+
+		ContainerT& operator=(ContainerT&& container)
+		{
+			assign(container);
+			return *this;
+		}
+
+		ContainerT& operator=(const ContainerT& container)
+		{
+			assign(container);
+			return *this;
+		}
+
+		ContainerT& operator=(__InitList initList)
+		{
+			assign(initList);
+			return *this;
+		}
+
+		template <typename T>
+		ContainerT& operator=(const T&t)
+		{
+			assign(t);
+			return *this;
+		}
+
+	public:
+		ContainerT& swap(ContainerT& container)
+		{
+			if (!checkIsSelf(container))
+			{
+				m_data.swap(container.m_data);
+			}
+
+			return *this;
+		}
+
+		template<typename... args>
+		ContainerT& assign(__DataConstRef data, const args&... others)
+		{
+			clear();
+
+			add(data, others...);
+
+			return *this;
+		}
+
+		ContainerT& assign(ContainerT&& container)
+		{
+			return swap(container);
+		}
+
+		ContainerT& assign(__InitList initList)
+		{
+			return assign<__InitList>(initList);
+		}
+
+		template<typename T, typename = checkContainer_t<T>>
+		ContainerT& assign(const T& container)
+		{
+			if (checkIsSelf(container))
+			{
+				return *this;
+			}
+
+			//m_data = __ContainerType(container.begin(), container.end());
+
+			//m_data.clear();
+			//for (auto& data : container)
+			//{
+			//	_add(data);
+			//}
+
+			m_data.clear();
+			new (&m_data) __ContainerType(container.begin(), container.end());
+
+			return *this;
+		}
+
 		template<typename... args>
 		size_t add(__DataConstRef data, const args&... others)
 		{
@@ -152,6 +243,11 @@ namespace NS_JSTL
 			}, data, others...);
 
 			return size();
+		}
+
+		size_t add(__InitList initList)
+		{
+			return add<__InitList>(initList);
 		}
 
 		template<typename T>
@@ -168,91 +264,6 @@ namespace NS_JSTL
 			}
 
 			return size();
-		}
-
-		size_t add(__InitList initList)
-		{
-			return add<__InitList>(initList);
-		}
-		
-	protected:
-		template<typename... args>
-		static bool extractDataTypeArgs(__CB_ConstRef_bool cb, __DataConstRef data, const args&... others)
-		{
-			return tagDynamicArgsExtractor<const __DataType>::extract([&](__DataConstRef data) {
-				return cb(data);
-			}, data, others...);
-		}
-
-		template<typename... args>
-		static void extractDataTypeArgs(vector<__DataType>& vecArgs, __DataConstRef data, const args&... others)
-		{
-			extractDataTypeArgs([&](__DataConstRef data) {
-				vecArgs.push_back(data);
-				return true;
-			}, data, others...);
-		}
-
-		template<typename... args>
-		static bool extractKeyTypeArgs(CB_T_bool<__KeyConstRef> cb, __KeyConstRef key, const args&... others)
-		{
-			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__KeyConstRef key) {
-				return cb(key);
-			}, key, others...);
-		}
-
-		template<typename... args>
-		static void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __KeyConstRef key, const args&... others)
-		{
-			extractKeyTypeArgs([&](__KeyConstRef key) {
-				vecArgs.push_back(key);
-				return true;
-			}, key, others...);
-		}
-
-		template<typename T>
-		bool checkIsSelf(const T& container) const
-		{
-			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
-		}
-
-	public:
-		template<typename... args>
-		ContainerT& assign(__DataConstRef data, const args&... others)
-		{
-			clear();
-
-			add(data, others...);
-
-			return *this;
-		}
-
-		template<typename T>
-		ContainerT& assign(const T& container)
-		{
-			if (checkIsSelf(container))
-			{
-				return *this;
-			}
-
-			m_data = __ContainerType(container.begin(), container.end());
-
-			return *this;
-		}
-
-		ContainerT& assign(__InitList initList)
-		{
-			return assign<__InitList>(initList);
-		}
-
-		ContainerT& swap(ContainerT& container)
-		{
-			if ((void*)this != (void*)&container)
-			{
-				m_data.swap(container.m_data);
-			}
-
-			return *this;
 		}
 
 	public:
@@ -603,6 +614,47 @@ namespace NS_JSTL
 		__DataType reduce(const function<__DataType(__DataConstRef, __DataConstRef)>& cb) const
 		{
 			return NS_JSTL::reduce<__DataType, __ContainerType >(m_data, cb);
+		}
+
+	protected:
+		template<typename T>
+		bool checkIsSelf(const T& container) const
+		{
+			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
+		}
+
+		template<typename... args>
+		static bool extractDataTypeArgs(__CB_ConstRef_bool cb, __DataConstRef data, const args&... others)
+		{
+			return tagDynamicArgsExtractor<const __DataType>::extract([&](__DataConstRef data) {
+				return cb(data);
+			}, data, others...);
+		}
+
+		template<typename... args>
+		static void extractDataTypeArgs(vector<__DataType>& vecArgs, __DataConstRef data, const args&... others)
+		{
+			extractDataTypeArgs([&](__DataConstRef data) {
+				vecArgs.push_back(data);
+				return true;
+			}, data, others...);
+		}
+
+		template<typename... args>
+		static bool extractKeyTypeArgs(CB_T_bool<__KeyConstRef> cb, __KeyConstRef key, const args&... others)
+		{
+			return tagDynamicArgsExtractor<const __KeyType>::extract([&](__KeyConstRef key) {
+				return cb(key);
+			}, key, others...);
+		}
+
+		template<typename... args>
+		static void extractKeyTypeArgs(vector<__KeyType>& vecArgs, __KeyConstRef key, const args&... others)
+		{
+			extractKeyTypeArgs([&](__KeyConstRef key) {
+				vecArgs.push_back(key);
+				return true;
+			}, key, others...);
 		}
 	};
 

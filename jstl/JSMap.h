@@ -53,16 +53,8 @@ namespace NS_JSTL
 
 		using __CB_ValueR_DelConfirm = const function<E_DelConfirm(__ValueRef)>&;
 
-	protected:
-		__ContainerType& _data()
-		{
-			return __Super::m_data;
-		}
-
-		const __ContainerType& _data() const
-		{
-			return __Super::m_data;
-		}
+	private:
+		__ContainerType& m_data = __Super::m_data;
 
 	public:
 		JSMapT()
@@ -80,14 +72,14 @@ namespace NS_JSTL
 			set(keys, cb);
 		}
 
-		explicit JSMapT(const JSMapT& map)
+		JSMapT(JSMapT&& map)
 			: __Super(map)
 		{
 		}
 
-		JSMapT(JSMapT&& map)
+		explicit JSMapT(const JSMapT& map)
+			: __Super(map)
 		{
-			__Super::swap(map);
 		}
 
 		JSMapT(__InitList initList)
@@ -95,21 +87,21 @@ namespace NS_JSTL
 		{
 		}
 
-		template<typename T>
+		template<typename T, typename = checkContainer_t<T>>
 		explicit JSMapT(const T& container)
 			: __Super(container)
 		{
 		}
 
-		JSMapT& operator=(const JSMapT& map)
+		JSMapT& operator=(JSMapT&& map)
 		{
 			__Super::assign(map);
 			return *this;
 		}
 
-		JSMapT& operator=(JSMapT&& map)
+		JSMapT& operator=(const JSMapT& map)
 		{
-			__Super::swap(map);
+			__Super::assign(map);
 			return *this;
 		}
 
@@ -129,27 +121,27 @@ namespace NS_JSTL
 	protected:
 		size_t _add(const __DataType& pr) override
 		{
-			_data().insert(pr);
+			m_data.insert(pr);
 
-			return _data().size();
+			return m_data.size();
 		}
 
 		size_t _del(__KeyConstRef key) override
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return 0;
 			}
 
-			_data().erase(itr);
+			m_data.erase(itr);
 
 			return 1;
 		}
 
 		bool _includes(__KeyConstRef key) const override
 		{
-			return _data().find(key) != _data().end();
+			return m_data.find(key) != m_data.end();
 		}
 
 		virtual void _toString(stringstream& ss, const __DataType& pr) const override
@@ -202,13 +194,13 @@ namespace NS_JSTL
 
 		__ValueType& get(__KeyConstRef key)
 		{
-			return _data()[key];
+			return m_data[key];
 		}
 
 		bool get(__KeyConstRef key, __CB_ValueR_void cb)
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -223,8 +215,8 @@ namespace NS_JSTL
 
 		bool get(__KeyConstRef key, __CB_ValueCR_void cb) const
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -239,8 +231,8 @@ namespace NS_JSTL
 
 		bool del_one(__KeyConstRef key, __CB_ValueR_void cb=NULL)
 		{
-			auto itr = _data().find(key);
-			if (itr == _data().end())
+			auto itr = m_data.find(key);
+			if (itr == m_data.end())
 			{
 				return false;
 			}
@@ -250,7 +242,7 @@ namespace NS_JSTL
 				cb(itr->second);
 			}
 
-			_data().erase(itr);
+			m_data.erase(itr);
 
 			return true;
 		}
@@ -274,7 +266,7 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (!cb(pr.second))
 				{
@@ -290,7 +282,7 @@ namespace NS_JSTL
 				return;
 			}
 
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (!cb(pr.second))
 				{
@@ -302,7 +294,7 @@ namespace NS_JSTL
 		JSArray<__KeyType> keys(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__KeyType> arr;
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (cb)
 				{
@@ -321,7 +313,7 @@ namespace NS_JSTL
 		JSArray<__ValueType> values(__CB_KeyCR_ValueCR_bool cb = NULL) const
 		{
 			JSArray<__ValueType> arr;
-			for (auto& pr : _data())
+			for (auto& pr : m_data)
 			{
 				if (cb)
 				{
@@ -339,7 +331,7 @@ namespace NS_JSTL
 
 		__ValueType& set(__KeyConstRef key, __ValueConstRef value)
 		{
-			return _data()[key] = value;
+			return m_data[key] = value;
 		}
 
 		template<typename T>
@@ -347,10 +339,10 @@ namespace NS_JSTL
 		{
 			if (!__Super::checkIsSelf(container))
 			{
-				_data().insert(container.begin(), container.end());
+				m_data.insert(container.begin(), container.end());
 			}
 
-			return _data().size();
+			return m_data.size();
 		}
 
 		size_t set(__InitList initList)
@@ -369,7 +361,7 @@ namespace NS_JSTL
 				}
 			}
 
-			return _data().size();
+			return m_data.size();
 		}
 
 		size_t set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
@@ -385,7 +377,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto& pr : _data())
+				for (auto& pr : m_data)
 				{
 					map.set(pr.first, cb(pr.first, pr.second));
 				}
@@ -406,7 +398,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto& pr : _data())
+				for (auto& pr : m_data)
 				{
 					if (cb(pr.first, pr.second))
 					{

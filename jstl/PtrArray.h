@@ -46,14 +46,14 @@ namespace NS_JSTL
 			assign(ref, others...);
 		}
 
-		explicit PtrArray(const PtrArray& arr)
+		PtrArray(PtrArray&& arr)
 			: __Super(arr)
 		{
 		}
 
-		PtrArray(PtrArray&& arr)
+		explicit PtrArray(const PtrArray& arr)
+			: __Super(arr)
 		{
-			__Super::swap(arr);
 		}
 
 		PtrArray(__InitList_Ptr initList)
@@ -61,14 +61,8 @@ namespace NS_JSTL
 		{
 		}
 
-		template<typename T, typename _ITR = decltype(declval<T>().begin())>
+		template<typename T, typename = checkContainer_t<T>>
 		explicit PtrArray(T& container)
-		{
-			assign(container);
-		}
-
-		template<typename T, typename _ITR = decltype(declval<T>().begin())>
-		explicit PtrArray(const T& container)
 		{
 			assign(container);
 		}
@@ -602,11 +596,11 @@ namespace NS_JSTL
 			});
 		}
 
-		PtrArray& sort(__CB_Sort_T<__Type> cb)
+		PtrArray& QSort(__CB_Sort_T<__Type> cb)
 		{
             if (cb)
             {
-                __Super::sort([&](__ConstPtrRef lhs, __ConstPtrRef rhs) {
+				__Super::QSort([&](__PtrType lhs, __PtrType rhs) {
                     if (NULL != lhs && NULL != rhs)
                     {
                         return cb(*lhs, *rhs);

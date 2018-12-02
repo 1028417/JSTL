@@ -11,7 +11,7 @@ class ptrcontainerT : public __BaseType<__PtrType>
 {
 private:
 	using __Super = __BaseType<__PtrType>;
-
+	
 protected:
 	using __Type = typename remove_reference<decltype(*(__PtrType)NULL)>::type;
 	using __RefType = __Type&;
@@ -23,95 +23,96 @@ public:
 	{
 	}
 
-	ptrcontainerT(__PtrType ptr)
+	ptrcontainerT(__Super&& container)
 	{
-		add(ptr);
+		swap(container);
 	}
 
-	ptrcontainerT(__RefType ref)
+	ptrcontainerT(const ptrcontainerT& container)
+		: __Super(container.begin(), container.end())
 	{
-		add(ref);
+	}
+
+	explicit ptrcontainerT(const vector<__PtrType>& container)
+		: __Super(container.begin(), container.end())
+	{
+	}
+
+	explicit ptrcontainerT(const list<__PtrType>& container)
+		: __Super(container.begin(), container.end())
+	{
 	}
 
 	template<class _Iter, typename = checkIter_t<_Iter>>
-	ptrcontainerT(_Iter _First, _Iter _Last)
+	explicit ptrcontainerT(_Iter _First, _Iter _Last)
 		: __Super(_First, _Last)
 	{
 	}
 
-	ptrcontainerT(const list<__PtrType>& container)
-		: __Super(container.begin(), container.end())
+	explicit ptrcontainerT(__PtrType ptr)
 	{
+		_add(ptr);
 	}
 
-	ptrcontainerT(const vector<__PtrType>& container)
-		: __Super(container.begin(), container.end())
+	explicit ptrcontainerT(__RefType ref)
 	{
-	}
-
-	template <typename T>
-	ptrcontainerT(const list<T*>& container)
-	{
-		add(container);
+		_add(ref);
 	}
 
 	template <typename T>
-	ptrcontainerT(list<T*>& container)
+	explicit ptrcontainerT(const vector<T>& container)
 	{
-		add(container);
+		_addContainer(container);
 	}
 
 	template <typename T>
-	ptrcontainerT(const list<T*>& container, bool bDynamicCastFlag)
+	explicit ptrcontainerT(list<T>& container)
 	{
-		_addDowncast(container, bDynamicCastFlag);
+		_addContainer(container);
 	}
 
 	template <typename T>
-	ptrcontainerT(list<T>& container)
+	explicit ptrcontainerT(const list<T>& container)
 	{
-		add(container);
+		_addContainer(container);
+	}
+
+private:
+	template <typename T>
+	void _addContainer(T& container)
+	{
+		for (auto& ptr : container)
+		{
+			_add(ptr);
+		}
+	}
+
+	void _add(__PtrType ptr)
+	{
+		if (NULL != ptr)
+		{
+			push_back(ptr);
+		}
+	}
+	
+	void _add(__RefType ref)
+	{
+		push_back(&ref);
 	}
 
 	template <typename T>
-	ptrcontainerT(const vector<T*>& container)
+	void _add(T* ptr, ...)
 	{
-		add(container);
+		_add(dynamic_cast<__PtrType>(ptr));
 	}
 
 	template <typename T>
-	ptrcontainerT(vector<T*>& container)
+	void _add(T& ref, ...)
 	{
-		add(container);
-	}
-
-	template <typename T>
-	ptrcontainerT(const vector<T*>& container, bool bDynamicCastFlag)
-	{
-		_addDowncast(container, bDynamicCastFlag);
-	}
-
-	template <typename T>
-	ptrcontainerT(vector<T>& container)
-	{
-		add(container);
+		_add(dynamic_cast<__PtrType>(&ref));
 	}
 
 public:
-	ptrcontainerT& add(__PtrType ptr)
-	{
-		push_back(ptr);
-
-		return *this;
-	}
-
-	ptrcontainerT& add(__RefType ref)
-	{
-		push_back(&ref);
-
-		return *this;
-	}
-
 	bool del(__ConstPtr ptr)
 	{
 		auto itr = std::find(__Super::begin(), __Super::end(), ptr);
@@ -129,99 +130,49 @@ public:
 		return del(&ref);
 	}
 
-private:
-	template <typename T>
-	void _addPtr(T& container)
+	ptrcontainerT& clear()
 	{
-		for (auto ptr : container)
-		{
-			add(ptr);
-		}
+		__Super::clear();
+		return *this;
 	}
 
-	template <typename T>
-	void _addDowncast(T& container, bool bDynamicCastFlag)
+	ptrcontainerT& add(__PtrType ptr)
 	{
-		for (auto& ptr : container)
-		{
-			auto newPtr = dynamic_cast<__PtrType>(ptr);
-			if (NULL != newPtr)
-			{
-				add(newPtr);
-			}
-			else
-			{
-				if (bDynamicCastFlag)
-				{
-					add(newPtr);
-				}
-			}
-		}
+		push_back(ptr);
+		return *this;
 	}
 
-	template <typename T>
-	void _addRef(T& container)
+	ptrcontainerT& add(__RefType ref)
 	{
-		for (auto& ref : container)
-		{
-			add(ref);
-		}
-	}
-
-public:
-	template <typename T>
-	ptrcontainerT& add(const list<T*>& container)
-	{
-		_addPtr(container);
+		push_back(&ref);
 		return *this;
 	}
 
 	template <typename T>
-	ptrcontainerT& add(list<T*>& container)
+	ptrcontainerT& add(const vector<T>& container)
 	{
-		_addPtr(container);
-		return *this;
-	}
-
-	template <typename T>
-	ptrcontainerT& add(list<T>& container)
-	{
-		_addRef(container);
-		return *this;
-	}
-
-	template <typename T>
-	ptrcontainerT& add(const vector<T*>& container)
-	{
-		_addPtr(container);
-		return *this;
-	}
-
-	template <typename T>
-	ptrcontainerT& add(vector<T*>& container)
-	{
-		_addPtr(container);
+		_addContainer(container);
 		return *this;
 	}
 
 	template <typename T>
 	ptrcontainerT& add(vector<T>& container)
 	{
-		_addRef(container);
+		_addContainer(container);
 		return *this;
 	}
 
 	template <typename T>
-	ptrcontainerT& add(const list<T*>& container, bool bDynamicCastFlag)
+	ptrcontainerT& add(const list<T>& container)
 	{
-		_addDowncast(container, bDynamicCastFlag);
+		_addContainer(container);
 		return *this;
 	}
 
 	template <typename T>
-	ptrcontainerT& add(const vector<T*>& container, bool bDynamicCastFlag)
+	ptrcontainerT& add(list<T>& container)
 	{
-		_addDowncast(container, bDynamicCastFlag);
+		_addContainer(container);
 		return *this;
 	}
 };

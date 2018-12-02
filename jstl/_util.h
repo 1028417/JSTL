@@ -67,7 +67,7 @@ namespace NS_JSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator()(const T&lhs, const T&rhs) const
+		bool operator()(T&lhs, T&rhs) const
 		{
 			if (m_cb)
 			{
@@ -78,7 +78,7 @@ namespace NS_JSTL
 		}
 
 		template <typename U>
-		static auto _compare(const U&lhs, const U&rhs) -> decltype(declval<U>() < declval<U>())
+		static auto _compare(U&lhs, U&rhs) -> decltype(declval<U>() < declval<U>())
 		{
 			return lhs < rhs;
 		}

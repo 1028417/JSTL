@@ -29,16 +29,8 @@ namespace NS_JSTL
 		__UsingSuperType(__CB_ConstRef_bool);
 #endif
 
-	protected:
-		__ContainerType& _data()
-		{
-			return __Super::m_data;
-		}
-
-		const __ContainerType& _data() const
-		{
-			return __Super::m_data;
-		}
+	private:
+		__ContainerType& m_data = __Super::m_data;
 
 	public:
 		JSSetT()
@@ -47,8 +39,13 @@ namespace NS_JSTL
 
 		template<typename... args>
 		explicit JSSetT(__DataConstRef data, const args&... others)
+			: __Super(data, others...)
 		{
-			__Super::add(data, others...);
+		}
+
+		JSSetT(JSSetT&& set)
+			: __Super(set)
+		{
 		}
 
 		explicit JSSetT(const JSSetT& set)
@@ -56,31 +53,26 @@ namespace NS_JSTL
 		{
 		}
 
-		JSSetT(JSSetT&& set)
-		{
-			__Super::swap(set);
-		}
-
 		JSSetT(__InitList initList)
 			: __Super(initList)
 		{
 		}
 
-		template<typename T, typename _ITR = decltype(declval<T>().begin())>
+		template<typename T, typename = checkContainer_t<T>>
 		explicit JSSetT(const T& container)
 			: __Super(container)
 		{
 		}
 
-		JSSetT& operator=(const JSSetT& set)
+		JSSetT& operator=(JSSetT&& set)
 		{
 			__Super::assign(set);
 			return *this;
 		}
 
-		JSSetT& operator=(JSSetT&& set)
+		JSSetT& operator=(const JSSetT& set)
 		{
-			__Super::swap(set);
+			__Super::assign(set);
 			return *this;
 		}
 
@@ -100,27 +92,27 @@ namespace NS_JSTL
 	protected:
 		size_t _add(__DataConstRef data) override
 		{
-			_data().insert(data);
+			m_data.insert(data);
 
-			return _data().size();
+			return m_data.size();
 		}
 
 		size_t _del(__DataConstRef data) override
 		{
-			auto itr = _data().find(data);
-			if (itr == _data().end())
+			auto itr = m_data.find(data);
+			if (itr == m_data.end())
 			{
 				return 0;
 			}
 
-			_data().erase(itr);
+			m_data.erase(itr);
 
 			return 1;
 		}
 
 		bool _includes(__DataConstRef data) const override
 		{
-			return _data().find(data) != _data().end();
+			return m_data.find(data) != m_data.end();
 		}
 
 	public:
@@ -171,7 +163,7 @@ namespace NS_JSTL
 		{
 			JSSetT set;
 			JSSetT other(rhs);
-			for (auto& data : _data())
+			for (auto& data : m_data)
 			{
 				if (other.includes(data))
 				{
@@ -206,7 +198,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto&data : _data())
+				for (auto&data : m_data)
 				{
 					set.add(cb(data));
 				}
@@ -227,7 +219,7 @@ namespace NS_JSTL
 
 			if (cb)
 			{
-				for (auto&data : _data())
+				for (auto&data : m_data)
 				{
 					if (cb(data))
 					{
