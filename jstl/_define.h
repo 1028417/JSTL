@@ -12,6 +12,26 @@
 
 using namespace std;
 
+template<class _Iter>
+#ifdef _MSC_VER
+using checkIter_t = enable_if_t<_Is_iterator<_Iter>::value>;
+#else
+using checkIter_t = std::_RequireInputIter<_Iter>;
+#endif
+
+template<class T>
+using checkContainer_t = checkIter_t<decltype(declval<T>().begin())>;
+
+template <typename T, typename _RetType, class = checkContainer_t<T>>
+struct tagCheckContainerT
+{
+	typedef _RetType type;
+};
+template <typename T>
+struct tagCheckContainerT<T, void, void>
+{
+};
+
 namespace NS_JSTL
 {
 	typedef size_t TD_PosType;

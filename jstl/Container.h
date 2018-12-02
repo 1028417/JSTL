@@ -155,7 +155,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, size_t>()) add(const T& container)
+		typename tagCheckContainerT<T, size_t>::type add(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
@@ -373,7 +373,7 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		decltype(checkContainer<T, bool>()) includes(const T& container) const
+		typename tagCheckContainerT<T, bool>::type includes(const T& container) const
 		{
 			if (checkIsSelf(container))
 			{
@@ -484,7 +484,7 @@ namespace NS_JSTL
 		}
 
 		template <typename T>
-		decltype(checkContainer<T, size_t>()) del(const T& container)
+		typename tagCheckContainerT<T, size_t>::type del(const T& container)
 		{
 			if (checkIsSelf(container))
 			{

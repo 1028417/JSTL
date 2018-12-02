@@ -2,35 +2,9 @@
 #ifndef __ptrcontainer_H
 #define __ptrcontainer_H
 
+#include "_define.h"
+
 #include <list>
-using namespace std;
-
-template <typename T>
-class GetType
-{
-public:
-	typedef T type;
-	typedef T& type_ref;
-	typedef T* type_pointer;
-};
-
-template<typename T>
-class GetType<T&>
-{
-public:
-	typedef typename remove_reference<T>::type type;
-	typedef typename remove_reference<T>::type_ref type_ref;
-	typedef typename remove_reference<T>::type_pointer type_pointer;
-};
-
-template<typename T>
-class GetType<T*>
-{
-public:
-	typedef typename remove_reference<T>::type type;
-	typedef typename remove_reference<T>::type_ref type_ref;
-	typedef typename remove_reference<T>::type_pointer type_pointer;
-};
 
 template <template<typename...> typename __BaseType, class __PtrType>
 class ptrcontainerT : public __BaseType<__PtrType>
@@ -59,13 +33,7 @@ public:
 		add(ref);
 	}
 
-#ifdef _MSC_VER
-	template<class _Iter,
-		class = enable_if_t<_Is_iterator<_Iter>::value>>
-#else
-	template<class _Iter,
-		typename = std::_RequireInputIter<_Iter>>
-#endif
+	template<class _Iter, typename = checkIter_t<_Iter>>
 	ptrcontainerT(_Iter _First, _Iter _Last)
 		: __Super(_First, _Last)
 	{
@@ -94,15 +62,15 @@ public:
 	}
 
 	template <typename T>
-	ptrcontainerT(list<T>& container)
-	{
-		add(container);
-	}
-
-	template <typename T>
 	ptrcontainerT(const list<T*>& container, bool bDynamicCastFlag)
 	{
 		_addDowncast(container, bDynamicCastFlag);
+	}
+
+	template <typename T>
+	ptrcontainerT(list<T>& container)
+	{
+		add(container);
 	}
 
 	template <typename T>
@@ -118,40 +86,47 @@ public:
 	}
 
 	template <typename T>
-	ptrcontainerT(vector<T>& container)
-	{
-		add(container);
-	}
-
-	template <typename T>
 	ptrcontainerT(const vector<T*>& container, bool bDynamicCastFlag)
 	{
 		_addDowncast(container, bDynamicCastFlag);
 	}
 
+	template <typename T>
+	ptrcontainerT(vector<T>& container)
+	{
+		add(container);
+	}
+
 public:
-	void add(__PtrType ptr)
+	ptrcontainerT& add(__PtrType ptr)
 	{
 		push_back(ptr);
+
+		return *this;
 	}
 
-	void add(__RefType ref)
+	ptrcontainerT& add(__RefType ref)
 	{
 		push_back(&ref);
+
+		return *this;
 	}
 
-	void del(__ConstPtr ptr)
+	bool del(__ConstPtr ptr)
 	{
 		auto itr = std::find(__Super::begin(), __Super::end(), ptr);
 		if (itr != __Super::end())
 		{
 			erase(itr);
+			return true;
 		}
+
+		return false;
 	}
 
-	void del(__ConstRef ref)
+	bool del(__ConstRef ref)
 	{
-		del(&ref);
+		return del(&ref);
 	}
 
 private:
@@ -195,51 +170,59 @@ private:
 
 public:
 	template <typename T>
-	void add(const list<T*>& container)
+	ptrcontainerT& add(const list<T*>& container)
 	{
 		_addPtr(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(list<T*>& container)
+	ptrcontainerT& add(list<T*>& container)
 	{
 		_addPtr(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(list<T>& container)
+	ptrcontainerT& add(list<T>& container)
 	{
 		_addRef(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(const vector<T*>& container)
+	ptrcontainerT& add(const vector<T*>& container)
 	{
 		_addPtr(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(vector<T*>& container)
+	ptrcontainerT& add(vector<T*>& container)
 	{
 		_addPtr(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(vector<T>& container)
+	ptrcontainerT& add(vector<T>& container)
 	{
 		_addRef(container);
+		return *this;
 	}
 
 	template <typename T>
-	void add(const list<T*>& container, bool bDynamicCastFlag)
+	ptrcontainerT& add(const list<T*>& container, bool bDynamicCastFlag)
 	{
 		_addDowncast(container, bDynamicCastFlag);
+		return *this;
 	}
 
 	template <typename T>
-	void add(const vector<T*>& container, bool bDynamicCastFlag)
+	ptrcontainerT& add(const vector<T*>& container, bool bDynamicCastFlag)
 	{
 		_addDowncast(container, bDynamicCastFlag);
+		return *this;
 	}
 };
 
