@@ -43,17 +43,22 @@ namespace NS_JSTL
 		{
 		}
 
+		explicit JSSetT(__ContainerType&& container)
+		{
+			__Super::swap(container);
+		}
+
 		JSSetT(JSSetT&& set)
+		{
+			__Super::swap(set);
+		}
+
+		JSSetT(const JSSetT& set)
 			: __Super(set)
 		{
 		}
 
-		explicit JSSetT(const JSSetT& set)
-			: __Super(set)
-		{
-		}
-
-		JSSetT(__InitList initList)
+		explicit JSSetT(__InitList initList)
 			: __Super(initList)
 		{
 		}
@@ -64,9 +69,21 @@ namespace NS_JSTL
 		{
 		}
 
+		template<typename T, typename = checkContainer_t<T>>
+		explicit JSSetT(T& container)
+			: __Super(container)
+		{
+		}
+
+		JSSetT& operator=(__ContainerType&& container)
+		{
+			__Super::swap(container);
+			return *this;
+		}
+
 		JSSetT& operator=(JSSetT&& set)
 		{
-			__Super::assign(set);
+			__Super::swap(set);
 			return *this;
 		}
 
@@ -89,12 +106,17 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		template <typename T>
+		JSSetT& operator=(T&t)
+		{
+			__Super::assign(t);
+			return *this;
+		}
+
 	protected:
-		size_t _add(__DataConstRef data) override
+		void _add(__DataConstRef data) override
 		{
 			m_data.insert(data);
-
-			return m_data.size();
 		}
 
 		size_t _del(__DataConstRef data) override
@@ -163,7 +185,7 @@ namespace NS_JSTL
 		{
 			JSSetT set;
 			JSSetT other(rhs);
-			for (auto& data : m_data)
+			for (auto&data : m_data)
 			{
 				if (other.includes(data))
 				{
@@ -171,23 +193,6 @@ namespace NS_JSTL
 				}
 			}
 			return set;
-		}
-
-		template<typename... args>
-		size_t add(__DataConstRef data, const args&... others)
-		{
-			return __Super::add(data, others...);
-		}
-
-		template<typename T>
-		size_t add(const T& container)
-		{
-			return __Super::add(container);
-		}
-
-		size_t add(__InitList initList)
-		{
-			return add<__InitList>(initList);
 		}
 
 	public:

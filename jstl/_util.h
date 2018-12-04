@@ -25,7 +25,7 @@ namespace NS_JSTL
 	};
 
 	template <typename T, typename U> struct decay_is_same
-		: std::is_same<typename std::decay<T>::type, U>::type
+		: is_same<typename decay<T>::type, U>::type
 	{
 	};
 	
@@ -106,7 +106,7 @@ namespace NS_JSTL
 			return false;
 		}
 
-		enum { value = std::is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
+		enum { value = is_same<decltype(_lmove(declval<T*>(), declval<U*>())), T&>::value };
 	};
 
 	template <typename T, typename U = int>	struct tagLMove {
@@ -239,8 +239,14 @@ namespace NS_JSTL
 	}
 
 	template <typename T>
-	void QSort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
+	void qsort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
 	{
+		if (size < 2)
+		{
+			return;
+		}
+		int end = (int)size - 1;
+
 		tagTrySort<T> trySort;
 		auto fnCompare = [&](T& lhs, T& rhs) {
 			if (cb) {
@@ -285,16 +291,17 @@ namespace NS_JSTL
 			fnSort(begin, i - 1);
 			fnSort(i + 1, end);
 		};
-		fnSort(0, size - 1);
+		
+		fnSort(0, end);
 	}
 
 	template <typename T>
-	void QSort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
+	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
 	{
 		size_t size = vecData.size();
 		if (size > 1)
 		{
-			QSort<T>(&vecData.front(), size, cb);
+			qsort<T>(&vecData.front(), size, cb);
 		}
 	}
 }

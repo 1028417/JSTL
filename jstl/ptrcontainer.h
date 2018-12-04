@@ -6,187 +6,271 @@
 
 #include <list>
 
-template <template<typename...> typename __BaseType, class __PtrType>
-class ptrcontainerT : public __BaseType<__PtrType>
+namespace NS_JSTL
 {
-private:
-	using __Super = __BaseType<__PtrType>;
-	
-protected:
-	using __Type = typename remove_reference<decltype(*(__PtrType)NULL)>::type;
-	using __RefType = __Type&;
-	using __ConstRef = const __Type&;
-	using __ConstPtr = const __Type*;
-
-public:
-	ptrcontainerT()
+	template <template<typename...> typename __BaseType, class __PtrType>
+	class ptrcontainerT : public __BaseType<__PtrType>
 	{
-	}
+	private:
+		using __Super = __BaseType<__PtrType>;
 
-	ptrcontainerT(__Super&& container)
-	{
-		swap(container);
-	}
+	protected:
+		using __Type = typename remove_reference<decltype(*(__PtrType)NULL)>::type;
+		using __RefType = __Type&;
+		
+		using __ConstRef = const __Type&;
+		using __ConstPtr = const __Type*;
 
-	ptrcontainerT(const ptrcontainerT& container)
-		: __Super(container.begin(), container.end())
-	{
-	}
+		using __InitList = InitList_T<__PtrType>;
 
-	explicit ptrcontainerT(const vector<__PtrType>& container)
-		: __Super(container.begin(), container.end())
-	{
-	}
+	public:
+		ptrcontainerT()
+		{
+		}
 
-	explicit ptrcontainerT(const list<__PtrType>& container)
-		: __Super(container.begin(), container.end())
-	{
-	}
+		template<class _Iter, typename = checkIter_t<_Iter>>
+		explicit ptrcontainerT(_Iter _First, _Iter _Last)
+		{
+			for (auto itr = _First; itr != _Last; itr++)
+			{
+				_add(*itr);
+			}
+		}
 
-	template<class _Iter, typename = checkIter_t<_Iter>>
-	explicit ptrcontainerT(_Iter _First, _Iter _Last)
-		: __Super(_First, _Last)
-	{
-	}
+		explicit ptrcontainerT(__Super&& container)
+		{
+			__Super::swap(container);
+		}
 
-	explicit ptrcontainerT(__PtrType ptr)
-	{
-		_add(ptr);
-	}
+		ptrcontainerT(ptrcontainerT&& container)
+		{
+			__Super::swap(container);
+		}
 
-	explicit ptrcontainerT(__RefType ref)
-	{
-		_add(ref);
-	}
+		ptrcontainerT(const ptrcontainerT& container)
+			: __Super(container.begin(), container.end())
+		{
+		}
 
-	template <typename T>
-	explicit ptrcontainerT(const vector<T>& container)
-	{
-		_addContainer(container);
-	}
+		explicit ptrcontainerT(__InitList initLst)
+		{
+			_addContainer(initLst);
+		}
 
-	template <typename T>
-	explicit ptrcontainerT(list<T>& container)
-	{
-		_addContainer(container);
-	}
+		template <typename T, typename = checkContainer_t<T>>
+		explicit ptrcontainerT(const T& container)
+		{
+			_addContainer(container);
+		}
 
-	template <typename T>
-	explicit ptrcontainerT(const list<T>& container)
-	{
-		_addContainer(container);
-	}
-
-private:
-	template <typename T>
-	void _addContainer(T& container)
-	{
-		for (auto& ptr : container)
+		template <typename T, typename = checkContainer_t<T>>
+		explicit ptrcontainerT(T& container)
+		{
+			_addContainer(container);
+		}
+		explicit ptrcontainerT(__PtrType ptr)
 		{
 			_add(ptr);
 		}
-	}
 
-	void _add(__PtrType ptr)
-	{
-		if (NULL != ptr)
+		explicit ptrcontainerT(__RefType ref)
 		{
-			push_back(ptr);
+			_add(ref);
 		}
-	}
-	
-	void _add(__RefType ref)
-	{
-		push_back(&ref);
-	}
 
-	template <typename T>
-	void _add(T* ptr, ...)
-	{
-		_add(dynamic_cast<__PtrType>(ptr));
-	}
-
-	template <typename T>
-	void _add(T& ref, ...)
-	{
-		_add(dynamic_cast<__PtrType>(&ref));
-	}
-
-public:
-	bool del(__ConstPtr ptr)
-	{
-		auto itr = std::find(__Super::begin(), __Super::end(), ptr);
-		if (itr != __Super::end())
+		template <typename T>
+		explicit ptrcontainerT(T* ptr)
 		{
-			erase(itr);
+			_add(ptr);
+		}
+
+		ptrcontainerT& operator = (const ptrcontainerT& container)
+		{
+			__Super::assign(container.begin(), container.end());
+			return *this;
+		}
+
+	private:
+		inline bool _add(__RefType ref)
+		{
+			__Super::push_back(&ref);
 			return true;
 		}
 
-		return false;
-	}
+		inline bool _add(__PtrType ptr)
+		{
+			if (NULL != ptr)
+			{
+				__Super::push_back(ptr);
+				return true;
+			}
+			
+			return false;
+		}
 
-	bool del(__ConstRef ref)
-	{
-		return del(&ref);
-	}
+		/*template <typename = checkNotConstType_t<__Type>>
+		inline void _add(typename remove_const<__Type>::type * ptr, ...)
+		{
+			if (NULL != ptr)
+			{
+				__Super::push_back(ptr);
+			}
+		}*/
 
-	ptrcontainerT& clear()
-	{
-		__Super::clear();
-		return *this;
-	}
+		template <typename T, typename = checkClass_t<T, __Type>>
+		inline bool _add(T* ptr, ...)
+		{
+			return _add(dynamic_cast<__PtrType>(ptr));
+		}
 
-	ptrcontainerT& add(__PtrType ptr)
-	{
-		push_back(ptr);
-		return *this;
-	}
+		template <typename T, typename = checkClass_t<T, __Type>>
+		inline bool _add(T& ref, ...)
+		{
+			return _add(dynamic_cast<__PtrType>(&ref));
+		}
 
-	ptrcontainerT& add(__RefType ref)
-	{
-		push_back(&ref);
-		return *this;
-	}
+		template <typename T>
+		size_t _addContainer(T& container)
+		{
+			size_t uRet = 0;
 
-	template <typename T>
-	ptrcontainerT& add(const vector<T>& container)
-	{
-		_addContainer(container);
-		return *this;
-	}
+			for (auto&data : container)
+			{
+				if (_add(data))
+				{
+					uRet++;
+				}
+			}
 
-	template <typename T>
-	ptrcontainerT& add(vector<T>& container)
-	{
-		_addContainer(container);
-		return *this;
-	}
+			return uRet;
+		}
 
-	template <typename T>
-	ptrcontainerT& add(const list<T>& container)
-	{
-		_addContainer(container);
-		return *this;
-	}
+		inline size_t _del(__ConstPtr ptr)
+		{
+			size_t uRet = 0;
 
-	template <typename T>
-	ptrcontainerT& add(list<T>& container)
-	{
-		_addContainer(container);
-		return *this;
-	}
+			auto itr = __Super::begin();
+			while (true)
+			{
+				itr = find(itr, __Super::end(), ptr);
+				if (itr != __Super::end())
+				{
+					itr = __Super::erase(itr);
+				
+					uRet++;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			return uRet;
+		}
+
+		inline size_t _del(__ConstRef ref)
+		{
+			return _del(&ref);
+		}
+
+		template <typename T>
+		size_t _del(T* ptr)
+		{
+			return _del((__ConstPtr)ptr);
+		}
+
+		template <typename T>
+		size_t _delContainer(T& container)
+		{
+			size_t uRet = 0;
+
+			for (auto&data : container)
+			{
+				if (_del(data))
+				{
+					uRet++;
+				}
+			}
+
+			return uRet;
+		}
+
+	public:
+		ptrcontainerT& add(__RefType ref)
+		{
+			__Super::push_back(&ref);
+			return *this;
+		}
+
+		bool add(__PtrType ptr)
+		{
+			return _add(ptr);
+		}
+
+		size_t add(__InitList initLst)
+		{
+			return _addContainer(initLst);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t add(const T& container)
+		{
+			return _addContainer(container);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t add(T& container)
+		{
+			return _addContainer(container);
+		}
+
+	public:
+		//template <typename = checkNotConstType_t<__Type>>
+		size_t del(__ConstRef ref)
+		{
+			return _del(&ref);
+		}
+
+		size_t del(__ConstPtr ptr)
+		{
+			return _del(ptr);
+		}
+
+		template <typename T>
+		size_t del(T* ptr)
+		{
+			return del((__ConstPtr)ptr);
+		}
+
+		size_t del(__InitList initLst)
+		{
+			return _delContainer(initLst);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t del(const T& container)
+		{
+			return _delContainer(container);
+		}
+
+		template <typename T, typename = checkContainer_t<T>>
+		size_t del(T& container)
+		{
+			return _delContainer(container);
+		}
+	};
+
+	template <class __PtrType>
+	using ptrvectorT = ptrcontainerT<vector, __PtrType>;
+
+	template <class __Type>
+	using ptrvector = ptrvectorT<__Type*>;
+
+	template <class __PtrType>
+	using ptrlistT = ptrcontainerT<list, __PtrType>;
+
+	template <class __Type>
+	using ptrlist = ptrlistT<__Type*>;
 };
-
-template <class __PtrType>
-using ptrvectorT = ptrcontainerT<vector, __PtrType>;
-
-template <class __Type>
-using ptrvector = ptrvectorT<__Type*>;
-
-template <class __PtrType>
-using ptrlistT = ptrcontainerT<list, __PtrType>;
-
-template <class __Type>
-using ptrlist = ptrlistT<__Type*>;
 
 #endif // __ptrcontainer_H

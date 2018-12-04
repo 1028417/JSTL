@@ -72,17 +72,22 @@ namespace NS_JSTL
 			set(keys, cb);
 		}
 
+		explicit JSMapT(__ContainerType&& container)
+		{
+			__Super::swap(container);
+		}
+
 		JSMapT(JSMapT&& map)
+		{
+			__Super::swap(map);
+		}
+
+		JSMapT(const JSMapT& map)
 			: __Super(map)
 		{
 		}
 
-		explicit JSMapT(const JSMapT& map)
-			: __Super(map)
-		{
-		}
-
-		JSMapT(__InitList initList)
+		explicit JSMapT(__InitList initList)
 			: __Super(initList)
 		{
 		}
@@ -93,9 +98,21 @@ namespace NS_JSTL
 		{
 		}
 
+		template<typename T, typename = checkContainer_t<T>>
+		explicit JSMapT(T& container)
+			: __Super(container)
+		{
+		}
+
+		JSMapT& operator=(__ContainerType&& container)
+		{
+			__Super::swap(container);
+			return *this;
+		}
+
 		JSMapT& operator=(JSMapT&& map)
 		{
-			__Super::assign(map);
+			__Super::swap(map);
 			return *this;
 		}
 
@@ -118,12 +135,17 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		template<typename T>
+		JSMapT& operator=(T&t)
+		{
+			__Super::assign(t);
+			return *this;
+		}
+
 	protected:
-		size_t _add(const __DataType& pr) override
+		void _add(const __DataType& pr) override
 		{
 			m_data.insert(pr);
-
-			return m_data.size();
 		}
 
 		size_t _del(__KeyConstRef key) override
@@ -229,7 +251,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool del_one(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		bool del_if(__KeyConstRef key, __CB_ValueR_void cb=NULL)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
@@ -247,14 +269,14 @@ namespace NS_JSTL
 			return true;
 		}
 
-		size_t del_some(__CB_ValueR_DelConfirm cb)
+		size_t del_if(__CB_ValueR_DelConfirm cb)
 		{
 			if (!cb)
 			{
 				return 0;
 			}
 
-			return __Super::del([&](__DataType& data) {
+			return __Super::del_if([&](__DataType& data) {
 				return cb(data.second);
 			});
 		}
@@ -304,7 +326,7 @@ namespace NS_JSTL
 					}
 				}
 
-				arr.push(pr.first);
+				arr.add(pr.first);
 			}
 
 			return arr;
@@ -323,7 +345,7 @@ namespace NS_JSTL
 					}
 				}
 
-				arr.push(pr.second);
+				arr.add(pr.second);
 			}
 
 			return arr;
@@ -335,23 +357,21 @@ namespace NS_JSTL
 		}
 
 		template<typename T>
-		size_t set(const T& container)
+		void set(const T& container)
 		{
 			if (!__Super::checkIsSelf(container))
 			{
 				m_data.insert(container.begin(), container.end());
 			}
-
-			return m_data.size();
 		}
 
-		size_t set(__InitList initList)
+		void set(__InitList initList)
 		{
-			return set<__InitList>(initList);
+			set<__InitList>(initList);
 		}
 
 		template <typename T>
-		size_t set(const T& container, const function<__ValueType(__KeyType)>& cb)
+		void set(const T& container, const function<__ValueType(__KeyType)>& cb)
 		{
 			if (cb)
 			{
@@ -360,13 +380,11 @@ namespace NS_JSTL
 					this->set(key, cb(key));
 				}
 			}
-
-			return m_data.size();
 		}
 
-		size_t set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
+		void set(__InitList_Key keys, const function<__ValueType(__KeyType)>& cb)
 		{
-			return set<__InitList_Key>(keys, cb);
+			set<__InitList_Key>(keys, cb);
 		}
 
 	public:

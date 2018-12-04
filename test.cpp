@@ -50,7 +50,7 @@ bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const JSMap<TD_Car
 	arrCardExpect.forEach([&](TD_PosType pos, const TD_CardNum&uCardNum) {
 		if (1 == uContinuityCount)
 		{
-			retCardPattern.push(tagCardPattern(eCardPattern, uCardNum, 1));
+			retCardPattern.add(tagCardPattern(eCardPattern, uCardNum, 1));
 			bRet = true;
 		}
 		else
@@ -58,7 +58,7 @@ bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const JSMap<TD_Car
 			if (!arrCardExpect.get(pos + uContinuityCount - 1, [&](const TD_CardNum&uCardNum) {
 				if (uCardNum - uCardNum + 1 == uContinuityCount)
 				{
-					retCardPattern.push(tagCardPattern(eCardPattern, uCardNum, 1));
+					retCardPattern.add(tagCardPattern(eCardPattern, uCardNum, 1));
 					bRet = true;
 				}
 			}))
@@ -102,14 +102,14 @@ int main()
 	struct tag {};
 	JSArray<tag> qqta{ {},{},{},{} };
 	auto idof = qqta.indexOf({});
-	qqta.QSort();
+	qqta.qsort();
 	auto strsk = qqta.toString();
 	
 	JSArray<int> qq;
 	qq= { 12,2,3 };
 	qq = 1;
 	auto aaaa = qq.indexOf({2});
-	qq.QSort();
+	qq.qsort();
 	auto aaaaaaa = qq.toString();
 	qq.unshift({ 1 });
 	qq.unshift(1);
@@ -123,13 +123,14 @@ int main()
 
 	JSArray<int> arr(qq);
 	arr=qq;
-	arr.push({ 66,44,19,2,2,3,5,5,6,7,8 });
-	qq.push( { 12,2,3 });
+	arr.add({ 66,44,19,2,2,3,5,5,6,7,8 });
+	qq.add( { 12,2,3 });
 	JSArray<int> arr2;
 	arr2 = arr.map([](float i) {return i * 2; });
 	auto ff = arr.reduce([](const float& a1, const int& a2) {return a1+a2; });
 
 	JSArray<int> arr3 = arr2.slice(6, 3);
+	arr3 = arr3;
 
 	JSMap<int, int> ooo({1}, [](int key) {
 		return key*2;
@@ -170,6 +171,9 @@ int main()
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
 	JSArray<int> ts2(7,7.9, 4);
+	ts2.add({1,2,3});
+	ts2 = {1,2,3};
+
 	ts2.getFront([](int&) {});
 	((const JSArray<int>&)ts2).getFront([](const int&) {});
 
@@ -181,7 +185,7 @@ int main()
 		t = 7;
 	}
 
-	ts2.QSort();
+	ts2.qsort();
 	ts2.concat(9);
 	ts2.concat({ 9 });
 	ts2.concat(9, 9);
@@ -204,12 +208,18 @@ int main()
 	int uy = 1;
 	PtrArray<int> PtrArray0001(uy, uy);
 	PtrArray<int> PtrArray111(&uy, &uy);
+	
+
+	int p1111 = 1;
+	//PtrArray111.del(p1111, p1111);
+
 	PtrArray111.assign(uy, uy);
 	PtrArray111.assign(&uy, &uy);
-	PtrArray111.push(uy, uy);
-	PtrArray111.push(&uy, &uy);
-	PtrArray111.push({ &uy });
-	PtrArray111.push(PtrArray111);
+	PtrArray111.add(uy, uy);
+	PtrArray111.add(&uy, &uy);
+	PtrArray111 = PtrArray111;
+	PtrArray111.add({ &uy });
+	PtrArray111.add(PtrArray111);
 
 	PtrArray111.unshift(uy, uy);
 	PtrArray111.unshift(&uy, &uy);
@@ -222,11 +232,11 @@ int main()
 	PtrArray111.concat(PtrArray111);
 
 	ConstPtrArray<int> ConstPtrArray111(&(const int&)uy);
-	ConstPtrArray111.push(uy);
-	ConstPtrArray111.push(&uy);
-	ConstPtrArray111.push({ &uy });
-	ConstPtrArray111.push(PtrArray111);
-	ConstPtrArray111.push(ConstPtrArray111);
+	ConstPtrArray111.add(uy);
+	ConstPtrArray111.add(&uy);
+	ConstPtrArray111.add({ &uy });
+	ConstPtrArray111.add(PtrArray111);
+	ConstPtrArray111.add(ConstPtrArray111);
 
 	ConstPtrArray111.unshift(uy);
 	ConstPtrArray111.unshift(&uy);
@@ -241,17 +251,18 @@ int main()
 	ConstPtrArray111.concat(ConstPtrArray111);
 
 
-	ConstPtrArray111.push(PtrArray111);
+	ConstPtrArray111.add(PtrArray111);
 	ConstPtrArray111.concat(PtrArray111);
 
-	ConstPtrArray<int> ConstPtrArray222;
-	ConstPtrArray222 = ((const ConstPtrArray<int>&)ConstPtrArray111);
-	ConstPtrArray222.push(ConstPtrArray111);
+	ConstPtrArray<int> ConstPtrArray222((const ConstPtrArray<int>&)ConstPtrArray111);
+	ConstPtrArray222 = (const ConstPtrArray<int>&)ConstPtrArray111;
+	ConstPtrArray222.add(ConstPtrArray111);
 	ConstPtrArray222.concat(ConstPtrArray111);
-	ConstPtrArray222.push(nullptr);
+	ConstPtrArray222.add(nullptr);
 
 	bool b = ConstPtrArray222.includes(&uy);
-	ConstPtrArray222.del(nullptr, nullptr, nullptr);
+	ConstPtrArray222.del((int*)nullptr, (int*)nullptr, (int*)nullptr);
+	//ConstPtrArray222.del(NULL, NULL, NULL);
 
 	ConstPtrArray222 = 5;
 
@@ -267,7 +278,7 @@ int main()
 		return a + b;
 	});
 
-	JSSet<int> sstt={1,2};
+	JSSet<int> sstt({1,2});
 	sstt -= afrdg;
 	sstt += {5};
 
@@ -276,7 +287,7 @@ int main()
 	PtrArray<int> zqq311(*(int*)nullptr);
 	PtrArray<int> zqq161(jahss);
 	PtrArray<int> zqq711(zqq161);
-
+	
 	int yyy = 7;
 	list<int*> l;
 	PtrArray<int> popopo(l);
@@ -306,10 +317,10 @@ int main()
 	popopo.assign(zqq161);
 	
 
-	popopo.push( (int*)nullptr);
-	popopo.push({nullptr, nullptr, nullptr});
-	popopo.push(*(int*)nullptr);
-	popopo.push(jahss);
+	popopo.add( (int*)nullptr);
+	popopo.add({nullptr, nullptr, nullptr});
+	popopo.add(*(int*)nullptr);
+	popopo.add(jahss);
 
 	popopo -= (int*)nullptr;
 	popopo -= {nullptr, nullptr, nullptr};
@@ -320,7 +331,7 @@ int main()
 	popopo.del( popopo);
 
 	ConstPtrArray<int> ccccc;
-	ccccc.push(ccccc);
+	ccccc.add(ccccc);
 	ccccc += ccccc;
 	ccccc += sstt;
 	
@@ -328,5 +339,15 @@ int main()
 	oiuy-vector<int>();
 	oiuy - oiuy;
 	JSUnsortSet<int> qafjdjsd = oiuy&qq;
+	
+	if (qafjdjsd)
+	{
+		return 0;
+	}
+	
+	float *pf=0;
+	list<int> lala;
+	ptrlist<int> pll;
+	pll.add(lala);
 	return 0;
 }

@@ -20,7 +20,9 @@ namespace NS_JSTL
 	{		
 	protected:
 		using __DataType = __DataType__;
+
 		using __ContainerType = __ContainerType__;
+		
 		__ContainerType m_data;
 
 		using __InitList = InitList_T<__DataType>;
@@ -40,90 +42,6 @@ namespace NS_JSTL
 
 		using __CB_Ref_DelConfirm = CB_T_Ret<__DataRef, E_DelConfirm>;
 
-	private:
-		template <typename DATA> class __ContainerOperatorT
-		{
-		public:
-			__ContainerOperatorT(DATA& data)
-				: m_data(data)
-			{
-			}
-
-		protected:
-			DATA& m_data;
-
-		public:
-			template <typename CB>
-			bool getFront(const CB& cb)
-			{
-				auto itr = m_data.begin();
-				if (itr == m_data.end())
-				{
-					return false;
-				}
-
-				if (cb)
-				{
-					cb(*itr);
-				}
-
-				return true;
-			}
-
-			template <typename CB>
-			bool getBack(const CB& cb)
-			{
-				auto itr = m_data.rbegin();
-				if (itr == m_data.rend())
-				{
-					return false;
-				}
-
-				if (cb)
-				{
-					cb(*itr);
-				}
-
-				return true;
-			}
-		};
-
-		using __ContainerOperator = __ContainerOperatorT<__ContainerType>;
-		__ContainerOperator m_ContainerOperator = __ContainerOperator(m_data);
-		__ContainerOperator& getContainerOperator()
-		{
-			return m_ContainerOperator;
-		}
-
-		using __ContainerReader = __ContainerOperatorT<const __ContainerType>;
-		__ContainerReader m_ContainerReader = __ContainerReader(m_data);
-		__ContainerReader& getContainerOperator() const
-		{
-			return (__ContainerReader&)m_ContainerReader;
-		}
-
-	protected:
-		virtual size_t _add(__DataConstRef data)
-		{
-			m_data.insert(m_data.end(), data);
-			return 1;
-		}
-
-		virtual size_t _del(__KeyConstRef key)
-		{
-			return 0;
-		}
-
-		virtual bool _includes(__KeyConstRef key) const
-		{
-			return false;
-		}
-
-		virtual void _toString(stringstream& ss, __DataConstRef data) const
-		{
-			tagSSTryLMove(ss) << data;
-		}
-
 	public:
 		ContainerT()
 		{
@@ -135,17 +53,22 @@ namespace NS_JSTL
 			add(data, others...);
 		}
 
+		explicit ContainerT(__ContainerType&& container)
+		{
+			m_data.swap(container);
+		}
+
 		ContainerT(ContainerT&& container)
 		{
 			swap(container);
 		}
 
-		explicit ContainerT(const ContainerT& container)
+		ContainerT(const ContainerT& container)
 			: m_data(container.begin(), container.end())
 		{
 		}
 
-		ContainerT(__InitList initList)
+		explicit ContainerT(__InitList initList)
 			: m_data(initList.begin(), initList.end())
 		{
 		}
@@ -156,9 +79,15 @@ namespace NS_JSTL
 		{
 		}
 
+		template<typename T, typename = checkContainer_t<T>>
+		explicit ContainerT(T& container)
+			: m_data(container.begin(), container.end())
+		{
+		}
+
 		ContainerT& operator=(ContainerT&& container)
 		{
-			assign(container);
+			swap(container);
 			return *this;
 		}
 
@@ -181,14 +110,23 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		template <typename T>
+		ContainerT& operator=(T&t)
+		{
+			assign(t);
+			return *this;
+		}
+
 	public:
 		ContainerT& swap(ContainerT& container)
 		{
-			if (!checkIsSelf(container))
-			{
-				m_data.swap(container.m_data);
-			}
+			_swap(container.m_data);
+			return *this;
+		}
 
+		ContainerT& swap(__ContainerType& container)
+		{
+			_swap(container);
 			return *this;
 		}
 
@@ -200,6 +138,11 @@ namespace NS_JSTL
 			add(data, others...);
 
 			return *this;
+		}
+
+		ContainerT assign(__ContainerType&& container)
+		{
+			m_data.swap(container);
 		}
 
 		ContainerT& assign(ContainerT&& container)
@@ -223,7 +166,7 @@ namespace NS_JSTL
 			//m_data = __ContainerType(container.begin(), container.end());
 
 			//m_data.clear();
-			//for (auto& data : container)
+			//for (auto&data : container)
 			//{
 			//	_add(data);
 			//}
@@ -234,36 +177,37 @@ namespace NS_JSTL
 			return *this;
 		}
 
+		void add(__DataConstRef data)
+		{
+			_add(data);
+		}
+
 		template<typename... args>
-		size_t add(__DataConstRef data, const args&... others)
+		void add(__DataConstRef data, const args&... others)
 		{
 			(void)extractDataTypeArgs([&](__DataConstRef data) {
 				_add(data);
 				return true;
 			}, data, others...);
-
-			return size();
 		}
 
-		size_t add(__InitList initList)
+		void add(__InitList initList)
 		{
-			return add<__InitList>(initList);
+			add<__InitList>(initList);
 		}
 
-		template<typename T>
-		typename tagCheckContainerT<T, size_t>::type add(const T& container)
+		template<typename T, typename = checkContainer_t<T>>
+		void add(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
-				return size();
+				return;
 			}
 
 			for (auto&data : container)
 			{
 				_add(data);
 			}
-
-			return size();
 		}
 
 	public:
@@ -272,10 +216,10 @@ namespace NS_JSTL
 			return !m_data.empty();
 		}
 
-		template <typename T>
-		T erase(T& itr)
+		template <typename T, typename = checkIter_t<T>>
+		T erase(const T& itr)
 		{
-			return itr = m_data.erase(itr);
+			return m_data.erase(itr);
 		}
 
 		void clear()
@@ -308,34 +252,34 @@ namespace NS_JSTL
 
 		bool getFront(__CB_Ref_void cb)
 		{
-			return getContainerOperator().getFront(cb);
+			return _getOperator().getFront(cb);
 		}
 
 		bool getFront(__CB_ConstRef_void cb) const
 		{
-			return getContainerOperator().getFront(cb);
+			return _getOperator().getFront(cb);
 		}
 
 		bool getFront(__DataRef data) const
 		{
-			return getContainerOperator().getFront([&](__DataConstRef _data) {
+			return _getOperator().getFront([&](__DataConstRef _data) {
 				data = _data;
 			});
 		}
 
 		void getBack(__CB_Ref_void cb)
 		{
-			getContainerOperator().getBack(cb);
+			_getOperator().getBack(cb);
 		}
 
 		void getBack(__CB_ConstRef_void cb) const
 		{
-			getContainerOperator().getBack(cb);
+			_getOperator().getBack(cb);
 		}
 
 		bool getBack(__DataRef data) const
 		{
-			return getContainerOperator().getBack([&](__DataConstRef _data) {
+			return _getOperator().getBack([&](__DataConstRef _data) {
 				data = _data;
 			});
 		}
@@ -383,8 +327,8 @@ namespace NS_JSTL
 			return bRet;
 		}
 
-		template<typename T>
-		typename tagCheckContainerT<T, bool>::type includes(const T& container) const
+		template<typename T, typename = checkContainer_t<T>>
+		bool includes(const T& container) const
 		{
 			if (checkIsSelf(container))
 			{
@@ -494,8 +438,8 @@ namespace NS_JSTL
 			return uRet;
 		}
 
-		template <typename T>
-		typename tagCheckContainerT<T, size_t>::type del(const T& container)
+		template<typename T, typename = checkContainer_t<T>>
+		size_t del(const T& container)
 		{
 			if (checkIsSelf(container))
 			{
@@ -524,7 +468,7 @@ namespace NS_JSTL
 			return del<__InitList_Key>(keys);
 		}
 
-		size_t del(__CB_Ref_DelConfirm cb)
+		size_t del_if(__CB_Ref_DelConfirm cb)
 		{
 			if (!cb)
 			{
@@ -574,7 +518,6 @@ namespace NS_JSTL
 			return ss.str();
 		}
 
-	public:
 		bool every(__CB_ConstRef_bool cb) const
 		{
 			if (!cb)
@@ -617,10 +560,43 @@ namespace NS_JSTL
 		}
 
 	protected:
+		virtual void _add(__DataConstRef data)
+		{
+			m_data.insert(m_data.end(), data);
+		}
+
+		virtual size_t _del(__KeyConstRef key)
+		{
+			return 0;
+		}
+
+		virtual bool _includes(__KeyConstRef key) const
+		{
+			return false;
+		}
+
+		virtual void _toString(stringstream& ss, __DataConstRef data) const
+		{
+			tagSSTryLMove(ss) << data;
+		}
+
 		template<typename T>
 		bool checkIsSelf(const T& container) const
 		{
-			return ((void*)&container == (void*)this) || ((void*)&container == (void*)&m_data);
+			if (is_same<T, __ContainerType>::value)
+			{
+				return (__ContainerType*)&container == &m_data;
+			}
+
+			return (ContainerT*)&container == this;
+		}
+
+		template<typename... args>
+		static bool extractDataTypeArgs(__CB_Ref_bool cb, __DataRef data, args&... others)
+		{
+			return tagDynamicArgsExtractor<__DataType>::extract([&](__DataRef data) {
+				return cb(data);
+			}, data, others...);
 		}
 
 		template<typename... args>
@@ -655,6 +631,77 @@ namespace NS_JSTL
 				vecArgs.push_back(key);
 				return true;
 			}, key, others...);
+		}
+
+	private:
+		void _swap(__ContainerType& container)
+		{
+			if (&container != &m_data)
+			{
+				m_data.swap(container);
+			}
+		}
+
+	private:
+		template <typename DATA> class __ContainerOperatorT
+		{
+		public:
+			__ContainerOperatorT(DATA& data)
+				: m_data(data)
+			{
+			}
+
+		private:
+			DATA& m_data;
+
+		public:
+			template <typename CB>
+			bool getFront(const CB& cb)
+			{
+				auto itr = m_data.begin();
+				if (itr == m_data.end())
+				{
+					return false;
+				}
+
+				if (cb)
+				{
+					cb(*itr);
+				}
+
+				return true;
+			}
+
+			template <typename CB>
+			bool getBack(const CB& cb)
+			{
+				auto itr = m_data.rbegin();
+				if (itr == m_data.rend())
+				{
+					return false;
+				}
+
+				if (cb)
+				{
+					cb(*itr);
+				}
+
+				return true;
+			}
+		};
+
+		using __ContainerOperator = __ContainerOperatorT<__ContainerType>;
+		__ContainerOperator m_ContainerOperator = __ContainerOperator(m_data);
+		__ContainerOperator& _getOperator()
+		{
+			return m_ContainerOperator;
+		}
+
+		using __ContainerReader = __ContainerOperatorT<const __ContainerType>;
+		__ContainerReader m_ContainerReader = __ContainerReader(m_data);
+		__ContainerReader& _getOperator() const
+		{
+			return (__ContainerReader&)m_ContainerReader;
 		}
 	};
 
