@@ -180,10 +180,6 @@ int main()
 	ts2.forEach([](int i) {
 		return true;
 	});
-	for (auto& t : ts2)
-	{
-		t = 7;
-	}
 
 	ts2.qsort();
 	ts2.concat(9);
@@ -270,11 +266,7 @@ int main()
 	JSSet<int> afrdg(5, 5, 5, 4);
 	bool bbb = afrdg.includes(5);
 
-	int t = reduce(afrdg, [](int a, int b) {
-		return a + b;
-	});
-
-	t= afrdg.reduce([](int a, int b) {
+	int t= afrdg.reduce([](int a, int b) {
 		return a + b;
 	});
 
@@ -349,5 +341,26 @@ int main()
 	list<int> lala;
 	ptrlist<int> pll;
 	pll.add(lala);
+
+	PtrArray<int> ttrt;
+	ttrt([&](int&) {});
+	ttrt([&](int&) {return true; });
+
+	int iii;
+
+	class A
+	{
+	public:A() {}
+		   virtual ~A(){}
+	};
+	class B : public A
+	{
+	public:B() {}
+	};
+
+	A qaq;
+	PtrArray<B> okok;// (qaq, qaq, qaq);
+	okok.add(&qaq);
+
 	return 0;
 }

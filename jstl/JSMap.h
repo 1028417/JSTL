@@ -251,7 +251,7 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool del_if(__KeyConstRef key, __CB_ValueR_void cb=NULL)
+		bool del_key(__KeyConstRef key, __CB_ValueR_void cb=NULL)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())

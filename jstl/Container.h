@@ -13,16 +13,46 @@ namespace NS_JSTL
 		DC_Yes
 		, DC_No
 		, DC_Abort
+		, DC_YesAbort
+	};
+
+	template <class __C>
+	class CContainVisitor
+	{
+		typedef decltype(CItrVisitor::begin(declval<__C&>())) __ITR;
+
+	public:
+		CContainVisitor(__C& container)
+			: m_container(container)
+		{
+		}
+
+		__C& m_container;
+
+		__ITR begin()
+		{
+			return CItrVisitor::begin(m_container);
+		}
+
+		__ITR end()
+		{
+			return CItrVisitor::end(m_container);
+		}
+
+		void erase(__ITR& itr)
+		{
+			CItrVisitor::erase(m_container, itr);
+		}
 	};
 
 	template<typename __DataType__, typename __ContainerType__, typename __KeyType = __DataType__>
 	class ContainerT
-	{		
+	{
 	protected:
 		using __DataType = __DataType__;
 
 		using __ContainerType = __ContainerType__;
-		
+
 		__ContainerType m_data;
 
 		using __InitList = InitList_T<__DataType>;
@@ -34,11 +64,9 @@ namespace NS_JSTL
 
 		using __CB_Ref_void = CB_T_void<__DataRef>;
 		using __CB_Ref_bool = CB_T_bool<__DataRef>;
-		using __CB_Ref_Pos = CB_T_Pos<__DataRef>;
 
 		using __CB_ConstRef_void = CB_T_void<__DataConstRef>;
 		using __CB_ConstRef_bool = CB_T_bool<__DataConstRef>;
-		using __CB_ConstRef_Pos = CB_T_Pos<__DataConstRef>;
 
 		using __CB_Ref_DelConfirm = CB_T_Ret<__DataRef, E_DelConfirm>;
 
@@ -75,7 +103,7 @@ namespace NS_JSTL
 
 		template<typename T, typename = checkContainer_t<T>>
 		explicit ContainerT(const T& container)
-			: m_data(container.begin(), container.end())
+			: m_data(CContainVisitor<const T>(container).begin(), CContainVisitor<const T>(container).end())
 		{
 		}
 
@@ -172,7 +200,9 @@ namespace NS_JSTL
 			//}
 
 			m_data.clear();
-			new (&m_data) __ContainerType(container.begin(), container.end());
+
+			CContainVisitor<const T> Visitor(container);
+			new (&m_data) __ContainerType(Visitor.begin(), Visitor.end());
 
 			return *this;
 		}
@@ -216,12 +246,6 @@ namespace NS_JSTL
 			return !m_data.empty();
 		}
 
-		template <typename T, typename = checkIter_t<T>>
-		T erase(const T& itr)
-		{
-			return m_data.erase(itr);
-		}
-
 		void clear()
 		{
 			m_data.clear();
@@ -230,24 +254,6 @@ namespace NS_JSTL
 		size_t size() const
 		{
 			return m_data.size();
-		}
-
-		decltype(m_data.begin()) begin()
-		{
-			return m_data.begin();
-		}
-		decltype(m_data.end()) end()
-		{
-			return m_data.end();
-		}
-
-		decltype(m_data.cbegin()) begin() const
-		{
-			return m_data.cbegin();
-		}
-		decltype(m_data.cbegin()) end() const
-		{
-			return m_data.cend();
 		}
 
 		bool getFront(__CB_Ref_void cb)
@@ -267,14 +273,14 @@ namespace NS_JSTL
 			});
 		}
 
-		void getBack(__CB_Ref_void cb)
+		bool getBack(__CB_Ref_void cb)
 		{
-			_getOperator().getBack(cb);
+			return _getOperator().getBack(cb);
 		}
 
-		void getBack(__CB_ConstRef_void cb) const
+		bool getBack(__CB_ConstRef_void cb) const
 		{
-			_getOperator().getBack(cb);
+			return _getOperator().getBack(cb);
 		}
 
 		bool getBack(__DataRef data) const
@@ -366,11 +372,12 @@ namespace NS_JSTL
 
 			if (!m_data.empty())
 			{
-				for (auto itr = ret.begin(); itr != ret.end(); )
+				CContainVisitor<T> Visitor(ret);
+				for (auto itr = Visitor.begin(); itr != Visitor.end(); )
 				{
 					if (!_includes(*itr))
 					{
-						itr = ret.erase(itr);
+						Visitor.erase(itr);
 					}
 					else
 					{
@@ -403,11 +410,12 @@ namespace NS_JSTL
 
 			if (!m_data.empty())
 			{
-				for (auto itr = ret.begin(); itr != ret.end(); )
+				CContainVisitor<T> Visitor(ret);
+				for (auto itr = Visitor.begin(); itr != Visitor.end(); )
 				{
 					if (_includes(*itr))
 					{
-						itr = ret.erase(itr);
+						Visitor.erase(itr);
 					}
 					else
 					{
@@ -450,14 +458,16 @@ namespace NS_JSTL
 
 			size_t uRet = 0;
 
-			for (auto&data : container)
+			CContainVisitor<const T> Visitor(container);
+			auto itrEnd = Visitor.end();
+			for (auto itr = Visitor.begin(); itr != itrEnd; itr++)
 			{
 				if (m_data.empty())
 				{
 					break;
 				}
 
-				uRet += _del(data);
+				uRet += _del(*itr);
 			}
 
 			return uRet;
@@ -487,10 +497,13 @@ namespace NS_JSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
-					uRet++;
-					
-					if (E_DelConfirm::DC_Abort == eRet)
+					if (E_DelConfirm::DC_Yes == eRet || E_DelConfirm::DC_YesAbort == eRet)
+					{
+						itr = m_data.erase(itr);
+						uRet++;
+					}
+
+					if (E_DelConfirm::DC_Abort == eRet || E_DelConfirm::DC_YesAbort == eRet)
 					{
 						break;
 					}
@@ -557,6 +570,31 @@ namespace NS_JSTL
 		__DataType reduce(const function<__DataType(__DataConstRef, __DataConstRef)>& cb) const
 		{
 			return NS_JSTL::reduce<__DataType, __ContainerType >(m_data, cb);
+		}
+
+	public:
+		decltype(m_data.begin()) begin()
+		{
+			return m_data.begin();
+		}
+		decltype(m_data.end()) end()
+		{
+			return m_data.end();
+		}
+
+		decltype(m_data.cbegin()) begin() const
+		{
+			return m_data.cbegin();
+		}
+		decltype(m_data.cbegin()) end() const
+		{
+			return m_data.cend();
+		}
+
+		template <typename T, typename = checkIter_t<T>>
+		T erase(const T& itr)
+		{
+			return m_data.erase(itr);
 		}
 
 	protected:
@@ -687,6 +725,18 @@ namespace NS_JSTL
 				}
 
 				return true;
+			}
+
+			template <typename CB>
+			void forEach(const CB& cb)
+			{
+				for (auto& data : m_data)
+				{
+					if (!cb(data))
+					{
+						break;
+					}
+				}
 			}
 		};
 
