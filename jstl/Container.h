@@ -322,15 +322,11 @@ namespace NS_JSTL
 		}
 
 		template<typename... args>
-		bool includes(__DataConstRef data, const args&... others) const
+		bool includes(__KeyConstRef data, const args&... others) const
 		{
-			bool bRet = true;
-
-			(void)extractDataTypeArgs([&](__DataConstRef data) {
-				return bRet = _includes(data);
+			return tagDynamicArgsExtractor<__KeyConstRef>::extract([&](__KeyConstRef data) {
+				return _includes(data);
 			}, data, others...);
-
-			return bRet;
 		}
 
 		template<typename T, typename = checkContainer_t<T>>
@@ -352,9 +348,9 @@ namespace NS_JSTL
 			return true;
 		}
 
-		bool includes(__InitList initList) const
+		bool includes(__InitList_Key initList) const
 		{
-			return includes<__InitList>(initList);
+			return includes<__InitList_Key>(initList);
 		}
 
 		template<typename... args>

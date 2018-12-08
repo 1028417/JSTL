@@ -332,11 +332,6 @@ int main()
 	oiuy - oiuy;
 	JSUnsortSet<int> qafjdjsd = oiuy&qq;
 	
-	if (qafjdjsd)
-	{
-		return 0;
-	}
-	
 	float *pf=0;
 	list<int> lala;
 	ptrlist<int> pll;
@@ -361,6 +356,16 @@ int main()
 	A qaq;
 	PtrArray<B> okok;// (qaq, qaq, qaq);
 	okok.add(&qaq);
+
+	JSArray<int> gggg(1, 3, 5, 7, 9);
+	bool bin = gggg.includes(1, 3, 5, 7, 9);
+	bin = gggg.includes(1, 3, 5, 7, 9, 6);
+	
+	
+
+	JSMap<int, int> mgmg;
+	bin = mgmg.includes(1, 3, 5, 7, 9);
+	bin = mgmg.includes(1, 5, 9);
 
 	return 0;
 }
