@@ -1,6 +1,6 @@
 
-#include "jstl/jstl.h"
-using namespace NS_JSTL;
+#include "sstl/sstl.h"
+using namespace NS_SSTL;
 
 typedef size_t TD_CardNum;
 
@@ -39,11 +39,11 @@ struct tagCardPattern
 
 static map<ECardPattern, size_t> g_mapCardPattern{};
 
-bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const JSMap<TD_CardNum, size_t>& mapCardSum, TD_CardNum uBaseCardNum, size_t uContinuityCount, JSArray<tagCardPattern>& retCardPattern)
+bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const SMap<TD_CardNum, size_t>& mapCardSum, TD_CardNum uBaseCardNum, size_t uContinuityCount, SArray<tagCardPattern>& retCardPattern)
 {
 	bool bRet = false;
 
-	JSArray<TD_CardNum> arrCardExpect = mapCardSum.filter([&](const TD_CardNum&uCardNum, const size_t& uSum) {
+	SArray<TD_CardNum> arrCardExpect = mapCardSum.filter([&](const TD_CardNum&uCardNum, const size_t& uSum) {
 		return uSum >= uFlag && uCardNum>= uBaseCardNum;
 	}).keys();
 
@@ -82,30 +82,30 @@ bool enumCardPattern(ECardPattern eCardPattern, TD_CardNum uBaseCardNum = 0, siz
 	}
 	size_t uCardPatternFlag = itr->second;
 	
-	JSMap<TD_CardNum, size_t> mapCardSum;
+	SMap<TD_CardNum, size_t> mapCardSum;
 
-	JSArray<tagCardPattern> retCardPattern;
+	SArray<tagCardPattern> retCardPattern;
 	return enumCardPattern(eCardPattern, uCardPatternFlag, mapCardSum, uBaseCardNum, uContinuityCount, retCardPattern);
 }
 
 
-JSMap<int, set<int>> sss()
+SMap<int, set<int>> sss()
 {
-	return JSMap<int, set<int>>();
+	return SMap<int, set<int>>();
 }
 
 int main()
 {
-	JSMap<int, set<int>> jjhh;
+	SMap<int, set<int>> jjhh;
 	jjhh = jjhh;
 
 	struct tag {};
-	JSArray<tag> qqta{ {},{},{},{} };
+	SArray<tag> qqta{ {},{},{},{} };
 	auto idof = qqta.indexOf({});
 	qqta.qsort();
 	auto strsk = qqta.toString();
 	
-	JSArray<int> qq;
+	SArray<int> qq;
 	qq= { 12,2,3 };
 	qq = 1;
 	auto aaaa = qq.indexOf({2});
@@ -118,64 +118,57 @@ int main()
 	//qq = ll;
 	auto idf = qq.indexOf(2);
 
-	JSMap<int, int> masaa{ { 21,2 },{ 1,2 },{ 1,2 } };
+	SMap<int, int> masaa{ { 21,2 },{ 1,2 },{ 1,2 } };
 	auto hbfdjv = masaa.toString();
 
-	JSArray<int> arr(qq);
+	SArray<int> arr(qq);
 	arr=qq;
 	arr.add({ 66,44,19,2,2,3,5,5,6,7,8 });
 	qq.add( { 12,2,3 });
-	JSArray<int> arr2;
+	SArray<int> arr2;
 	arr2 = arr.map([](float i) {return i * 2; });
 	auto ff = arr.reduce([](const float& a1, const int& a2) {return a1+a2; });
 
-	JSArray<int> arr3 = arr2.slice(6, 3);
+	SArray<int> arr3 = arr2.slice(6, 3);
 	arr3 = arr3;
 
-	JSMap<int, int> ooo({1}, [](int key) {
+	SMap<int, int> ooo({1}, [](int key) {
 		return key*2;
 	});
 
 	map<int, int> tm;
-	JSMap<int,int> mmm(tm);
+	SMap<int,int> mmm(tm);
 	mmm = { {1,1} };
 	mmm = tm;
 	mmm.keys();
-	mmm.getInner(1);
-	mmm.getInner({ 1, 2 });
-	mmm.getInner(arr3);
-	mmm.getOuter(1, 2);
-	mmm.getOuter(11);
-	mmm.getOuter({ 1, 2 });
-	mmm.getOuter(arr3);
-
+	
 	mmm.del(1, 2);
 	mmm.del(11);
 	mmm.del({ 1, 2 });
 	mmm.del(arr3);
 
-	JSSet<int> set ;
+	SSet<int> set ;
 	set.add({ 2,3,4 });
 	set.add( 1,2,3 );
 
-	JSSet<int> set2 ( {1});
+	SSet<int> set2 ( {1});
 	set2 = arr2;
 	set2.add({3,4,5});
 
-	JSMap<int, int> m{ { 21,2 },{ 1,2 },{ 1,2 } };
+	SMap<int, int> m{ { 21,2 },{ 1,2 },{ 1,2 } };
 	m.set(1, 1);
 
 	enumCardPattern(CP_None);
 
-	JSMap<int, int> ts1;
+	SMap<int, int> ts1;
 	ts1.assign( { { 1, 1 }, { 32,1 }, { 3,1 } });
 
-	JSArray<int> ts2(7,7.9, 4);
+	SArray<int> ts2(7,7.9, 4);
 	ts2.add({1,2,3});
 	ts2 = {1,2,3};
 
 	ts2.getFront([](int&) {});
-	((const JSArray<int>&)ts2).getFront([](const int&) {});
+	((const SArray<int>&)ts2).getFront([](const int&) {});
 
 	ts2.forEach([](int i) {
 		return true;
@@ -186,21 +179,13 @@ int main()
 	ts2.concat({ 9 });
 	ts2.concat(9, 9);
 	ts2.concat(ts2);
-	ts2.getInner(9);
-	ts2.getInner(9, 9);
-	ts2.getInner({ 9, 9 });
-	ts2.getInner(ts2);
-	ts2.getOuter(9, 9);
-	ts2.getOuter(9);
-	ts2.getOuter({ 9, 9 });
-	ts2.getOuter(ts2);
-
+	
 	ts2.del(9, 9);
 	ts2.del(9);
 	ts2.del({ 9, 9 });
 	ts2.del(ts2);
 
-	JSArray<int*> pils;
+	SArray<int*> pils;
 	int uy = 1;
 	PtrArray<int> PtrArray0001(uy, uy);
 	PtrArray<int> PtrArray111(&uy, &uy);
@@ -262,15 +247,15 @@ int main()
 
 	ConstPtrArray222 = 5;
 
-	JSArray<int> jahss(5, 5, 5, 5);
-	JSSet<int> afrdg(5, 5, 5, 4);
+	SArray<int> jahss(5, 5, 5, 5);
+	SSet<int> afrdg(5, 5, 5, 4);
 	bool bbb = afrdg.includes(5);
 
 	int t= afrdg.reduce([](int a, int b) {
 		return a + b;
 	});
 
-	JSSet<int> sstt({1,2});
+	SSet<int> sstt({1,2});
 	sstt -= afrdg;
 	sstt += {5};
 
@@ -327,10 +312,10 @@ int main()
 	ccccc += ccccc;
 	ccccc += sstt;
 	
-	JSUnsortSet<int> oiuy{4,4,5,5,3,3};
+	SUnsortSet<int> oiuy{4,4,5,5,3,3};
 	oiuy-vector<int>();
 	oiuy - oiuy;
-	JSUnsortSet<int> qafjdjsd = oiuy&qq;
+	SUnsortSet<int> qafjdjsd = oiuy&qq;
 	
 	float *pf=0;
 	list<int> lala;
@@ -357,13 +342,13 @@ int main()
 	PtrArray<B> okok;// (qaq, qaq, qaq);
 	okok.add(&qaq);
 
-	JSArray<int> gggg(1, 3, 5, 7, 9);
+	SArray<int> gggg(1, 3, 5, 7, 9);
 	bool bin = gggg.includes(1, 3, 5, 7, 9);
 	bin = gggg.includes(1, 3, 5, 7, 9, 6);
 	
 	
 
-	JSMap<int, int> mgmg;
+	SMap<int, int> mgmg;
 	bin = mgmg.includes(1, 3, 5, 7, 9);
 	bin = mgmg.includes(1, 5, 9);
 

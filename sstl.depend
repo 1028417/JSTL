@@ -1,0 +1,77 @@
+# depslib dependency file v1.0
+1532276274 source:/home/lhyuan/Desktop/SSTL/main.cpp
+	<iostream>
+	"JSArray.h"
+	"JSSet.h"
+	"JSMap.h"
+
+1532276775 /home/lhyuan/Desktop/SSTL/JSArray.h
+	"Container.h"
+	<deque>
+
+1532276775 /home/lhyuan/Desktop/SSTL/Container.h
+	<initializer_list>
+	<algorithm>
+	<functional>
+	<sstream>
+
+1532276775 /home/lhyuan/Desktop/SSTL/JSSet.h
+	"Container.h"
+	<unordered_set>
+	<set>
+
+1532276775 /home/lhyuan/Desktop/SSTL/JSMap.h
+	"Container.h"
+	<unordered_map>
+	<map>
+	"JSSet.h"
+	"JSArray.h"
+
+1539651569 source:/home/lhyuan/Desktop/SSTL/test.cpp
+	"sstl/sstl.h"
+	<list>
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/sstl.h
+	"_define.h"
+	"_util.h"
+	"JSArray.h"
+	"PtrArray.h"
+	"JSSet.h"
+	"JSMap.h"
+	"ptrcontain.h"
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/_define.h
+	<initializer_list>
+	<vector>
+	<deque>
+	<functional>
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/_util.h
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/JSArray.h
+	"Container.h"
+	<algorithm>
+	"JSMap.h"
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/Container.h
+	<sstream>
+	<list>
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/JSMap.h
+	"Container.h"
+	<unordered_map>
+	<map>
+	"JSArray.h"
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/PtrArray.h
+	"JSArray.h"
+
+1540816840 /home/lhyuan/Desktop/SSTL/sstl/JSSet.h
+	"Container.h"
+	<unordered_set>
+	<set>
+
+1543682865 /home/lhyuan/Desktop/SSTL/sstl/ptrcontain.h
+	<list>
+	<vector>
+
