@@ -151,7 +151,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sstl\Container.h" />
+    <ClInclude Include="sstl\SContainer.h" />
     <ClInclude Include="sstl\sstl.h" />
     <ClInclude Include="sstl\PtrArray.h" />
     <ClInclude Include="sstl\SArray.h" />

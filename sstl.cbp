@@ -33,13 +33,13 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="sstl/Container.h">
-			<Option virtualFolder="sstl/" />
-		</Unit>
 		<Unit filename="sstl/PtrArray.h">
 			<Option virtualFolder="sstl/" />
 		</Unit>
 		<Unit filename="sstl/SArray.h">
+			<Option virtualFolder="sstl/" />
+		</Unit>
+		<Unit filename="sstl/SContainer.h">
 			<Option virtualFolder="sstl/" />
 		</Unit>
 		<Unit filename="sstl/SMap.h">
@@ -48,7 +48,9 @@
 		<Unit filename="sstl/SSet.h">
 			<Option virtualFolder="sstl/" />
 		</Unit>
-		<Unit filename="sstl/_check.h" />
+		<Unit filename="sstl/_check.h">
+			<Option virtualFolder="sstl/" />
+		</Unit>
 		<Unit filename="sstl/_define.h">
 			<Option virtualFolder="sstl/" />
 		</Unit>

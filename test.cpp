@@ -47,7 +47,7 @@ bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const SMap<TD_Card
 		return uSum >= uFlag && uCardNum>= uBaseCardNum;
 	}).keys();
 
-	arrCardExpect.forEach([&](TD_PosType pos, const TD_CardNum&uCardNum) {
+	arrCardExpect([&](TD_PosType pos, const TD_CardNum&uCardNum) {
 		if (1 == uContinuityCount)
 		{
 			retCardPattern.add(tagCardPattern(eCardPattern, uCardNum, 1));
@@ -111,9 +111,9 @@ int main()
 	auto aaaa = qq.indexOf({2});
 	qq.qsort();
 	auto aaaaaaa = qq.toString();
-	qq.unshift({ 1 });
-	qq.unshift(1);
-	qq.unshift(1,2);
+	qq.addFront({ 1 });
+	qq.addFront(1);
+	qq.addFront(1,2);
 	
 	//qq = ll;
 	auto idf = qq.indexOf(2);
@@ -170,7 +170,7 @@ int main()
 	ts2.getFront([](int&) {});
 	((const SArray<int>&)ts2).getFront([](const int&) {});
 
-	ts2.forEach([](int i) {
+	ts2([](int i) {
 		return true;
 	});
 
@@ -202,10 +202,10 @@ int main()
 	PtrArray111.add({ &uy });
 	PtrArray111.add(PtrArray111);
 
-	PtrArray111.unshift(uy, uy);
-	PtrArray111.unshift(&uy, &uy);
-	PtrArray111.unshift({ &uy });
-	PtrArray111.unshift(PtrArray111);
+	PtrArray111.addFront(uy, uy);
+	PtrArray111.addFront(&uy, &uy);
+	PtrArray111.addFront({ &uy });
+	PtrArray111.addFront(PtrArray111);
 
 	PtrArray111.concat(uy, uy);
 	PtrArray111.concat(&uy, &uy);
@@ -219,11 +219,11 @@ int main()
 	ConstPtrArray111.add(PtrArray111);
 	ConstPtrArray111.add(ConstPtrArray111);
 
-	ConstPtrArray111.unshift(uy);
-	ConstPtrArray111.unshift(&uy);
-	ConstPtrArray111.unshift({ &uy });
-	ConstPtrArray111.unshift(PtrArray111);
-	ConstPtrArray111.unshift(ConstPtrArray111);
+	ConstPtrArray111.addFront(uy);
+	ConstPtrArray111.addFront(&uy);
+	ConstPtrArray111.addFront({ &uy });
+	ConstPtrArray111.addFront(PtrArray111);
+	ConstPtrArray111.addFront(ConstPtrArray111);
 
 	ConstPtrArray111.concat(uy);
 	ConstPtrArray111.concat(&uy);
@@ -281,11 +281,11 @@ int main()
 	popopo = jahss;
 	popopo = zqq161;
 
-	popopo.unshift((int*)nullptr);
-	popopo.unshift({ nullptr, nullptr, nullptr });
-	popopo.unshift(*(int*)nullptr);
-	popopo.unshift(jahss);
-	popopo.unshift(zqq161);
+	popopo.addFront((int*)nullptr);
+	popopo.addFront({ nullptr, nullptr, nullptr });
+	popopo.addFront(*(int*)nullptr);
+	popopo.addFront(jahss);
+	popopo.addFront(zqq161);
 
 	popopo.assign((int*)nullptr);
 	popopo.assign({ nullptr, nullptr, nullptr });
@@ -312,10 +312,10 @@ int main()
 	ccccc += ccccc;
 	ccccc += sstt;
 	
-	SUnsortSet<int> oiuy{4,4,5,5,3,3};
+	SHashSet<int> oiuy{4,4,5,5,3,3};
 	oiuy-vector<int>();
 	oiuy - oiuy;
-	SUnsortSet<int> qafjdjsd = oiuy&qq;
+	SHashSet<int> qafjdjsd = oiuy & qq;
 	
 	float *pf=0;
 	list<int> lala;

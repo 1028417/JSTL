@@ -15,9 +15,6 @@
     <ClInclude Include="sstl\_util.h">
       <Filter>sstl</Filter>
     </ClInclude>
-    <ClInclude Include="sstl\Container.h">
-      <Filter>sstl</Filter>
-    </ClInclude>
     <ClInclude Include="sstl\SArray.h">
       <Filter>sstl</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>sstl</Filter>
     </ClInclude>
     <ClInclude Include="sstl\_check.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
+    <ClInclude Include="sstl\SContainer.h">
       <Filter>sstl</Filter>
     </ClInclude>
   </ItemGroup>
