@@ -39,5 +39,8 @@
     <ClInclude Include="sstl\SContainer.h">
       <Filter>sstl</Filter>
     </ClInclude>
+    <ClInclude Include="sstl\SList.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -175,7 +175,7 @@ int main()
 	});
 
 	ts2.qsort();
-	ts2.concat(9);
+	ts2.concat(9,9);
 	ts2.concat({ 9 });
 	ts2.concat(9, 9);
 	ts2.concat(ts2);
