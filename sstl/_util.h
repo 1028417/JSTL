@@ -2,8 +2,6 @@
 #ifndef __Util_H
 #define __Util_H
 
-#include "_define.h"
-
 namespace NS_SSTL
 {
 	template <typename T>
@@ -32,14 +30,34 @@ namespace NS_SSTL
 		typedef typename remove_reference<T>::type_pointer type_pointer;
 	};
 
+	struct tagCheckPair
+	{
+		template <typename T, typename = decltype(declval<T>().first), typename = decltype(declval<T>().second)>
+		static bool check(T);
+
+		template <typename T>
+		static void check(...);
+	};
+	template <typename T>
+	using checkPair_t = checkSameType_t<decltype(tagCheckPair::check(declval<T>())), bool>;
+	template <typename T>
+	using checkNotPair_t = checkSameType_t<decltype(tagCheckPair::check(declval<T>())), void>;
+
 	template <typename T> struct tagTryCompare {
 		static bool compare(const T&t1, const T&t2)
 		{
 			return _compare(t1, t2);
 		}
+		
+		template <typename U, typename = checkPair_t<U>>
+		static bool _compare(const U&t1, const U&t2)
+		{
+			return tagTryCompare<decltype(t1.first)>::compare(t1.first, t2.first)
+				&& tagTryCompare<decltype(t1.second)>::compare(t1.second, t2.second);
+		}
 
-		template <typename U>
-		static auto _compare(const U&t1, const U&t2) ->decltype(declval<U>() == declval<U>())
+		template <typename U, typename = checkNotPair_t<U>, typename RET = decltype(declval<const U&>() == declval<const U&>())>
+		static RET _compare(const U&t1, const U&t2)
 		{
 			return t1 == t2;
 		}
@@ -291,6 +309,59 @@ namespace NS_SSTL
 		{
 			qsort<T>(&vecData.front(), size, cb);
 		}
+	}
+
+	template <typename _C, typename DATA, typename CB>
+	size_t find(_C& container, const DATA& data, const CB& cb)
+	{
+		size_t uRet = 0;
+
+		for (auto itr = container.begin(); itr != container.end(); )
+		{
+			if (tagTryCompare<DATA>().compare(*itr, data))
+			{
+				uRet++;
+
+				if (cb)
+				{
+					auto lpData = &*itr;
+					if (!cb(itr) || itr == container.end())
+					{
+						break;
+					}
+
+					if (&*itr != lpData)
+					{
+						continue;
+					}
+				}
+			}
+
+			itr++;
+		}
+
+		return uRet;
+	}
+
+	template <typename _C, typename DATA, typename CB>
+	size_t find(const _C& container, const DATA& data, const CB& cb)
+	{
+		size_t uRet = 0;
+
+		for (auto itr = container.begin(); itr != container.end(); itr++)
+		{
+			if (tagTryCompare<DATA>().compare(*itr, data))
+			{
+				uRet++;
+
+				if (!cb && !cb(itr))
+				{
+					break;
+				}
+			}
+		}
+
+		return uRet;
 	}
 }
 
