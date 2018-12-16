@@ -267,10 +267,9 @@ namespace NS_SSTL
 		{
 			int uIdx = 0;
 
-			tagTryCompare<__DataType> compare;
 			for (auto& item : m_data)
 			{
-				if (compare(item, data))
+				if (tagTryCompare<__DataType>::compare(item, data))
 				{
 					return uIdx;
 				}
@@ -284,10 +283,9 @@ namespace NS_SSTL
 		{
 			int uIdx = 1;
 
-			tagTryCompare<const __DataType> compare;
 			for (auto& item : m_data)
 			{
-				if (compare(item, data))
+				if (tagTryCompare<const __DataType>::compare(item, data))
 				{
 					return m_data.size()-uIdx;
 				}

@@ -54,14 +54,14 @@ namespace NS_SSTL
 			return _compare(t1, t2);
 		}
 
-		template <typename U, typename = checkPair_t<U>>
-		static bool _compare(const U&t1, const U&t2)
+		template <typename A, typename B>
+		static bool _compare(const pair<A,B>&t1, const pair<A, B>&t2)
 		{
-			return tagTryCompare<decltype(t1.first)>::compare(t1.first, t2.first)
-				&& tagTryCompare<decltype(t1.second)>::compare(t1.second, t2.second);
+			return tagTryCompare<A>::compare(t1.first, t2.first)
+				&& tagTryCompare<B>::compare(t1.second, t2.second);
 		}
 
-		template <typename U, typename = checkNotPair_t<U>, typename RET = decltype(declval<const U&>() == declval<const U&>())>
+		template <typename U, typename RET = decltype(declval<const U&>() == declval<const U&>())>
 		static RET _compare(const U&t1, const U&t2)
 		{
 			return t1 == t2;
@@ -321,10 +321,9 @@ namespace NS_SSTL
 	{
 		size_t uRet = 0;
 
-		tagTryCompare<DATA> compare;
 		for (auto itr = container.begin(); itr != container.end(); )
 		{
-			if (compare(*itr, data))
+			if (tagTryCompare<DATA>::compare(*itr, data))
 			{
 				uRet++;
 
@@ -354,10 +353,9 @@ namespace NS_SSTL
 	{
 		size_t uRet = 0;
 		
-		tagTryCompare<DATA> compare;
 		for (auto itr = container.begin(); itr != container.end(); itr++)
 		{
-			if (compare(*itr, data))
+			if (tagTryCompare<DATA>::compare(*itr, data))
 			{
 				uRet++;
 
