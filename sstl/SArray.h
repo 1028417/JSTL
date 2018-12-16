@@ -266,9 +266,11 @@ namespace NS_SSTL
 		int indexOf(__DataConstRef data) const
 		{
 			int uIdx = 0;
+
+			tagTryCompare<__DataType> compare;
 			for (auto& item : m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(item, data))
+				if (compare(item, data))
 				{
 					return uIdx;
 				}
@@ -281,9 +283,11 @@ namespace NS_SSTL
 		int lastIndexOf(__DataConstRef data) const
 		{
 			int uIdx = 1;
+
+			tagTryCompare<const __DataType> compare;
 			for (auto& item : m_data)
 			{
-				if (tagTryCompare<__DataType>().compare(item, data))
+				if (compare(item, data))
 				{
 					return m_data.size()-uIdx;
 				}

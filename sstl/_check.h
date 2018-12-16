@@ -182,17 +182,16 @@ namespace NS_SSTL
 		__C& m_container;
 
 		typedef decltype(tagItrVisitor::begin(declval<__C&>())) __ITR;
-		__ITR m_itr;
 
 	public:
-		__ITR& begin()
+		__ITR begin()
 		{
-			return m_itr = tagItrVisitor::begin(m_container);
+			return tagItrVisitor::begin(m_container);
 		}
 
-		__ITR& end()
+		__ITR end()
 		{
-			return m_itr = tagItrVisitor::end(m_container);
+			return tagItrVisitor::end(m_container);
 		}
 	};
 };

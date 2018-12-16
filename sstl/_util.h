@@ -44,11 +44,16 @@ namespace NS_SSTL
 	using checkNotPair_t = checkSameType_t<decltype(tagCheckPair::check(declval<T>())), void>;
 
 	template <typename T> struct tagTryCompare {
+		bool operator()(const T&t1, const T&t2)
+		{
+			return _compare(t1, t2);
+		}
+
 		static bool compare(const T&t1, const T&t2)
 		{
 			return _compare(t1, t2);
 		}
-		
+
 		template <typename U, typename = checkPair_t<U>>
 		static bool _compare(const U&t1, const U&t2)
 		{
@@ -68,18 +73,18 @@ namespace NS_SSTL
 		}
 	};
 
-	template <typename T> struct tagSortT {
-		tagSortT(__CB_Sort_T<T> cb) : m_cb(cb)
-		{
-		}
+	//template <typename T> struct tagSortT {
+	//	tagSortT(__CB_Sort_T<T> cb) : m_cb(cb)
+	//	{
+	//	}
 
-		__CB_Sort_T<T> m_cb;
+	//	__CB_Sort_T<T> m_cb;
 
-		bool operator() (const T&lhs, const T&rhs)const
-		{
-			return m_cb(lhs, rhs);
-		}
-	};
+	//	bool operator() (const T&lhs, const T&rhs)const
+	//	{
+	//		return m_cb(lhs, rhs);
+	//	}
+	//};
 
 	template <typename T> struct tagTrySort {
 		tagTrySort(__CB_Sort_T<T> cb = NULL) : m_cb(cb)
@@ -245,7 +250,7 @@ namespace NS_SSTL
 	}
 
 	template <typename T>
-	void qsort(T* lpData, size_t size, __CB_Sort_T<T> cb = NULL)
+	void qsort(T* lpData, size_t size, __CB_Sort_T<T> cbCompare)
 	{
 		if (size < 2)
 		{
@@ -253,13 +258,13 @@ namespace NS_SSTL
 		}
 		int end = (int)size - 1;
 
-		tagTrySort<T> trySort;
+		tagTrySort<T> sort;
 		auto fnCompare = [&](T& lhs, T& rhs) {
-			if (cb) {
-				return cb(lhs, rhs);
+			if (cbCompare) {
+				return cbCompare(lhs, rhs);
 			}
 
-			return trySort(lhs, rhs);
+			return sort(lhs, rhs);
 		};
 
 		function<void(int, int)> fnSort;
@@ -270,11 +275,11 @@ namespace NS_SSTL
 
 			int i = begin;
 			int j = end;
-			T n = lpData[begin];
+			T t = lpData[begin];
 
 			do {
 				do {
-					if (fnCompare(lpData[j], n)) {
+					if (fnCompare(lpData[j], t)) {
 						lpData[i] = lpData[j];
 						i++;
 						break;
@@ -283,7 +288,7 @@ namespace NS_SSTL
 				} while (i < j);
 
 				while (i < j) {
-					if (fnCompare(n, lpData[i])) {
+					if (fnCompare(t, lpData[i])) {
 						lpData[j] = lpData[i];
 						j--;
 						break;
@@ -292,7 +297,7 @@ namespace NS_SSTL
 				}
 			} while (i < j);
 
-			lpData[i] = n;
+			lpData[i] = t;
 
 			fnSort(begin, i - 1);
 			fnSort(i + 1, end);
@@ -316,9 +321,10 @@ namespace NS_SSTL
 	{
 		size_t uRet = 0;
 
+		tagTryCompare<DATA> compare;
 		for (auto itr = container.begin(); itr != container.end(); )
 		{
-			if (tagTryCompare<DATA>().compare(*itr, data))
+			if (compare(*itr, data))
 			{
 				uRet++;
 
@@ -347,10 +353,11 @@ namespace NS_SSTL
 	size_t find(const _C& container, const DATA& data, const CB& cb)
 	{
 		size_t uRet = 0;
-
+		
+		tagTryCompare<DATA> compare;
 		for (auto itr = container.begin(); itr != container.end(); itr++)
 		{
-			if (tagTryCompare<DATA>().compare(*itr, data))
+			if (compare(*itr, data))
 			{
 				uRet++;
 
