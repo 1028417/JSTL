@@ -30,19 +30,6 @@ namespace NS_SSTL
 		typedef typename remove_reference<T>::type_pointer type_pointer;
 	};
 
-	struct tagCheckPair
-	{
-		template <typename T, typename = decltype(declval<T>().first), typename = decltype(declval<T>().second)>
-		static bool check(T);
-
-		template <typename T>
-		static void check(...);
-	};
-	template <typename T>
-	using checkPair_t = checkSameType_t<decltype(tagCheckPair::check(declval<T>())), bool>;
-	template <typename T>
-	using checkNotPair_t = checkSameType_t<decltype(tagCheckPair::check(declval<T>())), void>;
-
 	template <typename T> struct tagTryCompare {
 		bool operator()(const T&t1, const T&t2)
 		{
@@ -220,8 +207,7 @@ namespace NS_SSTL
 			return T();
 		}
 
-		auto itrPrev = itr;
-		itr++;
+		auto itrPrev = itr++;
 		if (itr == container.end())
 		{
 			return *itrPrev;
@@ -230,8 +216,7 @@ namespace NS_SSTL
 		T ret = cb(*itrPrev, *itr);
 		while (true)
 		{
-			itr++;
-			if (itr == container.end())
+			if (++itr == container.end())
 			{
 				break;
 			}
@@ -342,7 +327,7 @@ namespace NS_SSTL
 				}
 			}
 
-			itr++;
+			++itr;
 		}
 
 		return uRet;
@@ -353,7 +338,7 @@ namespace NS_SSTL
 	{
 		size_t uRet = 0;
 		
-		for (auto itr = container.begin(); itr != container.end(); itr++)
+		for (auto itr = container.begin(); itr != container.end(); ++itr)
 		{
 			if (tagTryCompare<DATA>::compare(*itr, data))
 			{
@@ -367,6 +352,18 @@ namespace NS_SSTL
 		}
 
 		return uRet;
+	}
+
+	template<typename _C, typename CB>
+	void itrReverseVisit(_C& container, const CB& cb)
+	{
+		auto itrBegin = container.begin();
+		auto itr = container.end();
+		while (itr != itrBegin)
+		{
+			itr--;
+			cb(*itr);
+		}
 	}
 }
 

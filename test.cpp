@@ -207,6 +207,8 @@ int main()
 	PtrArray111.addFront({ &uy });
 	PtrArray111.addFront(PtrArray111);
 
+	auto iitrr = PtrArray111.rbegin();
+
 	PtrArray111.concat(uy, uy);
 	PtrArray111.concat(&uy, &uy);
 	PtrArray111.concat({ &uy });
@@ -315,7 +317,7 @@ int main()
 	SHashSet<int> oiuy{4,4,5,5,3,3};
 	oiuy-vector<int>();
 	oiuy - oiuy;
-	SHashSet<int> qafjdjsd = oiuy & qq;
+	SHashSet<int> qafjdjsd(oiuy & qq);
 	
 	float *pf=0;
 	list<int> lala;

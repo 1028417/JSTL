@@ -151,6 +151,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sstl\ArrList.h" />
     <ClInclude Include="sstl\SList.h" />
     <ClInclude Include="sstl\SContainer.h" />
     <ClInclude Include="sstl\sstl.h" />

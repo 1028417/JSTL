@@ -42,5 +42,8 @@
     <ClInclude Include="sstl\SList.h">
       <Filter>sstl</Filter>
     </ClInclude>
+    <ClInclude Include="sstl\ArrList.h">
+      <Filter>sstl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
