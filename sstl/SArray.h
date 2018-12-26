@@ -2,6 +2,8 @@
 #ifndef __SArray_H
 #define __SArray_H
 
+#include <algorithm>
+
 namespace NS_SSTL
 {
 	template<typename __DataType, template<typename...> class __BaseType>
@@ -242,7 +244,7 @@ namespace NS_SSTL
 		{
 			for (int iIdx = m_data.size() - 1; iIdx >= 0; iIdx--)
 			{
-				auto itr = std::find(lstPos.begin(), lstPos.end(), iIdx);
+				auto itr = std::find(lstPos.begin(), lstPos.end(), (TD_PosType)iIdx);
 				if (itr != lstPos.end())
 				{
 					m_data.erase(m_data.begin() + iIdx);
@@ -257,6 +259,18 @@ namespace NS_SSTL
 			}
 
 			return true;
+		}
+
+		bool del_one(__DataConstRef data, __CB_Ref_void cb = NULL)
+		{
+			return 0 != _del(data, [&](__DataRef data) {
+				if (cb)
+				{
+					cb(data);
+				}
+
+				return E_DelConfirm::DC_YesAbort;
+			});
 		}
 
 		int indexOf(__DataConstRef data) const
@@ -333,7 +347,7 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_ConstRef_void cb = NULL)
+		bool popBack(__CB_Ref_void cb = NULL)
 		{
 			if (m_data.empty())
 			{
@@ -501,22 +515,30 @@ namespace NS_SSTL
 		}
 
 	private:
-		inline void _add(__DataConstRef data) override
+		void _add(__DataConstRef data) override
 		{
 			m_data.push_back(data);
 		}
 
-		size_t _find(__DataConstRef data, const CB_Find& cb=NULL) override
+		size_t _del(__DataConstRef data, CB_Del cb) override
 		{
-			return NS_SSTL::find(m_data, data, cb);
+			return NS_SSTL::del(m_data, data, cb);
+		}
+		
+		bool _includes(__DataConstRef data) const override
+		{
+			for (auto& t_data : m_data)
+			{
+				if (tagTryCompare<__DataConstRef>::compare(t_data, data))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
-		size_t _cfind(__DataConstRef data, const CB_ConstFind& cb = NULL) const override
-		{
-			return NS_SSTL::find(m_data, data, cb);
-		}
-
-	private:
+	protected:
 		int _checkPos(int pos) const
 		{
 			auto size = m_data.size();
