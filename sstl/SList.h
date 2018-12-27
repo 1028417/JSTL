@@ -7,7 +7,7 @@ namespace NS_SSTL
 	template<typename __DataType, template<typename...> class __BaseType>
 	class SListT : public __SuperT
 	{
-	private:
+	protected:
 		__UsingSuper(__SuperT);
 
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
@@ -249,19 +249,7 @@ namespace NS_SSTL
 
 			return true;
 		}
-
-		bool del_one(__DataConstRef data, __CB_Ref_void cb = NULL)
-		{
-			return 0 != _del(data, [&](__DataRef data) {
-				if (cb)
-				{
-					cb(data);
-				}
-
-				return E_DelConfirm::DC_YesAbort;
-			});
-		}
-
+		
 	public:
 		SListT& sort(__CB_Sort_T<__DataType> cb = NULL)
 		{
@@ -359,7 +347,39 @@ namespace NS_SSTL
 
 		size_t _del(__DataConstRef data, CB_Del cb) override
 		{
-			return NS_SSTL::del(m_data, data, cb);
+			size_t uRet = 0;
+
+			for (auto itr = m_data.begin(); itr != m_data.end(); )
+			{
+				if (!tagTryCompare<__DataConstRef>::compare(*itr, data))
+				{
+					++itr;
+					continue;
+				}
+
+				E_DelConfirm eRet = cb(*itr);
+				if (E_DelConfirm::DC_Abort == eRet)
+				{
+					break;
+				}
+				else if (E_DelConfirm::DC_No == eRet)
+				{
+					++itr;
+					continue;
+				}
+				else
+				{
+					itr = __Super::erase(itr);
+					uRet++;
+
+					if (E_DelConfirm::DC_YesAbort == eRet)
+					{
+						break;
+					}
+				}
+			}
+
+			return uRet;
 		}
 
 		bool _includes(__DataConstRef data) const override

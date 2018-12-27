@@ -6,7 +6,7 @@ namespace NS_SSTL
 {
 #define __SMapSuper SContainerT<__BaseType<__KeyType, __ValueType>, __KeyType>
 
-	template<typename __KeyType, typename __ValueType, template<typename...> typename __BaseType>
+	template<typename __KeyType, typename __ValueType, template<typename...> class __BaseType>
 	class SMapT : public __SMapSuper
 	{
 	private:
@@ -391,7 +391,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = m_data.erase(itr);
+					itr = __Super::erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == eRet)
