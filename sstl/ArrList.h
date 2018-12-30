@@ -148,9 +148,9 @@ namespace NS_SSTL
 #ifndef __MINGW32__
 		virtual __ItrType erase(const __CItrType& itr)
 		{
-			rm_ptrArray.del(&*itr);
+			m_ptrArray.del(&*itr);
 
-			rreturn m_data.erase(itr);
+			return m_data.erase(itr);
 		}
 #else
 		virtual __ItrType erase(const __ItrType& itr)
