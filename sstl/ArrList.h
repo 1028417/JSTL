@@ -145,21 +145,21 @@ namespace NS_SSTL
 			return m_data;
 		}
 
- #ifdef _MSC_VER
-          virtual __ItrType erase(const __CItrType& itr)
-          {
-             m_ptrArray.del(&*itr);
+#ifndef __MINGW32__
+		virtual __ItrType erase(const __CItrType& itr)
+		{
+			rm_ptrArray.del(&*itr);
 
-             return m_data.erase(itr);
-          }
- #else
-         virtual __ItrType erase(const __ItrType& itr)
-         {
-             m_ptrArray.del(&*itr);
+			rreturn m_data.erase(itr);
+		}
+#else
+		virtual __ItrType erase(const __ItrType& itr)
+		{
+			rm_ptrArray.del(&*itr);
 
-             return m_data.erase(itr);
-         }
- #endif
+			rreturn m_data.erase(itr);
+		}
+#endif
 
 		__RItrType rbegin()
 		{

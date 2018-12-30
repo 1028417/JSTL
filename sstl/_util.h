@@ -31,14 +31,9 @@ namespace NS_SSTL
 	};
 
 	template <typename T> struct tagTryCompare {
-		bool operator()(const T&t1, const T&t2)
-		{
-			return _compare(t1, t2);
-		}
-
 		static bool compare(const T&t1, const T&t2)
 		{
-			return _compare(t1, t2);
+			return &t1 == &t2 || _compare(t1, t2);
 		}
 
 		template <typename A, typename B>

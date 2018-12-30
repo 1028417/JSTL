@@ -27,24 +27,26 @@ namespace NS_SSTL
 			T& m_data;
 
 		public:
-			template <typename CB, typename = checkCBBool_t<CB, __DataRef>>
+			template <typename CB, typename = checkCBBool_t<CB, __DataRef, size_t>>
 			void forEach(const CB& cb)
 			{
+				size_t idx = 0;
 				for (auto& data : m_data)
 				{
-					if (!cb(data))
+					if (!cb(data, idx++))
 					{
 						break;
 					}
 				}
 			}
 
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef>, typename = void>
+			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, size_t>, typename = void>
 			void forEach(const CB& cb)
 			{
+				size_t idx = 0;
 				for (auto& data : m_data)
 				{
-					cb(data);
+					cb(data, idx++);
 				}
 			}
 		};

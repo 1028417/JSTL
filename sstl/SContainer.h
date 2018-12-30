@@ -309,13 +309,13 @@ namespace NS_SSTL
 			m_data.clear();
         }
 
-#ifdef _MSC_VER
-         virtual __ItrType erase(const __CItrType& itr)
-         {
-             return m_data.erase(itr);
-         }
+#ifndef __MINGW32__
+		virtual __ItrType erase(const __CItrType& itr)
+		{
+			return m_data.erase(itr);
+		}
 #else
-        virtual __ItrType erase(const __ItrType& itr)
+		virtual __ItrType erase(const __ItrType& itr)
 		{
 			return m_data.erase(itr);
 		}
