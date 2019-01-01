@@ -4,11 +4,11 @@
 
 namespace NS_SSTL
 {
-	template<typename __DataType, template<typename...> class __BaseType>
-	class SListT : public __SuperT
+	template<typename __DataType>
+	class SListT : public SContainerT<std::list<__DataType>>
 	{
 	protected:
-		__UsingSuper(__SuperT);
+		__UsingSuper(SContainerT<std::list<__DataType>>)
 
 		typedef decltype(declval<__ContainerType&>().rbegin()) __RItrType;
 		typedef decltype(declval<const __ContainerType&>().rbegin()) __CRItrType;
@@ -228,9 +228,9 @@ namespace NS_SSTL
 
 	public:
 		template <typename T>
-		SListT<T, __BaseType> map(CB_T_Ret<__DataConstRef, T> cb) const
+		SListT<T> map(CB_T_Ret<__DataConstRef, T> cb) const
 		{
-			SListT<T, __BaseType> lst;
+			SListT<T> lst;
 
 			for (auto&data : m_data)
 			{
@@ -241,7 +241,7 @@ namespace NS_SSTL
 		}
 
 		template <typename CB, typename RET = decltype(declval<CB>()(__DataType()))>
-		SListT<RET, __BaseType> map(const CB& cb) const
+		SListT<RET> map(const CB& cb) const
 		{
 			return map<RET>(cb);
 		}

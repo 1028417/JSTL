@@ -4,13 +4,11 @@
 
 namespace NS_SSTL
 {
-#define __PairListSuper ArrListT<pair<__FirstType, __SecondType>, __BaseType>
-
-	template<typename __FirstType, typename __SecondType, template<typename...> class __BaseType>
-	class PairListT : public __PairListSuper
+	template<typename __FirstType, typename __SecondType, typename __DataType = pair<__FirstType, __SecondType>>
+	class PairListT : public ArrListT<__DataType>
 	{
 	private:
-		__UsingSuper(__PairListSuper)
+		__UsingSuper(ArrListT<__DataType>)
 		
 		using __PairType = pair<__FirstType, __SecondType>;
 		using __PairRef = __PairType&;
@@ -162,7 +160,7 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB, typename RET = SMapT<cbRet_t<CB, __FirstConstRef>, __SecondType, __BaseType> >
+        template <typename CB, typename RET = SMap<cbRet_t<CB, __FirstConstRef>, __SecondType> >
 		RET mapFirst(const CB& cb) const
 		{
 			RET lst;
@@ -175,7 +173,7 @@ namespace NS_SSTL
 			return lst;
 		}
 
-		template <typename CB, typename RET = SMapT<__FirstType, cbRet_t<CB, __SecondConstRef>, __BaseType> >
+        template <typename CB, typename RET = SMap<__FirstType, cbRet_t<CB, __SecondConstRef>> >
 		RET mapSecond(const CB& cb) const
 		{
 			RET lst;

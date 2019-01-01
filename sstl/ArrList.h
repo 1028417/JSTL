@@ -4,13 +4,11 @@
 
 namespace NS_SSTL
 {
-#define __ArrListSuper SListT<__DataType, __BaseType>
-
-	template<typename __DataType, template<typename...> class __BaseType>
-	class ArrListT : public __ArrListSuper
+	template<typename __DataType>
+	class ArrListT : public SListT<__DataType>
 	{
 	private:
-		__UsingSuper(__ArrListSuper)
+		__UsingSuper(SListT<__DataType>)
 
 		__UsingSuperType(__RItrType)
 		__UsingSuperType(__CRItrType)
