@@ -47,7 +47,7 @@ bool enumCardPattern(ECardPattern eCardPattern, size_t uFlag, const SMap<TD_Card
 		return uSum >= uFlag && uCardNum>= uBaseCardNum;
 	}).keys();
 
-	arrCardExpect([&](const TD_CardNum&uCardNum, TD_PosType pos) {
+	arrCardExpect([&](const TD_CardNum&uCardNum, size_t pos) {
 		if (1 == uContinuityCount)
 		{
 			retCardPattern.add(tagCardPattern(eCardPattern, uCardNum, 1));
