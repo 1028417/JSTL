@@ -583,11 +583,11 @@ namespace NS_SSTL
 
 				while (cb(m_data[pos], (size_t)pos))
 				{
-					if (pos == endPos)
+					if (pos == targetPos)
 					{
 						break;
 					}
-					else if (pos < endPos)
+					else if (pos < targetPos)
 					{
 						pos++;
 					}
