@@ -86,18 +86,6 @@ namespace NS_SSTL
 			return *this;
 		}
 		
-		template<typename CB>
-		void operator() (const CB& cb)
-		{
-			adaptor().forEach(cb);
-		}
-
-		template<typename CB>
-		void operator() (const CB& cb) const
-		{
-			adaptor().forEach(cb);
-		}
-
 	public:
 		__RItrType rbegin()
 		{
@@ -375,24 +363,14 @@ namespace NS_SSTL
 					}
 				}
 			}
-
-			template <typename CB, typename = checkCBVoid_t<CB, __DataRef, size_t>, typename = void>
-			void forEach(const CB& cb)
-			{
-				size_t idx = 0;
-				for (auto& data : m_data)
-				{
-					cb(data, idx++);
-				}
-			}
 		};
 
 		CAdaptor<> m_adaptor = CAdaptor<>(m_data);
-		CAdaptor<>& adaptor()
+		inline CAdaptor<>& adaptor()
 		{
 			return m_adaptor;
 		}
-		CAdaptor<const __ContainerType>& adaptor() const
+		inline CAdaptor<const __ContainerType>& adaptor() const
 		{
 			return (CAdaptor<const __ContainerType>&)m_adaptor;
 		}
