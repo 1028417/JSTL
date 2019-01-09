@@ -201,11 +201,11 @@ namespace NS_SSTL
 		{
 			if (cb)
 			{
-				m_data.sort(tagTrySort<__DataType>(cb));
+				m_data.sort(tagSort<__DataType>(cb));
 			}
 			else
 			{
-				m_data.sort();
+				m_data.sort(tagTrySort<__DataType>());
 			}
 
 			return *this;

@@ -300,7 +300,18 @@ namespace NS_SSTL
 			return true;
 		}
 
-		SArrayT& qsort(__CB_Sort_T<__DataType> cb = NULL)
+		SArrayT& qsort()
+		{
+			size_t size = m_data.size();
+			if (size > 1)
+			{
+				NS_SSTL::qsort<__DataType>(&m_data.front(), size);
+			}
+
+			return *this;
+		}
+
+		SArrayT& qsort(__CB_Sort_T<__DataType> cb)
 		{
 			size_t size = m_data.size();
 			if (size > 1)
@@ -490,7 +501,7 @@ namespace NS_SSTL
 		private:
 			T& m_data;
 
-			using __RefType = decltype(m_data[0])&;
+			using __RefType = decltype(declval<T&>()[0])&;
 
 		private:
 			int _transPos(int pos) const

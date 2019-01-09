@@ -110,6 +110,7 @@ int main()
 	qq = 1;
 	auto aaaa = qq.indexOf({2});
 	qq.qsort();
+	
 	auto aaaaaaa = qq.toString();
 	qq.addFront({ 1 });
 	qq.addFront(1);
