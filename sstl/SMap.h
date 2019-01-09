@@ -120,7 +120,15 @@ namespace NS_SSTL
 		}
 
 	public:
-		template <typename CB>
+		bool get(__KeyConstRef key, __ValueRef value) const
+		{
+			return _find(key, [&](__PairConstRef pr) {
+				value = pr.second;
+				return false;
+			});
+		}
+
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
 			return _find(key, [&](__ItrType& itr) {
@@ -130,17 +138,7 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB>
-		size_t get(__KeyConstRef key, const CB& cb) const
-		{
-			return _find(key, [&](__PairConstRef pr) {
-				cb(pr.second);
-				
-				return true;
-			});
-		}
-		
-		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>>
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void>
 		size_t get(__KeyConstRef key, const CB& cb)
 		{
 			return _find(key, [&](__ItrType& itr) {
@@ -148,19 +146,21 @@ namespace NS_SSTL
 			});
 		}
 
-		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>>
+		template <typename CB, typename = checkCBVoid_t<CB, __ValueRef>>
+		bool get(__KeyConstRef key, const CB& cb) const
+		{
+			return _find(key, [&](__PairConstRef pr) {
+				cb(pr.second);
+
+				return true;
+			});
+		}
+
+		template <typename CB, typename = checkCBBool_t<CB, __ValueRef>, typename = void>
 		bool get(__KeyConstRef key, const CB& cb) const
 		{
 			return _find(key, [&](__PairConstRef pr) {
 				return cb(pr.second);
-			});
-		}
-
-		bool get(__KeyConstRef key, __ValueRef value) const
-		{
-			return _find(key, [&](__PairConstRef pr) {
-				value = pr.second;
-				return false;
 			});
 		}
 
@@ -487,7 +487,7 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-		template <typename _V, typename = void>
+		template <typename _V>
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
 		{
 			return m_data.insert({ key, value })->second;
@@ -506,7 +506,7 @@ namespace NS_SSTL
 		private:
 			T& m_data;
 
-			using __ValueRef = decltype(declval<T&>().begin()->second)&;
+			using __ValueRef = decltype(m_data.begin()->second)&;
 
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>
