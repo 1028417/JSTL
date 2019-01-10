@@ -342,9 +342,9 @@ namespace NS_SSTL
 
 			const PtrArray<__PairType>& m_ptrArray;
 
-			using __PairRef = decltype(*m_data.begin())&;
-			using __FirstRef = decltype(m_data.begin()->first)&;
-			using __SecondRef = decltype(m_data.begin()->second)&;
+			using __PairRef = decltype(*declval<T&>().begin())&;
+			using __FirstRef = decltype(declval<T&>().begin()->first)&;
+			using __SecondRef = decltype(declval<T&>().begin()->second)&;
 
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __FirstConstRef, __SecondConstRef> >

@@ -395,7 +395,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = __Super::erase(itr);
+					itr = m_data.erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == eRet)
@@ -487,7 +487,7 @@ namespace NS_SSTL
 			return m_data.insert({ key, value }).first->second;
 		}
 
-		template <typename _V>
+		template <typename _V, typename = void>
 		auto _insert(__KeyConstRef key, const _V& value)->decltype(m_data.insert({ key, value })->second)&
 		{
 			return m_data.insert({ key, value })->second;
@@ -506,7 +506,7 @@ namespace NS_SSTL
 		private:
 			T& m_data;
 
-			using __ValueRef = decltype(m_data.begin()->second)&;
+			using __ValueRef = decltype(declval<T&>().begin()->second)&;
 
 		public:
 			template <typename CB, typename = checkCBBool_t<CB, __KeyConstRef, __ValueRef>>

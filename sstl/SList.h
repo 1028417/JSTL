@@ -166,17 +166,26 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_Ref_void cb = NULL)
+		bool popBack()
 		{
 			if (m_data.empty())
 			{
 				return false;
 			}
 
-			if (cb)
+			m_data.pop_back();
+
+			return true;
+		}
+
+		bool popBack(__CB_Ref_void cb)
+		{
+			if (m_data.empty())
 			{
-				cb(m_data.back());
+				return false;
 			}
+			
+			cb(m_data.back());
 
 			m_data.pop_back();
 
@@ -274,7 +283,7 @@ namespace NS_SSTL
 			m_data.push_back(data);
 		}
 
-		bool _popFront(__CB_Ref_void cb = NULL) override
+		bool _popFront(__CB_Ref_void cb) override
 		{
 			if (m_data.empty())
 			{

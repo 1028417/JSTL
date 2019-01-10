@@ -170,7 +170,7 @@ namespace NS_SSTL
 				return false;
 			}
 
-			__Super::erase(m_data.begin() + pos);
+			m_data.erase(m_data.begin() + pos);
 
 			return true;
 		}
@@ -182,7 +182,7 @@ namespace NS_SSTL
 				auto itr = std::find(lstPos.begin(), lstPos.end(), (size_t)iIdx);
 				if (itr != lstPos.end())
 				{
-					__Super::erase(m_data.begin() + iIdx);
+					m_data.erase(m_data.begin() + iIdx);
 
 					(void)lstPos.erase(itr);
 
@@ -270,17 +270,26 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_Ref_void cb = NULL)
+		bool popBack()
 		{
 			if (m_data.empty())
 			{
 				return false;
 			}
 
-			if (cb)
+			m_data.pop_back();
+
+			return true;
+		}
+
+		bool popBack(__CB_Ref_void cb)
+		{
+			if (m_data.empty())
 			{
-				cb(m_data.back());
+				return false;
 			}
+			
+			cb(m_data.back());
 
 			m_data.pop_back();
 
@@ -462,7 +471,7 @@ namespace NS_SSTL
 				}
 				else
 				{
-					itr = __Super::erase(itr);
+					itr = m_data.erase(itr);
 					uRet++;
 
 					if (E_DelConfirm::DC_YesAbort == eRet)

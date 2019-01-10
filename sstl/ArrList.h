@@ -249,17 +249,21 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		bool popBack(__CB_Ref_void cb = NULL)
+		bool popBack()
 		{
 			(void)m_ptrArray.popBack();
+			return __Super::popBack();
+		}
 
+		bool popBack(__CB_Ref_void cb)
+		{
+			(void)m_ptrArray.popBack();
 			return __Super::popBack(cb);
 		}
 
 		bool popBack(__DataRef data)
 		{
 			(void)m_ptrArray.popBack();
-
 			return __Super::popBack(data);
 		}
 
@@ -312,7 +316,7 @@ namespace NS_SSTL
 			m_ptrArray.add(m_data.back());
 		}
 
-		bool _popFront(__CB_Ref_void cb = NULL) override
+		bool _popFront(__CB_Ref_void cb) override
 		{
 			(void)m_ptrArray.popFront();
 			return __Super::_popFront(cb);
