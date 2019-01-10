@@ -30,7 +30,8 @@ HEADERS += \
     sstl/SList.h \
     sstl/SMap.h \
     sstl/SSet.h \
-    sstl/sstl.h
+    sstl/sstl.h \
+    sstl/PairList.h
 
 CONFIG += c++11
 

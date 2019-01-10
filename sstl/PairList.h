@@ -15,10 +15,10 @@ namespace NS_SSTL
 		__UsingSuper(__Super__)
 
 		using __PairType = __Pair__;
-
 		using __PairRef = __PairType&;
-		using __PairConstRef = const __PairType&;
 
+		using __AdpPairType = pair<__FirstType const, __SecondType>;
+		
 		using __FirstRef = __FirstType&;
 		using __FirstConstRef = const __FirstType&;
 
@@ -65,6 +65,15 @@ namespace NS_SSTL
 		{
 		}
 
+		template<typename T, typename = checkContainerData_t<T, __AdpPairType>, typename = void>
+		explicit PairListT(const T& map)
+		{
+			for (auto& pr : map)
+			{
+				__Super::_add(pr);
+			}
+		}
+
 		PairListT& operator=(__ContainerType&& container)
 		{
 			__Super::swap(container);
@@ -86,6 +95,31 @@ namespace NS_SSTL
 		PairListT& operator=(__InitList initList)
 		{
 			__Super::assign(initList);
+			return *this;
+		}
+
+		template<typename T>
+		PairListT& operator=(const T&t)
+		{
+			__Super::assign(t);
+			return *this;
+		}
+
+		template<typename T, typename = checkContainerData_t<T, __AdpPairType>>
+		PairListT& operator=(const T&map)
+		{
+			__Super::clear();
+			for (auto& pr : map)
+			{
+				__Super::_add(pr);
+			}
+
+			return *this;
+		}
+
+		PairListT& operator=(const __AdpPairType& pr)
+		{
+			__Super::assign((const __PairType&)pr);
 			return *this;
 		}
 
@@ -165,7 +199,7 @@ namespace NS_SSTL
 
 	public:
 		template <typename CB>
-		SArray<__FirstType> firsts(const CB& cb = NULL) const
+		SArray<__FirstType> firsts(const CB& cb) const
 		{
 			return adaptor().firsts(cb);
 		}
@@ -318,6 +352,51 @@ namespace NS_SSTL
 			}
 
 			return false;
+		}
+
+		PairListT& sort(__CB_Sort_T<__PairType> cb)
+		{
+			__Super::sort(cb);
+
+			return *this;
+		}
+
+		PairListT& sortFirst()
+		{
+			tagTrySort<__FirstType> trySort;
+            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+                return trySort(pr1.first, pr2.first);
+			});
+
+			return *this;
+		}
+
+		PairListT& sortFirst(__CB_Sort_T<__FirstType> cb)
+		{
+            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+                return cb(pr1.first, pr2.first);
+			});
+
+			return *this;
+		}
+
+		PairListT& sortSecond()
+		{
+			tagTrySort<__SecondType> trySort;
+            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+                return trySort(pr1.second, pr2.second);
+			});
+
+			return *this;
+		}
+
+		PairListT& sortSecond(__CB_Sort_T<__SecondType> cb)
+		{
+            __Super::sort([&](__PairType& pr1, __PairType& pr2) {
+                return cb(pr1.second, pr2.second);
+			});
+
+			return *this;
 		}
 
 	private:

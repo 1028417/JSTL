@@ -100,12 +100,12 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template<typename T>
-		SMapT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
+		//template<typename T>
+		//SMapT& operator=(T&t)
+		//{
+		//	__Super::assign(t);
+		//	return *this;
+		//}
 
 		template<typename CB>
 		void operator() (const CB& cb)
@@ -212,7 +212,7 @@ namespace NS_SSTL
 
 	public:
 		template <typename CB>
-		SArray<__KeyType> keys(const CB& cb = NULL) const
+		SArray<__KeyType> keys(const CB& cb) const
 		{
 			return adaptor().keys(cb);
 		}
@@ -419,17 +419,12 @@ namespace NS_SSTL
 		}
 
 	private:
-		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb = NULL)
+		size_t _find(__KeyConstRef key, CB_T_Ret<__ItrType&, bool> cb)
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
 			{
 				return 0;
-			}
-
-			if (!cb)
-			{
-				return 1;
 			}
 
 			size_t uRet = 0;
@@ -452,17 +447,12 @@ namespace NS_SSTL
 			return uRet;
 		}
 
-		size_t _find(__KeyConstRef key, CB_T_Ret<__PairConstRef, bool> cb = NULL) const
+		size_t _find(__KeyConstRef key, CB_T_Ret<__PairConstRef, bool> cb) const
 		{
 			auto itr = m_data.find(key);
 			if (itr == m_data.end())
 			{
 				return 0;
-			}
-
-			if (!cb)
-			{
-				return 1;
 			}
 
 			size_t uRet = 0;

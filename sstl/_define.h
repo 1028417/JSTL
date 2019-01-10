@@ -34,7 +34,7 @@ namespace NS_SSTL
 	using CB_T_bool = CB_T_Ret<T, bool>;
 
 	template <typename T>
-	using __CB_Sort_T = const function<bool(T&lhs, T&rhs)>&;
+    using __CB_Sort_T = const function<bool(const T&lhs, const T&rhs)>&;
 
 	template <template<typename...> class __BaseType, class __PtrType> class ptrcontainerT;
 

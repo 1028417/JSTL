@@ -82,12 +82,12 @@ namespace NS_SSTL
 			return *this;
 		}
 
-		template <typename T>
-		SListT& operator=(T&t)
-		{
-			__Super::assign(t);
-			return *this;
-		}
+		//template <typename T>
+		//SListT& operator=(T&t)
+		//{
+		//	__Super::assign(t);
+		//	return *this;
+		//}
 		
 	public:
 		__RItrType rbegin()
@@ -206,17 +206,17 @@ namespace NS_SSTL
 		}
 		
 	public:
-		SListT& sort(__CB_Sort_T<__DataType> cb = NULL)
+		SListT& sort()
 		{
-			if (cb)
-			{
-				m_data.sort(tagSort<__DataType>(cb));
-			}
-			else
-			{
-				m_data.sort(tagTrySort<__DataType>());
-			}
+			m_data.sort(tagTrySort<__DataType>());
+			
+			return *this;
+		}
 
+		SListT& sort(__CB_Sort_T<__DataType> cb)
+		{
+			m_data.sort(tagSort<__DataType>(cb));
+			
 			return *this;
 		}
 

@@ -70,7 +70,7 @@ namespace NS_SSTL
 		explicit SContainerT(const T& container)
 			: m_data(container.begin(), container.end())
 		{
-		}
+		}		
 
 		SContainerT& operator=(__ContainerType&& container)
 		{

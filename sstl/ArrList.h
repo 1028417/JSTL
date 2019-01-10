@@ -267,10 +267,18 @@ namespace NS_SSTL
 			return __Super::popBack(data);
 		}
 
-		ArrListT& sort(__CB_Sort_T<__DataType> cb = NULL)
+		ArrListT& sort()
+		{
+			__Super::sort();
+			m_ptrArray.assign(m_data); // TODO
+
+			return *this;
+		}
+
+		ArrListT& sort(__CB_Sort_T<__DataType> cb)
 		{
 			__Super::sort(cb);
-			m_ptrArray.assign(m_data);
+			m_ptrArray.assign(m_data); // TODO
 
 			return *this;
 		}

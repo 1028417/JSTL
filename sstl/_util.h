@@ -55,19 +55,6 @@ namespace NS_SSTL
 		}
 	};
 
-	//template <typename T> struct tagSortT {
-	//	tagSortT(__CB_Sort_T<T> cb) : m_cb(cb)
-	//	{
-	//	}
-
-	//	__CB_Sort_T<T> m_cb;
-
-	//	bool operator() (const T&lhs, const T&rhs)const
-	//	{
-	//		return m_cb(lhs, rhs);
-	//	}
-	//};
-
 	template <typename T> struct tagSort {
 		tagSort(__CB_Sort_T<T> cb)
 			: m_cb(cb)
@@ -76,7 +63,7 @@ namespace NS_SSTL
 
 		__CB_Sort_T<T> m_cb;
 
-		bool operator() (T&lhs, T&rhs) const
+        bool operator() (const T&lhs, const T&rhs) const
 		{
 			return m_cb(lhs, rhs);
 		}
@@ -87,13 +74,13 @@ namespace NS_SSTL
 		{
 		}
 
-		bool operator() (T&lhs, T&rhs) const
+        bool operator() (const T&lhs, const T&rhs) const
 		{
 			return _compare(lhs, rhs);
 		}
 
 		template <typename U>
-		static auto _compare(U&lhs, U&rhs) -> decltype(declval<U>() < declval<U>())
+        static auto _compare(const U&lhs, const U&rhs) -> decltype(declval<const U>() < declval<const U>())
 		{
 			return lhs < rhs;
 		}
@@ -288,7 +275,7 @@ namespace NS_SSTL
     void qsort(T* lpData, size_t size)
     {
         tagTrySort<T> sort;
-        __CB_Sort_T<T> cbCompare = [&](T& lhs, T& rhs) {
+        __CB_Sort_T<T> cbCompare = [&](const T& lhs, const T& rhs) {
             return sort(lhs, rhs);
         };
 
@@ -302,7 +289,7 @@ namespace NS_SSTL
     }
 
 	template <typename T>
-	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb = NULL)
+	void qsort(vector<T>& vecData, __CB_Sort_T<T> cb)
 	{
 		size_t size = vecData.size();
 		if (size > 1)
