@@ -472,7 +472,20 @@ namespace NS_SSTL
 				});
 			}
 
-			template <typename CB, typename = checkCBBool_t<CB, __FirstRef, __SecondRef>>
+			template <typename CB, typename = checkCBBool_t<CB, __PairRef>>
+			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
+			{
+				m_ptrArray(startPos, endPos, cb);
+			}
+
+			template <typename CB, typename = checkCBVoid_t<CB, __PairRef>, typename = void>
+			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
+			{
+				m_ptrArray(startPos, endPos, cb);
+			}
+
+			template <typename CB, typename = checkCBBool_t<CB, __FirstRef, __SecondRef>
+				, typename = void, typename = void>
 			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
@@ -480,7 +493,8 @@ namespace NS_SSTL
 				});
 			}
 
-			template <typename CB, typename = checkCBVoid_t<CB, __FirstRef, __SecondRef>, typename = void>
+			template <typename CB, typename = checkCBVoid_t<CB, __FirstRef, __SecondRef>
+				, typename = void, typename = void, typename = void>
 			void forEach(const CB& cb, int startPos = 0, int endPos = -1) const
 			{
 				m_ptrArray(startPos, endPos, [&](__PairRef pr) {
