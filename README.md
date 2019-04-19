@@ -15,11 +15,11 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 ### 链表：SList  
 简单封装，为了配套。
 
-### 集合：SSetT、SSet、SHashSet  
-SSetT还可以代入multiset、unordered_multiset实现重复元素共存的模板。
+### 集合：SSet、SHashSet  
+基类SSetT还可以代入multiset、unordered_multiset实现重复元素共存的模板。
 
-### 映射：SMapT、SMap、SHashMap  
-* SMapT还可以代入multimap、unordered_multimap实现重复key共存的模板；  
+### 映射：SMap、SHashMap  
+* 基类SMapT还可以代入multimap、unordered_multimap实现重复key共存的模板；  
 * keys、values用于键/值遍历；  
 * filter、filterKey、filterValue用于过滤；  
 * mapKey、mapValue用于映射；  
