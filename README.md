@@ -6,10 +6,10 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 
 ## **模板类**
 * 数组：SArray/SVector  
-所有模板的构造函数、赋值操作符、assign、add等方法都支持传入多个元素或容器或初始列表；
-圆括号操作符提供按范围遍历；
-qsort方法实现快速排序法；
-仿nodejs实现slice、splice、concat、map、filter等方法；
+所有模板的构造函数、赋值操作符、assign、add等方法都支持传入多个元素或容器或初始列表；  
+圆括号操作符提供按范围遍历；  
+qsort方法实现快速排序法；  
+仿nodejs实现slice、splice、concat、map、filter等方法；  
 仿python实现every、any方法。
 
 * 链表：SList  
