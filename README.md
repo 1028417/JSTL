@@ -23,7 +23,7 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 * keys、values用于键/值遍历；
 * filter、filterKey、filterValue用于过滤；
 * mapKey、mapValue用于映射；
-* everyKey、everyValue、anyKey、anyValue整体判断。
+* everyKey、everyValue、anyKey、anyValue用于整体判断。
 
 ### 随机链表：ArrList
 
