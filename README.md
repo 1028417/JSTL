@@ -25,11 +25,11 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 * mapKey、mapValue用于映射；
 * everyKey、everyValue、anyKey、anyValue整体判断。
 
-### 随即访问链表：ArrList
+### 随机链表：ArrList
 
-### 随即访问pair链表：PairList
+### pair链表：PairList
 
-### 随即访问指针链表：PtrList
+### 指针链表：PtrList
 
 ## 用法
 包含jstl.h一个头文件即可，test.cpp中有些简单的用例。
