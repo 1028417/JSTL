@@ -1,23 +1,23 @@
 # **SSTL项目介绍**
 ## **背景**
-C++标准模块库用起来不太灵活，尤其和脚本语言对比起来更加显得耗费代码
-</br></br>
-最初参考Nodejs，在STL基础上利用C++11特性封装为JSTL,后来改名为超级模板库
+C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更加显得耗费大量代码。  
+
+最初参考Nodejs，在STL基础上利用C++11特性封装为JSTL,后来改名为超级模板库。
 
 ## **模板类**
-* SArray/SVector-数组
+* 数组：SArray/SVector
 
-* SList-链表
+* 链表：SList
 
-* SSet-集合
+* 集合：SSet
 
-* SMap-映射
+* 映射：SMap
 
-* ArrList-可随即访问的链表
+* 可随即访问的链表：ArrList
 
-* PairList-可随即访问的pair链表
+* 可随即访问的pair链表：PairList
 
-* PtrList-可随即访问的指针链表
+* 可随即访问的指针链表：PtrList
 
 ## 用法
-包含jstl.h一个头文件即可，test.cpp中有部分用例
+包含jstl.h一个头文件即可，test.cpp中有些简单的用例。
