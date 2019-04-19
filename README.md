@@ -19,10 +19,10 @@ qsort方法实现快速排序法；
 SSetT还可以代入multiset、unordered_multiset实现重复元素共存的模板。
 
 * 映射：SMapT、SMap、SHashMap  
-SMapT还可以代入multimap、unordered_multimap实现重复key共存的模板；
-keys、values用于键/值遍历：
-filter、filterKey、filterValue用于过滤；
-mapKey、mapValue用于映射；
+SMapT还可以代入multimap、unordered_multimap实现重复key共存的模板；  
+keys、values用于键/值遍历；  
+filter、filterKey、filterValue用于过滤；  
+mapKey、mapValue用于映射；  
 everyKey、everyValue、anyKey、anyValue整体判断。
 
 * 可随即访问的链表：ArrList
