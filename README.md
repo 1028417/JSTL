@@ -26,7 +26,7 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 * map、mapKey、mapValue方法用于映射；
 * every、everyKey、everyValue、any、anyKey、anyValue方法用于整体判断。
 
-### 顺序链表：ArrList
+### 关联数组：ArrList
 * 内置vector记录链表节点指针，可随机访问内部的元素。
 * add、get、set方法用于追加、读写；
 * qsort方法用于快速排序。
