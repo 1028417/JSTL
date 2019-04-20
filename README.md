@@ -20,19 +20,29 @@ C++标准模块库用起来很不灵活，尤其和脚本语言对比起来更�
 
 ### 映射：SMap、SHashMap
 * 基类SMapT还可以代入multimap、unordered_multimap实现重复key共存的模板；
-* keys、values用于键/值遍历；
-* filter、filterKey、filterValue用于过滤；
-* mapKey、mapValue用于映射；
-* everyKey、everyValue、anyKey、anyValue用于整体判断。
+* insert、set、get方法用于插入、读写；
+* keys、values方法用于返回或遍历键/值；
+* filter、filterKey、filterValue方法用于过滤；
+* map、mapKey、mapValue方法用于映射；
+* every、everyKey、everyValue、any、anyKey、anyValue方法用于整体判断。
 
 ### 复合链表：ArrList
 * 内置vector记录链表节点指针，可随机访问内部的元素。
+* add、get、set方法用于追加、读写；
+* qsort方法用于快速排序。
 
 ### pair链表：PairList
-内部存储泛型pair对象。
+* 内部存储泛型pair对象，firsts、seconds方法用于返回或遍历分量；
+* add、addPair方法用于追加；
+* get、getFirst、getSecond、set、setFirst、setSecond方法用于读写；
+* filter、filterFirst、filterSecond方法用于过滤；
+* map、mapKey、mapValue方法用于映射；
+* every、everyFirst、everySecond、any、anyFirst、anySecond方法用于整体判断；
+* qsort、qsortFirst、qsortSecond方法用于快速排序。
 
 ### 指针链表：PtrList
-内部存储指针，各接口提供dynamic_cast安全转换和基于引用的安全访问。
+* 内部存储指针，各接口提供dynamic_cast安全转换和基于引用的安全访问；
+* qsort方法用于快速排序。
 
 ## 用法
 包含jstl.h一个头文件即可，test.cpp中有些简单的用例。
