@@ -168,8 +168,8 @@ int main()
 	ts2.add({1,2,3});
 	ts2 = {1,2,3};
 
-	ts2.getFront([](int&) {});
-	((const SArray<int>&)ts2).getFront([](const int&) {});
+	ts2.front([](int&) {});
+	((const SArray<int>&)ts2).front([](const int&) {});
 
 	ts2([](int i) {
 		return true;
