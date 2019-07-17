@@ -322,7 +322,7 @@ int main()
 	
 	float *pf=0;
 	list<int> lala;
-	ptrlist<int> pll;
+	ptrvector<int> pll;
 	pll.add(lala);
 
 	PtrArray<int> ttrt;
