@@ -47,4 +47,4 @@ SSTL中所有模板类都是从stl原生模板派生，做一些泛型的封装�
 * qsort方法用于快速排序。
 
 ## 使用方法
-包含jstl.h一个头文件即可，test.cpp中有些简单的用例，VC、GCC、Qt(MinGW)编译通过。
+包含jstl.h一个头文件即可，test.cpp中有些简单的用例
